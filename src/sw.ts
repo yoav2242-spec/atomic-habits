@@ -11,4 +11,5 @@ self.skipWaiting()
 clientsClaim()
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
-registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html')))
+// Standalone pages (like the style preview) open as themselves, not as the app.
+registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/\/[\w-]+\.html$/] }))
