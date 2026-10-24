@@ -1,6 +1,6 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState, type ReactNode } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { Button, Field, Segmented, Stepper } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
@@ -42,12 +42,14 @@ function Sentence({ children }: { children: ReactNode }) {
 
 export default function HabitForm() {
   const { id } = useParams()
+  const [search] = useSearchParams()
   const navigate = useNavigate()
   const habits = useHabits()
   const identities = useIdentities()
   const existing = useLiveQuery(() => (id ? db.habits.get(id) : undefined), [id])
   const [draft, setDraft] = useState<Habit | null>(id ? null : newHabit(Date.now()))
-  const [step, setStep] = useState(id ? 0 : -1) // -1: pick a starter habit
+  // -1: pick a starter habit. Skipped when editing, or when "make my own" was already chosen.
+  const [step, setStep] = useState(id || search.has('own') ? 0 : -1)
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
 

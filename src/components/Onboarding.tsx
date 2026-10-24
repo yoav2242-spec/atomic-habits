@@ -29,7 +29,7 @@ export function Onboarding() {
       if (picked.size) bigCelebration()
     }
     await setMeta('onboarded', '1')
-    navigate(create && picked.size ? '/' : '/habits/new')
+    navigate(create && picked.size ? '/' : '/habits/new?own=1')
   }
 
   const toggle = (i: number) => setPicked((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n })
