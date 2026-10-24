@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { bigCelebration } from '../lib/celebrate'
 import { changeLevel, snoozeLevelUp } from '../lib/repo'
 import type { Habit } from '../lib/types'
+import { goalBreakdown, isAmount, stepOf } from '../lib/amounts'
 import { Button, Field, InfoTip, Modal, Stepper } from './ui'
 
 /** Suggests the next step by nudging the first number in the name: "Read 10 pages" → "Read 12 pages". */
@@ -19,7 +20,13 @@ export function LevelUpModal({ habit, direction, suggested, onClose }: { habit: 
   useEffect(() => {
     if (!habit) return
     setName(suggestName(habit.name, direction))
-    setTarget(habit.target_count > 1 && !/\d/.test(habit.name) ? Math.max(1, habit.target_count + direction) : habit.target_count)
+    if (isAmount(habit)) {
+      // Amounts grow or shrink by one step (one bottle), or about 15%, whichever is bigger.
+      const change = Math.max(stepOf(habit), Math.round((habit.target_count * 0.15) / stepOf(habit)) * stepOf(habit))
+      setTarget(Math.max(stepOf(habit), habit.target_count + direction * change))
+    } else {
+      setTarget(habit.target_count > 1 && !/\d/.test(habit.name) ? Math.max(1, habit.target_count + direction) : habit.target_count)
+    }
   }, [habit, direction])
 
   if (!habit) return null
@@ -46,7 +53,11 @@ export function LevelUpModal({ habit, direction, suggested, onClose }: { habit: 
         <Field label="New version of the habit" hint={harder ? 'e.g. more pages, more minutes, a little further.' : undefined}>
           <input value={name} onChange={(e) => setName(e.target.value)} />
         </Field>
-        {(habit.target_count > 1 || target > 1) && (
+        {isAmount(habit) ? (
+          <Field label={`Daily goal (${habit.unit})`} hint={goalBreakdown({ ...habit, target_count: target })}>
+            <Stepper value={target} min={stepOf(habit)} max={1_000_000} step={stepOf(habit)} onChange={setTarget} />
+          </Field>
+        ) : (habit.target_count > 1 || target > 1) && (
           <Field label="Times per day">
             <Stepper value={target} min={1} max={30} onChange={setTarget} />
           </Field>

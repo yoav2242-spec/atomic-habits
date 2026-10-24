@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { buttonClass, PageHeader } from '../components/ui'
+import { goalLabel } from '../lib/amounts'
 import { WEEKDAY_SHORT } from '../lib/dates'
 import { useProgress } from '../lib/progress'
 import { swapOrder } from '../lib/repo'
@@ -21,7 +22,7 @@ function Row({ h, streak, up, down }: { h: Habit; streak?: number; up?: Habit; d
       <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
         <div className="truncate font-extrabold">{h.name}</div>
         <div className="text-xs font-bold text-muted">
-          {scheduleLabel(h)}{h.cue_time && ` · ${h.cue_time}`}{streak ? ` · 🔥 ${streak}` : ''}{h.level > 1 ? ` · Lv ${h.level}` : ''}
+          {scheduleLabel(h)}{goalLabel(h) && ` · ${goalLabel(h)}`}{h.cue_time && ` · ${h.cue_time}`}{streak ? ` · 🔥 ${streak}` : ''}{h.level > 1 ? ` · Lv ${h.level}` : ''}
         </div>
       </Link>
       <Link to={`/habits/${h.id}/edit`} aria-label="Edit" className="bouncy flex h-9 w-9 items-center justify-center rounded-full bg-soft text-sm">✏️</Link>

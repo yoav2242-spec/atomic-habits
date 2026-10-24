@@ -20,7 +20,14 @@ export interface Habit extends Synced {
   color: string
   identity_id: string | null
   schedule: Schedule
+  /** Daily goal: times per day, or an amount in `unit` (e.g. 2400 ml). */
   target_count: number
+  /** '' = count times; otherwise the amount's unit, like "ml", "minutes" or "pages". */
+  unit: string
+  /** How much one tap of + adds (e.g. 800 for an 800 ml bottle). */
+  step: number
+  /** What one step is called: "bottle", "glass"… ('' = just the amount). */
+  step_label: string
   // 1st law: make it obvious
   cue_time: string | null // "HH:MM"
   location: string

@@ -3,11 +3,13 @@ import { formatDay } from '../lib/dates'
 import { setDay, setNote, type DayState } from '../lib/repo'
 import { isDone } from '../lib/streaks'
 import type { Checkin, Habit } from '../lib/types'
+import { isAmount, progressText, stepOf } from '../lib/amounts'
 import { Button, Modal, Stepper } from './ui'
 
 /** Change any past day of a habit: done, 2-minute version, not done (or slipped / clean), plus a note. */
 export function DayEditor({ habit, date, checkin, onClose }: { habit: Habit; date: string | null; checkin?: Checkin; onClose: () => void }) {
   const target = Math.max(1, habit.target_count)
+  const step = isAmount(habit) ? stepOf(habit) : 1
   const [state, setState] = useState<DayState>('none')
   const [count, setCount] = useState(0)
   const [note, setNoteText] = useState('')
@@ -51,8 +53,8 @@ export function DayEditor({ habit, date, checkin, onClose }: { habit: Habit; dat
         </div>
         {habit.type === 'build' && target > 1 && state !== 'two_min' && (
           <div className="flex items-center justify-between rounded-2xl bg-soft p-3">
-            <span className="text-sm font-bold">How many times?</span>
-            <Stepper value={count} min={0} max={Math.max(target * 2, 30)} onChange={(n) => { setCount(n); setState(n >= target ? 'done' : 'none') }} />
+            <span className="text-sm font-bold">{isAmount(habit) ? `How much? (${habit.unit})` : 'How many times?'}<span className="block text-xs text-muted">{progressText(habit, count)}</span></span>
+            <Stepper value={count} min={0} max={Math.max(target * 2, 30)} step={step} onChange={(n) => { setCount(n); setState(n >= target ? 'done' : 'none') }} />
           </div>
         )}
         <textarea rows={3} value={note} onChange={(e) => setNoteText(e.target.value)} placeholder="Note (optional): how did it go?" />

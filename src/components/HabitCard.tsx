@@ -5,7 +5,8 @@ import { diffDays } from '../lib/dates'
 import { getCheckin, increment, restoreCheckin, toggleDone } from '../lib/repo'
 import { isDone, nextMilestone, POINTS, type HabitStats } from '../lib/streaks'
 import type { Checkin, Habit } from '../lib/types'
-import { InfoTip } from './ui'
+import { isAmount, progressText, servingsText, stepOf } from '../lib/amounts'
+import { Button, InfoTip, Modal } from './ui'
 
 interface Props {
   habit: Habit
@@ -53,6 +54,11 @@ export function HabitCard(p: Props) {
   const isToday = p.date === p.today
   const done = isDone(h, c)
   const target = Math.max(1, h.target_count)
+  const amount = isAmount(h)
+  const step = amount ? stepOf(h) : 1
+  const count = c?.kind === 'full' ? c.count : 0
+  const [amountOpen, setAmountOpen] = useState(false)
+  const [amountText, setAmountText] = useState('')
 
   const reward = (pts: number, undo: () => void) => {
     setPopKey((k) => k + 1)
@@ -150,7 +156,14 @@ export function HabitCard(p: Props) {
               +{floatPts.pts}
             </span>
           )}
-          {target > 1 ? (
+          {amount ? (
+            <button ref={checkRef} key={popKey} onClick={() => bump(step)} aria-label={`Add one ${h.step_label || `${step} ${h.unit}`}`}
+              className="bouncy animate-pop flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-full text-white shadow-md"
+              style={{ background: done ? h.color : `color-mix(in srgb, ${h.color} 85%, black)` }}>
+              <span className="text-xl font-black leading-none">{done ? '✓' : '+'}</span>
+              {!done && <span className="text-[9px] font-extrabold leading-tight">{h.step_label || `${step}`}</span>}
+            </button>
+          ) : target > 1 ? (
             <div className="flex items-center gap-1.5">
               <button onClick={() => bump(-1)} className="bouncy h-9 w-9 rounded-full bg-soft text-lg font-bold" aria-label="Minus one">−</button>
               <span key={popKey} className="animate-pop w-11 text-center text-sm font-black tabular-nums" style={done ? { color: h.color } : undefined}>
@@ -172,6 +185,34 @@ export function HabitCard(p: Props) {
           )}
         </div>
       </div>
+
+      {amount && (
+        <div className="mt-3">
+          <div className="h-3 overflow-hidden rounded-full bg-soft">
+            <div className="h-full rounded-full transition-all duration-500" style={{ width: `${Math.min(100, (count / target) * 100)}%`, background: h.color }} />
+          </div>
+          <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs font-bold">
+            <span className="tabular-nums">{c?.kind === 'two_min' ? '2-minute version done' : progressText(h, count)}</span>
+            {servingsText(h, count) && <span className="text-muted">{servingsText(h, count)}</span>}
+            <span className="ml-auto flex gap-1.5">
+              <button onClick={() => bump(-step)} disabled={count === 0} className="bouncy rounded-full bg-soft px-2.5 py-1 text-muted disabled:opacity-30" aria-label="Take one back">−</button>
+              <button onClick={() => { setAmountText(''); setAmountOpen(true) }} className="bouncy rounded-full bg-soft px-2.5 py-1 text-muted">✏️ Other amount</button>
+            </span>
+          </div>
+        </div>
+      )}
+
+      <Modal open={amountOpen} onClose={() => setAmountOpen(false)} title={`${h.emoji} How much?`}>
+        <p className="mb-3 text-sm font-semibold text-muted">Type any amount, like a cup you drank somewhere else.</p>
+        <div className="flex items-center gap-2">
+          <input type="number" inputMode="decimal" min={0} value={amountText} onChange={(e) => setAmountText(e.target.value)} placeholder={String(step)} autoFocus />
+          <span className="font-black">{h.unit}</span>
+        </div>
+        <div className="mt-4 flex gap-2">
+          <Button variant="secondary" className="flex-1" onClick={() => { const v = Number(amountText); if (v > 0) bump(-v); setAmountOpen(false) }}>Remove</Button>
+          <Button className="flex-1" onClick={() => { const v = Number(amountText); if (v > 0) bump(v); setAmountOpen(false) }}>Add</Button>
+        </div>
+      </Modal>
 
       {(cue || line) && (
         <div className="mt-2.5 space-y-0.5 text-xs font-semibold text-muted">

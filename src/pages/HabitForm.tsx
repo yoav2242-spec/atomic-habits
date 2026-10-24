@@ -8,6 +8,7 @@ import { WEEKDAY_SHORT } from '../lib/dates'
 import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
+import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
 import type { Habit, Schedule } from '../lib/types'
 
 const EMOJIS = ['✨', '📖', '🏃', '💪', '🧘', '💧', '🥗', '😴', '✍️', '🎸', '🧠', '🌱', '🦷', '🚶', '🧹', '💊', '☀️', '🙏', '🤸', '🗣️', '📵', '🍪', '📺', '💸']
@@ -67,7 +68,7 @@ export default function HabitForm() {
   const anchor = h.stack_after_habit_id ? habits.find((o) => o.id === h.stack_after_habit_id)?.name.toLowerCase() : h.stack_after_text.trim()
 
   const save = async () => {
-    const saved = { ...h, name: h.name.trim() }
+    const saved = { ...h, name: h.name.trim(), target_count: Math.max(1, h.target_count || 1), step: Math.max(1, h.step || 1) }
     await saveHabit(saved)
     if (!id) {
       await addPastProgress(saved, pastDays)
@@ -192,9 +193,7 @@ export default function HabitForm() {
             <Field label="The 2-minute version" tip="two_min" hint="Something that takes 2 minutes or less.">
               <input value={h.two_min_version} onChange={(e) => set({ two_min_version: e.target.value })} placeholder="e.g. read one page" />
             </Field>
-            <Field label="How many times a day?" hint="Leave it at 1 for most habits. Use more for things like glasses of water.">
-              <Stepper value={h.target_count} min={1} max={20} onChange={(target_count) => set({ target_count })} />
-            </Field>
+            <DailyGoal h={h} set={set} />
           </>,
           <>
             <Tip>Each check-off gives you points, confetti and a growing streak. If you miss a day, just don't miss twice.</Tip>
@@ -344,5 +343,58 @@ function Summary({ h, identity, anchor }: { h: Habit; identity?: string; anchor?
       </dl>
       <p className="mt-2 text-xs font-semibold text-muted">Want to change something? Tap the dots at the top.</p>
     </div>
+  )
+}
+
+/** How much counts as done: once, a number of times, or an amount like 2,400 ml in 800 ml bottles. */
+function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
+  const mode = isAmount(h) ? 'amount' : h.target_count > 1 ? 'times' : 'once'
+  const setMode = (m: string) =>
+    set(m === 'once' ? { target_count: 1, unit: '', step: 1, step_label: '' }
+      : m === 'times' ? { target_count: Math.max(2, isAmount(h) ? 3 : h.target_count), unit: '', step: 1, step_label: '' }
+      : { target_count: 2000, unit: 'ml', step: 500, step_label: 'bottle' })
+  const presets = CONTAINERS[h.unit] ?? []
+  return (
+    <Field label="What counts as done each day?">
+      <div className="space-y-3">
+        <Segmented value={mode} onChange={setMode} options={[{ value: 'once', label: 'Just do it' }, { value: 'times', label: 'Times a day' }, { value: 'amount', label: 'An amount' }]} />
+        {mode === 'times' && <Stepper value={h.target_count} min={2} max={30} onChange={(target_count) => set({ target_count })} />}
+        {mode === 'amount' && (
+          <div className="space-y-3 rounded-2xl bg-soft p-3">
+            <div>
+              <div className="mb-1 text-xs font-bold text-muted">Daily goal</div>
+              <div className="flex gap-2">
+                <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-1/2" />
+                <select value={UNITS.includes(h.unit) ? h.unit : 'other'} onChange={(e) => set({ unit: e.target.value === 'other' ? 'times' : e.target.value })} className="!w-1/2">
+                  {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
+                  <option value="other">other…</option>
+                </select>
+              </div>
+              {!UNITS.includes(h.unit) && (
+                <input className="mt-2" value={h.unit} onChange={(e) => set({ unit: e.target.value || 'times' })} placeholder="Your unit, e.g. push-ups" />
+              )}
+            </div>
+            <div>
+              <div className="mb-1 text-xs font-bold text-muted">One tap of + adds</div>
+              <div className="flex gap-2">
+                <input type="number" inputMode="decimal" min={1} value={h.step || ''} onChange={(e) => set({ step: Math.max(0, Number(e.target.value)) })} className="!w-1/2" />
+                <input value={h.step_label} onChange={(e) => set({ step_label: e.target.value })} placeholder="name, e.g. bottle" className="!w-1/2" />
+              </div>
+              {presets.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {presets.map((c) => (
+                    <button key={`${c.label}${c.size}`} type="button" onClick={() => set({ step: c.size, step_label: c.label })}
+                      className={`bouncy rounded-full px-3 py-1 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'bg-sage text-white' : 'bg-card text-muted'}`}>
+                      {c.label} {c.size} {h.unit}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            {h.target_count > 0 && h.step > 0 && <p className="text-sm font-bold">= {goalBreakdown(h)} a day</p>}
+          </div>
+        )}
+      </div>
+    </Field>
   )
 }

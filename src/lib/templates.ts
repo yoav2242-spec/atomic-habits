@@ -11,7 +11,7 @@ export interface Template {
 
 export const TEMPLATES: Template[] = [
   { identity: 'a reader', habit: { name: 'Read 10 pages', emoji: '📖', color: '#a497d6', location: 'bed', stack_after_text: 'get into bed', two_min_version: 'read one page', why: 'I want to learn and wind down without a screen', temptation_bundle: 'a cup of herbal tea' } },
-  { identity: 'a healthy person', habit: { name: 'Drink water', emoji: '💧', color: '#7eaed4', target_count: 8, two_min_version: 'drink one glass', why: 'More energy and fewer headaches', stack_after_text: 'wake up' } },
+  { identity: 'a healthy person', habit: { name: 'Drink water', emoji: '💧', color: '#7eaed4', target_count: 2000, unit: 'ml', step: 500, step_label: 'bottle', two_min_version: 'drink one glass', why: 'More energy and fewer headaches', stack_after_text: 'wake up' } },
   { identity: 'an active person', habit: { name: 'Go for a walk', emoji: '🚶', color: '#7fb69b', two_min_version: 'walk to the end of the street', why: 'A clear head and a healthier body', temptation_bundle: 'my favorite podcast', stack_after_text: 'finish lunch' } },
   { identity: 'a calm person', habit: { name: 'Meditate 5 minutes', emoji: '🧘', color: '#6fb3ad', two_min_version: 'take 3 slow breaths', why: 'Less stress, more focus', stack_after_text: 'pour my morning coffee' } },
   { identity: 'an athlete', habit: { name: 'Work out', emoji: '💪', color: '#ee9f80', schedule: { kind: 'weekly', times: 3 }, two_min_version: 'put on my workout clothes', why: 'Feel strong and confident', temptation_bundle: 'my workout playlist' } },

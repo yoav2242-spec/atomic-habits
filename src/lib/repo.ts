@@ -20,7 +20,7 @@ export const HABIT_COLORS = ['#7fb69b', '#7eaed4', '#a497d6', '#ee9f80', '#e3bd5
 export function newHabit(sort_order: number): Habit {
   return {
     id: newId(), updated_at: now(), deleted: false, type: 'build', name: '', emoji: '✨', color: HABIT_COLORS[0],
-    identity_id: null, schedule: { kind: 'daily' }, target_count: 1, cue_time: null, location: '',
+    identity_id: null, schedule: { kind: 'daily' }, target_count: 1, unit: '', step: 1, step_label: '', cue_time: null, location: '',
     stack_after_habit_id: null, stack_after_text: '', cue_trigger: '', hide_plan: '', why: '', temptation_bundle: '',
     two_min_version: '', friction_plan: '', contract: '', level: 1, level_history: [], levelup_snooze: null,
     archived: false, sort_order, created_at: now(),
@@ -28,12 +28,16 @@ export function newHabit(sort_order: number): Habit {
 }
 
 /** Change how hard the habit is (new name and/or daily count), keeping a history of steps. */
-export async function changeLevel(h: Habit, name: string, target_count: number, direction: 1 | -1) {
-  const level = Math.max(1, (h.level ?? 1) + direction)
-  // Days saved before goals were stored on each day: pin them to the old goal first.
+/** Days saved before goals were stored on each day: pin them to the old goal before it changes. */
+async function pinPastGoals(h: Habit) {
   await db.checkins.where('habit_id').equals(h.id).modify((c) => {
     c.target ??= Math.max(1, h.target_count)
   })
+}
+
+export async function changeLevel(h: Habit, name: string, target_count: number, direction: 1 | -1) {
+  const level = Math.max(1, (h.level ?? 1) + direction)
+  await pinPastGoals(h)
   const step = { date: todayKey(), level, name, target_count }
   await save('habits', { ...h, name, target_count, level, level_history: [...(h.level_history ?? []), step], levelup_snooze: null })
 }
@@ -73,7 +77,12 @@ export async function setDay(h: Habit, date: string, state: DayState, count?: nu
   return patchCheckin(h, date, { kind: 'full', count: count ?? Math.max(1, h.target_count) })
 }
 
-export const saveHabit = (h: Habit) => save('habits', h)
+export async function saveHabit(h: Habit) {
+  // Changing the daily goal must not undo days that met the old goal.
+  const before = await db.habits.get(h.id)
+  if (before && before.target_count !== h.target_count) await pinPastGoals(before)
+  await save('habits', h)
+}
 export const deleteHabit = (h: Habit) => save('habits', { ...h, deleted: true })
 export const setArchived = (h: Habit, archived: boolean) => save('habits', { ...h, archived })
 
