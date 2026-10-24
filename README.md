@@ -20,4 +20,4 @@ npm run dev     # local preview
 npm test        # streak logic tests
 npm run build   # production build into dist/
 ```
-Pushing to `main` publishes the app to GitHub Pages (see `.github/workflows/deploy.yml`).
+To publish a new version to GitHub Pages: `npm run deploy`.
