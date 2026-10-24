@@ -9,7 +9,7 @@ import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
-import { clockAlarmUrl, isAndroid } from '../lib/alarm'
+import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
 
@@ -437,11 +437,14 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
       )}
       </>)}
       {!remindersReady && (
-        <p className="text-xs font-semibold text-muted">Set an alarm for {h.cue_time} in your phone's Clock app, named after this habit, and pick any sound you like.</p>
+        <p className="text-xs font-semibold text-muted">Get reminded at {h.cue_time}: add a Clock alarm (pick any sound) or a repeating Google Calendar event.</p>
       )}
-      {isAndroid() && alarm && (
-        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-2 text-sm')}>⏰ Add an alarm in my Clock app</a>
-      )}
+      <div className="flex gap-2">
+        {isAndroid() && alarm && (
+          <a href={alarm} className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 text-sm')}>⏰ Clock alarm</a>
+        )}
+        <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 text-sm')}>📅 Google Calendar</a>
+      </div>
     </div>
   )
 }

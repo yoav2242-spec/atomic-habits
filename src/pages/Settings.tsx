@@ -1,9 +1,9 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { AlarmClock, Bell, BellOff, ChevronRight, Download, HardDriveDownload, Palette, Sparkles, Trash2, Upload, User, Vibrate } from 'lucide-react'
+import { AlarmClock, Bell, CalendarPlus, BellOff, ChevronRight, Download, HardDriveDownload, Palette, Sparkles, Trash2, Upload, User, Vibrate } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, buttonClass, Card, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
-import { clockAlarmUrl, isAndroid } from '../lib/alarm'
+import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
@@ -164,22 +164,28 @@ export default function Settings() {
           </p>
         )}
         </>)}
-        <Row icon={<AlarmClock size={19} />} title="Clock app alarms" hint="Pick your own sound for each habit" stacked>
+        <Row icon={<AlarmClock size={19} />} title="Alarms and calendar" hint="Reminders that work even when Atomic is closed" stacked>
           {timed.length === 0 ? (
             <p className="text-xs font-semibold text-muted">Give a habit a time (in its ✏️ edit, "Make it obvious") to add an alarm for it.</p>
           ) : (
             <ul className="space-y-2">
               {timed.map((h) => (
-                <li key={h.id} className="clay-in flex items-center gap-3 rounded-2xl p-2.5 pl-3.5">
-                  <span className="min-w-0 flex-1 truncate font-bold">{h.emoji} {h.name}</span>
-                  <span className="font-black tabular-nums">{h.cue_time}</span>
-                  {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', '!min-h-10 !px-3 !py-1.5 text-xs')}>Add alarm</a>}
+                <li key={h.id} className="clay-in space-y-2.5 rounded-2xl p-3">
+                  <div className="flex items-center gap-3 px-0.5">
+                    <span className="min-w-0 flex-1 truncate font-bold">{h.emoji} {h.name}</span>
+                    <span className="font-black tabular-nums">{h.cue_time}</span>
+                  </div>
+                  <div className="flex gap-2">
+                    {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><AlarmClock size={15} /> Alarm</a>}
+                    <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><CalendarPlus size={15} /> Google Calendar</a>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
           <p className="text-xs font-semibold text-muted">
-            {isAndroid() ? '"Add alarm" opens your Clock app with the time and name filled in. Choose the sound and days there, then save.' : 'Open your Clock app and add an alarm at each time, named after the habit.'}
+            {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
+            "Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you (set its notification to "At time of event" if you like).
           </p>
         </Row>
       </Section>
