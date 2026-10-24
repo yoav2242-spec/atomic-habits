@@ -93,7 +93,7 @@ export default function HabitForm() {
       <div>
         <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Cancel</button>
         <h1 className="text-3xl font-black tracking-tight">Add a habit</h1>
-        <p className="mb-5 font-semibold text-muted">Tap a ready-made habit (everything is filled in for you), or make your own.</p>
+        <p className="mb-5 font-semibold text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
         <button onClick={() => setStep(0)} className="bouncy mb-4 flex w-full items-center gap-3 rounded-3xl bg-sage p-4 text-left text-white shadow-[0_4px_0_0_var(--color-sage-deep)]">
           <span className="text-3xl">✏️</span>
           <span>
@@ -103,7 +103,7 @@ export default function HabitForm() {
         </button>
         <div className="grid grid-cols-2 gap-2.5">
           {TEMPLATES.map((t) => (
-            <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(STEPS[t.habit.type ?? 'build'].length - 1) }}
+            <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(0) }}
               className="bouncy rounded-3xl border border-line bg-card p-3.5 text-left shadow-sm">
               <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-2xl text-2xl" style={{ background: `${t.habit.color}33` }}>{t.habit.emoji}</div>
               <div className="text-sm font-extrabold leading-tight">{t.habit.name}</div>
