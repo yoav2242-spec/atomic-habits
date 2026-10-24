@@ -9,9 +9,9 @@ import { ROUTINE_SUGGESTIONS } from '../lib/suggestions'
 import type { ScorecardItem } from '../lib/types'
 
 const RATINGS: { value: ScorecardItem['rating']; label: string; on: string }[] = [
-  { value: '+', label: '+', on: 'bg-sage text-white' },
-  { value: '=', label: '=', on: 'bg-muted text-white' },
-  { value: '-', label: '−', on: 'bg-rose text-white' },
+  { value: '+', label: '+', on: 'bg-sage text-on-pastel' },
+  { value: '=', label: '=', on: 'bg-muted text-on-pastel' },
+  { value: '-', label: '−', on: 'bg-rose text-on-pastel' },
 ]
 const RATING_DOT = { '+': 'var(--color-sage)', '=': 'var(--muted)', '-': 'var(--color-rose)' }
 
@@ -151,7 +151,7 @@ export default function Scorecard() {
           const dragging = drag?.from === n
           return (
             <li key={item.id}
-              className={`rounded-3xl border border-line bg-card p-3 shadow-sm ${item.id === justAdded ? 'animate-rise' : ''} ${dragging ? 'relative z-10 scale-[1.02] shadow-xl' : ''}`}
+              className={`rounded-3xl clay-sm p-3 shadow-sm ${item.id === justAdded ? 'animate-rise' : ''} ${dragging ? 'relative z-10 scale-[1.02] shadow-xl' : ''}`}
               style={{ transform: `translateY(${shiftFor(n)}px)${dragging ? ' scale(1.02)' : ''}`, transition: dragging ? 'none' : 'transform 0.2s ease' }}>
               <div className="flex items-center gap-1.5">
                 <button
@@ -214,7 +214,7 @@ export default function Scorecard() {
             <div className="flex flex-wrap items-center gap-2">
               <Stepper value={days} min={0} max={365} onChange={setDays} />
               {[7, 14, 30].map((d) => (
-                <button key={d} onClick={() => setDays(d)} className={`bouncy rounded-full px-3 py-1.5 text-xs font-extrabold ${days === d ? 'bg-sage text-white' : 'bg-soft text-muted'}`}>{d}</button>
+                <button key={d} onClick={() => setDays(d)} className={`bouncy rounded-full px-3 py-1.5 text-xs font-extrabold ${days === d ? 'bg-sage text-on-pastel' : 'bg-soft text-muted'}`}>{d}</button>
               ))}
             </div>
           </Field>

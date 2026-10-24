@@ -62,11 +62,11 @@ export function Onboarding() {
             <div className="grid grid-cols-2 gap-2.5">
               {TEMPLATES.map((t, i) => (
                 <button key={t.habit.name} onClick={() => toggle(i)}
-                  className={`bouncy rounded-3xl border-2 p-3 text-left ${picked.has(i) ? 'border-transparent text-white' : 'border-line bg-card'}`}
+                  className={`bouncy rounded-3xl border-2 p-3 text-left ${picked.has(i) ? 'border-transparent text-on-pastel' : 'border-line bg-card'}`}
                   style={picked.has(i) ? { background: t.habit.color } : undefined}>
                   <div className="text-2xl">{t.habit.emoji}</div>
                   <div className="mt-1 text-sm font-extrabold leading-tight">{t.habit.name}</div>
-                  <div className={`text-xs font-semibold ${picked.has(i) ? 'text-white/85' : 'text-muted'}`}>
+                  <div className={`text-xs font-semibold ${picked.has(i) ? 'text-on-pastel/70' : 'text-muted'}`}>
                     {t.habit.type === 'break' ? 'Break a bad habit' : `I am ${t.identity}`}
                   </div>
                 </button>

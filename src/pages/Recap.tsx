@@ -9,7 +9,7 @@ import { isDone, isScheduled, pointsOn } from '../lib/streaks'
 
 function Slide({ from, to, children }: { from: string; to: string; children: ReactNode }) {
   return (
-    <div className="animate-rise mb-3 rounded-[2rem] p-6 text-white shadow-[0_10px_30px_-12px_rgba(60,60,90,0.5)]" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
+    <div className="animate-rise mb-3 rounded-[2rem] p-6 text-on-pastel shadow-[0_10px_30px_-12px_rgba(60,60,90,0.5)]" style={{ background: `linear-gradient(135deg, ${from}, ${to})` }}>
       {children}
     </div>
   )
@@ -94,10 +94,10 @@ export default function Recap() {
       </div>
 
       <Slide from="var(--color-lavender)" to="var(--color-rose)">
-        <div className="text-sm font-extrabold uppercase tracking-wider text-white/80">Your month in habits</div>
+        <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">Your month in habits</div>
         <div className="mt-1 text-4xl font-black">{monthName}</div>
         <div className="mt-6 text-6xl font-black">{checkIns}</div>
-        <div className="font-bold text-white/90">check-ins. Each one a vote for who you're becoming.</div>
+        <div className="font-bold text-on-pastel/70">check-ins. Each one a vote for who you're becoming.</div>
       </Slide>
 
       {checkIns === 0 && breaking.length === 0 ? (
@@ -106,33 +106,33 @@ export default function Recap() {
         <>
           <Slide from="var(--color-sage)" to="var(--color-sky)">
             <div className="grid grid-cols-2 gap-4">
-              <div><div className="text-5xl font-black">{perfect}</div><div className="font-bold text-white/90">perfect days 💯</div></div>
-              <div><div className="text-5xl font-black">+{points}</div><div className="font-bold text-white/90">points ⭐</div></div>
+              <div><div className="text-5xl font-black">{perfect}</div><div className="font-bold text-on-pastel/70">perfect days 💯</div></div>
+              <div><div className="text-5xl font-black">+{points}</div><div className="font-bold text-on-pastel/70">points ⭐</div></div>
             </div>
           </Slide>
 
           {star && (
             <Slide from="var(--color-butter)" to="var(--color-peach)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-white/85">⭐ Star habit</div>
+              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">⭐ Star habit</div>
               <div className="mt-2 text-5xl">{star.p.habit.emoji}</div>
               <div className="text-2xl font-black">{star.p.habit.name}</div>
-              <div className="font-bold text-white/90">{Math.round(star.rate * 100)}% of the time. Amazing.</div>
+              <div className="font-bold text-on-pastel/70">{Math.round(star.rate * 100)}% of the time. Amazing.</div>
             </Slide>
           )}
 
           {longest && longest.bestRun >= 2 && (
             <Slide from="var(--color-peach)" to="var(--color-rose)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-white/85">🔥 Longest run</div>
+              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">🔥 Longest run</div>
               <div className="mt-2 text-5xl font-black">{longest.bestRun} days</div>
-              <div className="font-bold text-white/90">of {longest.p.habit.emoji} {longest.p.habit.name} in a row</div>
+              <div className="font-bold text-on-pastel/70">of {longest.p.habit.emoji} {longest.p.habit.name} in a row</div>
             </Slide>
           )}
 
           {topDay && topDay.done > 0 && (
             <Slide from="var(--color-sky)" to="var(--color-lavender)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-white/85">📅 Your power day</div>
+              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">📅 Your power day</div>
               <div className="mt-2 text-4xl font-black">{WEEKDAY_LONG[topDay.wd]}s</div>
-              <div className="font-bold text-white/90">You got the most done on {WEEKDAY_LONG[topDay.wd]}s this month.</div>
+              <div className="font-bold text-on-pastel/70">You got the most done on {WEEKDAY_LONG[topDay.wd]}s this month.</div>
             </Slide>
           )}
 
@@ -140,14 +140,14 @@ export default function Recap() {
             <Slide from="var(--color-lavender)" to="var(--color-sky)">
               {votesBy.length > 0 && (
                 <>
-                  <div className="mb-2 text-sm font-extrabold uppercase tracking-wider text-white/85">🪞 Who you became</div>
+                  <div className="mb-2 text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">🪞 Who you became</div>
                   {votesBy.slice(0, 3).map((v) => (
                     <div key={v.name} className="flex justify-between text-lg font-black"><span>I am {v.name}</span><span>{v.votes} votes</span></div>
                   ))}
                 </>
               )}
               {breaking.length > 0 && (
-                <div className={`font-bold text-white/90 ${votesBy.length ? 'mt-4' : ''}`}>
+                <div className={`font-bold text-on-pastel/70 ${votesBy.length ? 'mt-4' : ''}`}>
                   ✂️ Breaking bad habits: {slips === 0 ? 'zero slips all month! 🎉' : `${slips} slip${slips === 1 ? '' : 's'}, and you kept going.`}
                 </div>
               )}

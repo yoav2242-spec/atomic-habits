@@ -50,7 +50,7 @@ export default function Identity() {
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-2">
-                <span className="rounded-full px-2.5 py-0.5 text-xs font-black text-white" style={{ background: color }}>Lv {lvl.level}</span>
+                <span className="rounded-full px-2.5 py-0.5 text-xs font-black text-on-pastel" style={{ background: color }}>Lv {lvl.level}</span>
                 <div className="flex-1"><XPBar into={lvl.into} need={lvl.need} color={color} /></div>
               </div>
               <div className="mt-3 flex gap-4 text-sm font-bold">

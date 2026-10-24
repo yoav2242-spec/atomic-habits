@@ -127,7 +127,7 @@ function HabitRow({ p, today }: { p: HabitProgress; today: string }) {
     return isDone(h, c) ? (c!.kind === 'two_min' ? 0.5 : 1) : 0
   })
   return (
-    <Link to={`/habits/${h.id}`} className="bouncy block rounded-3xl border border-line bg-card p-3.5 shadow-sm">
+    <Link to={`/habits/${h.id}`} className="bouncy block rounded-3xl clay-sm p-3.5 shadow-sm">
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="min-w-0 truncate font-extrabold">{h.emoji} {h.name}</span>
         <span className="shrink-0 text-xs font-black text-muted">

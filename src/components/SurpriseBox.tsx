@@ -24,7 +24,7 @@ export function SurpriseBox({ progress, ready }: { progress: Progress; ready: bo
 
   if (opened && !prize) {
     return (
-      <Link to="/rewards" className="bouncy mb-5 flex items-center gap-3 rounded-3xl border border-line bg-card p-3 text-sm font-bold shadow-sm">
+      <Link to="/rewards" className="clay-in bouncy flex min-h-16 items-center gap-3 rounded-[22px] p-4 text-sm font-bold">
         <span className="text-2xl">🎁</span>
         <span className="flex-1 text-muted">Today's box is opened. A new one tomorrow!</span>
         <span className="text-muted">Rewards ›</span>
@@ -38,13 +38,12 @@ export function SurpriseBox({ progress, ready }: { progress: Progress; ready: bo
         <button
           disabled={!ready || shaking}
           onClick={open}
-          className={`bouncy mb-5 flex w-full items-center gap-3 rounded-3xl p-4 text-left shadow-sm ${ready ? 'text-white' : 'border border-dashed border-line bg-card'}`}
-          style={ready ? { background: 'linear-gradient(135deg, var(--color-lavender), var(--color-rose))', boxShadow: '0 4px 0 0 var(--color-lavender-deep)' } : undefined}
+          className={`bouncy flex min-h-20 w-full items-center gap-4 rounded-[24px] p-4 text-left ${ready ? 'puffy bg-rose/80 text-on-pastel' : 'clay-in'}`}
         >
           <span className={`text-4xl ${shaking ? 'animate-wiggle' : ready ? 'animate-pop' : 'opacity-40 grayscale'}`}>🎁</span>
           <span className="flex-1">
             <span className="block font-black">{ready ? 'Your surprise box is ready!' : "Today's surprise box"}</span>
-            <span className={`text-xs font-bold ${ready ? 'text-white/85' : 'text-muted'}`}>
+            <span className={`text-xs font-bold ${ready ? 'text-on-pastel/70' : 'text-muted'}`}>
               {ready ? (shaking ? 'Opening…' : 'Tap to open it') : "Finish all of today's habits to unlock it"}
             </span>
           </span>

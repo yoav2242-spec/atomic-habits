@@ -17,7 +17,7 @@ export function scheduleLabel(h: Habit) {
 
 function Row({ h, streak, up, down }: { h: Habit; streak?: number; up?: Habit; down?: Habit }) {
   return (
-    <div className="flex items-center gap-3 rounded-3xl border border-line bg-card p-3 shadow-sm">
+    <div className="flex items-center gap-3 rounded-3xl clay-sm p-3 shadow-sm">
       <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl text-xl" style={{ background: `${h.color}33` }}>{h.emoji}</span>
       <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
         <div className="truncate font-extrabold">{h.name}</div>

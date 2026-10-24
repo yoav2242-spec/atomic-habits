@@ -95,17 +95,17 @@ export default function HabitForm() {
         <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Cancel</button>
         <h1 className="text-3xl font-black tracking-tight">Add a habit</h1>
         <p className="mb-5 font-semibold text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
-        <button onClick={() => setStep(0)} className="bouncy mb-4 flex w-full items-center gap-3 rounded-3xl bg-sage p-4 text-left text-white shadow-[0_4px_0_0_var(--color-sage-deep)]">
+        <button onClick={() => setStep(0)} className="bouncy mb-4 flex w-full items-center gap-3 rounded-3xl bg-sage p-4 text-left text-on-pastel shadow-[0_4px_0_0_var(--color-sage-deep)]">
           <span className="text-3xl">✏️</span>
           <span>
             <span className="block text-lg font-black">Make my own</span>
-            <span className="text-sm font-semibold text-white/85">We'll guide you step by step</span>
+            <span className="text-sm font-semibold text-on-pastel/70">We'll guide you step by step</span>
           </span>
         </button>
         <div className="grid grid-cols-2 gap-2.5">
           {TEMPLATES.map((t) => (
             <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(0) }}
-              className="bouncy rounded-3xl border border-line bg-card p-3.5 text-left shadow-sm">
+              className="bouncy rounded-3xl clay-sm p-3.5 text-left shadow-sm">
               <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-2xl text-2xl" style={{ background: `${t.habit.color}33` }}>{t.habit.emoji}</div>
               <div className="text-sm font-extrabold leading-tight">{t.habit.name}</div>
               <div className="text-xs font-semibold text-muted">{t.habit.type === 'break' ? 'Break a bad habit' : `I am ${t.identity}`}</div>
@@ -151,7 +151,7 @@ export default function HabitForm() {
                   const on = days.includes(d)
                   return (
                     <button key={d} type="button" onClick={() => set({ schedule: { kind: 'weekdays', days: on ? days.filter((x) => x !== d) : [...days, d] } })}
-                      className={`bouncy flex-1 rounded-xl py-2.5 text-sm font-extrabold ${on ? 'bg-sage text-white' : 'bg-soft text-muted'}`}>
+                      className={`bouncy flex-1 rounded-xl py-2.5 text-sm font-extrabold ${on ? 'bg-sage text-on-pastel' : 'bg-soft text-muted'}`}>
                       {WEEKDAY_SHORT[d].slice(0, 2)}
                     </button>
                   )
@@ -305,7 +305,7 @@ function IdentityStep(p: {
         <div className="flex flex-wrap gap-2">
           {p.identities.map((i) => (
             <button key={i.id} type="button" onClick={() => p.set({ identity_id: p.h.identity_id === i.id ? null : i.id })}
-              className={`bouncy rounded-full px-4 py-2 text-sm font-extrabold ${p.h.identity_id === i.id ? 'bg-lavender text-white' : 'bg-soft text-muted'}`}>
+              className={`bouncy rounded-full px-4 py-2 text-sm font-extrabold ${p.h.identity_id === i.id ? 'bg-lavender text-on-pastel' : 'bg-soft text-muted'}`}>
               I am {i.name}
             </button>
           ))}
@@ -384,7 +384,7 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {presets.map((c) => (
                     <button key={`${c.label}${c.size}`} type="button" onClick={() => set({ step: c.size, step_label: c.label })}
-                      className={`bouncy rounded-full px-3 py-1 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'bg-sage text-white' : 'bg-card text-muted'}`}>
+                      className={`bouncy rounded-full px-3 py-1 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'bg-sage text-on-pastel' : 'bg-card text-muted'}`}>
                       {c.label} {c.size} {h.unit}
                     </button>
                   ))}

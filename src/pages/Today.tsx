@@ -1,13 +1,15 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { CalendarCheck, CalendarHeart, ChevronLeft, ChevronRight, Gift, Lightbulb, Pencil, Plus, Save, Sprout, Target } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Celebration, type CelebrationInfo } from '../components/Celebration'
 import { Garden } from '../components/Garden'
 import { HabitCard } from '../components/HabitCard'
-import { markFlag, Quests } from '../components/Quests'
+import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
-import { Button, buttonClass, Card, InfoTip, Modal, ProgressRing, useToast, XPBar } from '../components/ui'
+import { Button, buttonClass, Card, InfoTip, Modal, ProgressRing, spring, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
 import { db, getMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
@@ -50,6 +52,12 @@ export default function Today() {
   const [slipFor, setSlipFor] = useState<Habit | null>(null)
   const [levelUpFor, setLevelUpFor] = useState<Habit | null>(null)
   const [celebration, setCelebration] = useState<CelebrationInfo | null>(null)
+  const [sheet, setSheetState] = useState<string | null>(null)
+  const setSheet = (k: string | null) => {
+    if (k === 'tip' && progress) markFlag(progress.today, 'read_tip')
+    setSheetState(k)
+  }
+  const quests = useQuests(progress)
   // After a tap, compare progress before/after to spot a new badge, level, or a finished day.
   const armed = useRef<{ level: number; badges: Map<string, number>; done: number; perfectBest: number; mostInADay: number } | null>(null)
   const records = useMemo(() => (progress ? computeRecords(progress) : null), [progress])
@@ -106,6 +114,13 @@ export default function Today() {
   const backupDue = all.length > 0 && lastBackup !== 'loading' && (!lastBackup || diffDays(lastBackup.slice(0, 10), today) >= 14)
   const share = build.length ? doneCount / build.length : 0
   const tip = tipOfTheDay(diffDays('2000-01-01', today))
+  const boxReady = build.length > 0 && doneCount === build.length && !progress.rewards.some((r) => r.id === `box_${today}`)
+  const extras = [
+    { key: 'garden', label: 'Garden', Icon: Sprout, color: 'var(--color-sage)', badge: '' },
+    { key: 'quests', label: 'Quests', Icon: Target, color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
+    { key: 'box', label: 'Box', Icon: Gift, color: 'var(--color-rose)', badge: boxReady ? '!' : '' },
+    { key: 'tip', label: 'Tip', Icon: Lightbulb, color: 'var(--color-sky)', badge: '' },
+  ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
   const reviewDue = weekday(today) === 0 && !progress.rewards.some((r) => r.id === `review_${weekStart(today)}`)
   const lastMonth = addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)
@@ -147,107 +162,129 @@ export default function Today() {
 
   return (
     <div>
-      <header className="mb-4 flex items-center justify-between">
+      <header className="mb-5 flex items-end justify-between">
         <div>
-          <h1 className="text-[28px] font-black leading-tight tracking-tight">{title}</h1>
-          <p className="text-sm font-bold text-muted">{formatDay(date)}</p>
+          <p className="text-[13px] font-extrabold uppercase tracking-wider text-muted">{formatDay(date)}</p>
+          <h1 className="mt-1 text-[32px] font-black leading-none tracking-tight">{title}</h1>
         </div>
-        <div className="flex gap-1.5">
-          <button onClick={() => setOffset((o) => o + 1)} className="bouncy h-10 w-10 rounded-full bg-card text-lg font-black shadow-sm" aria-label="Previous day">‹</button>
-          <button onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="bouncy h-10 w-10 rounded-full bg-card text-lg font-black shadow-sm disabled:opacity-30" aria-label="Next day">›</button>
+        <div className="flex gap-2">
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><ChevronLeft size={20} /></motion.button>
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><ChevronRight size={20} /></motion.button>
         </div>
       </header>
 
       {all.length === 0 ? (
-        <Card className="animate-rise text-center">
-          <div className="mb-2 text-6xl">🌱</div>
+        <Card className="animate-rise !p-6 text-center">
+          <div className="puffy mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[28px] bg-sage/70 text-4xl">🌱</div>
           <h2 className="mb-2 text-2xl font-black">Let's plant your first habit</h2>
-          <p className="mb-5 font-semibold text-muted">Start tiny, so small it feels too easy. Pick a ready-made habit or make your own.</p>
+          <p className="mb-6 font-semibold text-muted">Start tiny, so small it feels too easy. Pick a ready-made habit or make your own.</p>
           <Link to="/habits/new" className={buttonClass('primary', 'w-full')}>Choose a habit</Link>
-          <Link to="/scorecard" className="mt-4 block text-sm font-bold text-sage-deep underline dark:text-sage">
+          <Link to="/scorecard" className="mt-4 block min-h-11 py-2 text-sm font-bold text-muted underline">
             Or first, list what you already do each day
           </Link>
         </Card>
       ) : (
         <>
           {offset === 0 ? (
-            <Card className="mb-5 flex items-center gap-4 !p-5">
-              <ProgressRing value={share} size={108} stroke={12}>
-                <span className="text-2xl font-black">{doneCount}/{build.length}</span>
-                <span className="text-[11px] font-extrabold text-muted">{share === 1 ? 'all done!' : 'done'}</span>
+            <Card className="mb-5 flex items-center gap-5 !p-5">
+              <ProgressRing value={share} size={124} stroke={13}>
+                <motion.span key={doneCount} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={spring} className="text-[28px] font-black leading-none">
+                  {doneCount}<span className="text-lg text-muted">/{build.length}</span>
+                </motion.span>
+                <span className="mt-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">{share === 1 ? 'all done' : 'done'}</span>
               </ProgressRing>
               <Link to="/stats" className="min-w-0 flex-1">
                 <div className="flex items-center gap-1.5">
-                  <span className="rounded-full bg-lavender px-2.5 py-0.5 text-xs font-black text-white">Level {progress.level.level}</span>
+                  <span className="puffy rounded-full bg-lavender/80 px-3 py-1 text-xs font-black text-on-pastel">Level {progress.level.level}</span>
                   <InfoTip tip="points" />
                 </div>
-                <div className="mt-2"><XPBar into={progress.level.into} need={progress.level.need} /></div>
-                <div className="mt-1 text-xs font-bold text-muted">{progress.level.need - progress.level.into} points to level {progress.level.level + 1}</div>
-                <div className="mt-2 text-lg font-black text-sage-deep dark:text-sage">+{progress.todayPoints} today</div>
+                <div className="mt-3"><XPBar into={progress.level.into} need={progress.level.need} /></div>
+                <div className="mt-1.5 text-xs font-bold text-muted">{progress.level.need - progress.level.into} to level {progress.level.level + 1}</div>
+                <motion.div key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="mt-2 text-xl font-black text-sage-deep">
+                  +{progress.todayPoints} <span className="text-sm text-muted">today</span>
+                </motion.div>
               </Link>
             </Card>
           ) : (
-            <p className="mb-4 rounded-2xl bg-soft px-4 py-3 text-sm font-bold">
-              ✏️ Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
-            </p>
-          )}
-
-          {offset === 0 && reviewDue && (
-            <Link to="/review" className="bouncy mb-4 flex items-center gap-3 rounded-3xl p-4 text-white" style={{ background: 'linear-gradient(135deg, var(--color-sky), var(--color-lavender))', boxShadow: '0 4px 0 0 var(--color-lavender-deep)' }}>
-              <span className="text-3xl">📅</span>
-              <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-xs font-bold text-white/85">2 minutes · pick next week's focus · +25 points</span></span>
-              <span className="text-2xl">›</span>
-            </Link>
-          )}
-          {offset === 0 && recapDue && (
-            <Link to={`/recap/${lastMonth}`} className="bouncy mb-4 flex items-center gap-3 rounded-3xl p-4 text-white" style={{ background: 'linear-gradient(135deg, var(--color-peach), var(--color-rose))', boxShadow: '0 4px 0 0 #b86c82' }}>
-              <span className="text-3xl">🗓️</span>
-              <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here!</span><span className="text-xs font-bold text-white/85">See everything you did last month</span></span>
-              <span className="text-2xl">›</span>
-            </Link>
-          )}
-
-          {offset === 0 && <Garden habits={progress.habits.filter((p) => !p.habit.archived)} today={today} />}
-
-          <div className="space-y-3">
-            {buildOrdered.map(({ habit, depth }) => card(habit, depth))}
-            {build.length === 0 && <p className="font-semibold text-muted">Nothing scheduled for this day. Enjoy the rest! 🌤️</p>}
-          </div>
-
-          {breaking.length > 0 && (
-            <>
-              <h2 className="mb-3 mt-7 text-sm font-black uppercase tracking-wider text-muted">Breaking free</h2>
-              <div className="space-y-3">{breaking.map((h) => card(h))}</div>
-            </>
-          )}
-
-          {offset === 0 && (
-            <div className="mt-6">
-              <SurpriseBox progress={progress} ready={build.length > 0 && doneCount === build.length} />
-              <Quests progress={progress} />
+            <div className="clay-in mb-5 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-bold">
+              <Pencil size={16} className="shrink-0 text-muted" /> Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
             </div>
           )}
 
           {offset === 0 && (
-            <Link to="/tips" onClick={() => markFlag(today, 'read_tip')} className="bouncy block rounded-3xl p-4" style={{ background: 'color-mix(in srgb, var(--color-butter) 20%, var(--card))' }}>
-              <div className="mb-1 flex items-center justify-between text-xs font-black uppercase tracking-wider text-muted">
-                <span>💡 Tip of the day</span><span>All tips ›</span>
-              </div>
-              <p className="font-bold leading-snug">{tip.icon} {tip.tip}</p>
-            </Link>
+            <div className="mb-5 grid grid-cols-4 gap-2.5">
+              {extras.map((x) => (
+                <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
+                  className="clay relative flex aspect-square flex-col items-center justify-center gap-1 rounded-[22px]">
+                  <span className="puffy flex h-10 w-10 items-center justify-center rounded-2xl text-on-pastel" style={{ background: x.color }}><x.Icon size={20} strokeWidth={2.4} /></span>
+                  <span className="text-[11px] font-extrabold">{x.label}</span>
+                  {x.badge && (
+                    <motion.span initial={{ scale: 0 }} animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 1.8 }}
+                      className="puffy absolute -right-1 -top-1 rounded-full bg-rose px-1.5 py-0.5 text-[10px] font-black text-on-pastel">{x.badge}</motion.span>
+                  )}
+                </motion.button>
+              ))}
+            </div>
           )}
 
-          <Link to="/habits/new" className="bouncy mt-5 flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-line py-4 font-extrabold text-muted">
-            + Add a habit
+          {offset === 0 && (reviewDue || recapDue) && (
+            <div className="mb-5 space-y-2.5">
+              {reviewDue && (
+                <Link to="/review" className="puffy bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-sky/70 px-4 py-3 text-on-pastel">
+                  <CalendarCheck size={22} />
+                  <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-xs font-bold opacity-75">2 minutes · pick next week's focus · +25</span></span>
+                  <ChevronRight size={20} />
+                </Link>
+              )}
+              {recapDue && (
+                <Link to={`/recap/${lastMonth}`} className="puffy bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-peach/70 px-4 py-3 text-on-pastel">
+                  <CalendarHeart size={22} />
+                  <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-xs font-bold opacity-75">See everything you did last month</span></span>
+                  <ChevronRight size={20} />
+                </Link>
+              )}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            {buildOrdered.map(({ habit, depth }) => card(habit, depth))}
+            {build.length === 0 && <p className="py-4 text-center font-semibold text-muted">Nothing scheduled for this day. Enjoy the rest.</p>}
+          </div>
+
+          {breaking.length > 0 && (
+            <>
+              <h2 className="mb-3 mt-8 text-[13px] font-extrabold uppercase tracking-wider text-muted">Breaking free</h2>
+              <div className="space-y-4">{breaking.map((h) => card(h))}</div>
+            </>
+          )}
+
+          <Link to="/habits/new" className="clay-in bouncy mt-6 flex min-h-14 items-center justify-center gap-2 rounded-[22px] font-extrabold text-muted">
+            <Plus size={18} /> Add a habit
           </Link>
 
           {backupDue && (
-            <Link to="/settings" className="mt-4 block rounded-2xl bg-butter/15 p-3 text-sm font-bold">
-              💾 Your habits live only on this phone. Tap to save a backup copy.
+            <Link to="/settings" className="clay-sm mt-4 flex items-center gap-2.5 rounded-2xl p-3.5 text-sm font-bold">
+              <Save size={18} className="shrink-0 text-muted" /> Your habits live only on this phone. Tap to save a backup copy.
             </Link>
           )}
         </>
       )}
+
+      <Modal open={sheet === 'garden'} onClose={() => setSheet(null)} title="Your garden">
+        <p className="mb-4 text-sm font-semibold text-muted">Each habit is a plant. It grows every time you practice, and droops (but never dies) when you miss.</p>
+        <Garden habits={progress.habits.filter((p) => !p.habit.archived)} today={today} />
+      </Modal>
+      <Modal open={sheet === 'quests'} onClose={() => setSheet(null)} title="Daily quests">
+        <p className="mb-4 text-sm font-semibold text-muted">Bonus points for small challenges. New ones every day.</p>
+        {quests && <QuestList status={quests} />}
+      </Modal>
+      <Modal open={sheet === 'box'} onClose={() => setSheet(null)} title="Surprise box">
+        <SurpriseBox progress={progress} ready={build.length > 0 && doneCount === build.length} />
+      </Modal>
+      <Modal open={sheet === 'tip'} onClose={() => setSheet(null)} title="Tip of the day">
+        <p className="mb-6 text-lg font-bold leading-snug">{tip.icon} {tip.tip}</p>
+        <Link to="/tips" className={buttonClass('secondary', 'w-full')}>See all tips</Link>
+      </Modal>
 
       <Modal open={!!noteFor} onClose={() => setNoteFor(null)} title={`📝 ${noteFor?.name ?? ''}`}>
         <textarea rows={4} value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="How did it go? What helped or got in the way?" autoFocus />
@@ -257,7 +294,7 @@ export default function Today() {
         </div>
       </Modal>
 
-      <Modal open={!!slipFor} onClose={() => setSlipFor(null)} title="That's okay 💛">
+      <Modal open={!!slipFor} onClose={() => setSlipFor(null)} title="That's okay">
         <p className="mb-3 font-semibold text-muted">
           One slip doesn't undo your progress. What matters is not slipping twice in a row. What set it off this time?
         </p>

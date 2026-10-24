@@ -132,7 +132,7 @@ export default function Stats() {
           [`/recap/${addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)}`, '🗓️', 'Monthly recap'],
           ['/rewards', '🎁', 'Rewards'],
         ].map(([to, icon, label]) => (
-          <Link key={label} to={to} className="bouncy rounded-3xl border border-line bg-card p-3 text-center shadow-sm">
+          <Link key={label} to={to} className="bouncy rounded-3xl clay-sm p-3 text-center shadow-sm">
             <div className="text-2xl">{icon}</div>
             <div className="text-xs font-extrabold">{label}</div>
           </Link>

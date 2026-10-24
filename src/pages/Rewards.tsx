@@ -40,7 +40,7 @@ export default function Rewards() {
             return (
               <button key={t.id} disabled={!open} onClick={() => setTheme(t.id)}
                 className={`bouncy flex flex-col items-center gap-1 rounded-2xl p-2 ${active ? 'ring-[3px] ring-ink/60' : ''} ${open ? 'bg-soft' : 'bg-soft opacity-50'}`}>
-                <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm text-white" style={{ background: open ? t.accent : 'var(--line)', boxShadow: open ? `0 3px 0 0 ${t.deep}` : undefined }}>
+                <span className="flex h-10 w-10 items-center justify-center rounded-full text-sm text-on-pastel" style={{ background: open ? t.accent : 'var(--line)', boxShadow: open ? `0 3px 0 0 ${t.deep}` : undefined }}>
                   {active ? '✓' : open ? '' : '🔒'}
                 </span>
                 <span className="text-[11px] font-extrabold">{t.name}</span>

@@ -45,7 +45,7 @@ export function DayEditor({ habit, date, checkin, onClose }: { habit: Habit; dat
         <div className="grid gap-2" style={{ gridTemplateColumns: `repeat(${options.length}, 1fr)` }}>
           {options.map((o) => (
             <button key={o.value} onClick={() => { setState(o.value); if (o.value === 'done') setCount(target); if (o.value === 'none') setCount(0) }}
-              className={`bouncy rounded-2xl border-2 px-2 py-3 text-sm font-extrabold ${state === o.value ? 'text-white' : 'border-line text-muted'}`}
+              className={`bouncy rounded-2xl border-2 px-2 py-3 text-sm font-extrabold ${state === o.value ? 'text-on-pastel' : 'border-line text-muted'}`}
               style={state === o.value ? { background: o.value === 'slip' ? 'var(--color-rose)' : habit.color, borderColor: 'transparent' } : undefined}>
               {o.label}
             </button>
