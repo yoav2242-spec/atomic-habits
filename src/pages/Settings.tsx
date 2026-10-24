@@ -151,6 +151,8 @@ export default function Settings() {
       </Section>
 
       <Section title="Reminders">
+        {/* Notifications need the optional online reminder helper; without it, Clock alarms are the reminders. */}
+        {remindersReady && (<>
         <Row icon={notifOn ? <Bell size={19} /> : <BellOff size={19} />} title="Notifications"
           hint={!notificationsSupported() ? 'Install the app to use notifications' : !remindersReady ? 'Almost ready: being set up' : notifOn ? 'On. Choose which habits remind you.' : 'A reminder at each habit’s time'}>
           <Toggle label="Notifications" on={notifOn} onChange={toggleNotifications} />
@@ -161,6 +163,7 @@ export default function Settings() {
             reminder times leave your phone, never habit names or progress.
           </p>
         )}
+        </>)}
         <Row icon={<AlarmClock size={19} />} title="Clock app alarms" hint="Pick your own sound for each habit" stacked>
           {timed.length === 0 ? (
             <p className="text-xs font-semibold text-muted">Give a habit a time (in its ✏️ edit, "Make it obvious") to add an alarm for it.</p>

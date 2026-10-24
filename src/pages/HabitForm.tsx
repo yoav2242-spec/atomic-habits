@@ -10,7 +10,7 @@ import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, sav
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
 import { clockAlarmUrl, isAndroid } from '../lib/alarm'
-import { VIBRATIONS } from '../lib/reminders'
+import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
 
 const EMOJIS = ['✨', '📖', '🏃', '💪', '🧘', '💧', '🥗', '😴', '✍️', '🎸', '🧠', '🌱', '🦷', '🚶', '🧹', '💊', '☀️', '🙏', '🤸', '🗣️', '📵', '🍪', '📺', '💸']
@@ -414,6 +414,7 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
   const alarm = clockAlarmUrl(h)
   return (
     <div className="clay-in space-y-3 rounded-2xl p-3.5">
+      {remindersReady && (<>
       <div className="flex items-center gap-3">
         <span className="flex-1">
           <span className="block text-sm font-extrabold">Remind me at {h.cue_time}</span>
@@ -434,8 +435,12 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
           </div>
         </div>
       )}
+      </>)}
+      {!remindersReady && (
+        <p className="text-xs font-semibold text-muted">Set an alarm for {h.cue_time} in your phone's Clock app, named after this habit, and pick any sound you like.</p>
+      )}
       {isAndroid() && alarm && (
-        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-2 text-sm')}>⏰ Add an alarm in my Clock app (own sound)</a>
+        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-2 text-sm')}>⏰ Add an alarm in my Clock app</a>
       )}
     </div>
   )
