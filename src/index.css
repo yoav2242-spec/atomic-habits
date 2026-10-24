@@ -9,8 +9,8 @@
   --color-line: var(--line);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
-  --color-sage: #7fb69b;
-  --color-sage-deep: #5c9479;
+  --color-sage: var(--accent);
+  --color-sage-deep: var(--accent-deep);
   --color-sky: #7eaed4;
   --color-lavender: #a497d6;
   --color-lavender-deep: #8273bf;
@@ -21,6 +21,8 @@
 
 :root {
   color-scheme: light dark;
+  --accent: #7fb69b;
+  --accent-deep: #5c9479;
   --bg: #f5f2ec;
   --card: #ffffff;
   --soft: #eeeae2;

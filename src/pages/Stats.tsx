@@ -1,8 +1,12 @@
+import { useEffect, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import { HabitBreakdown, ProgressInsights } from '../components/ProgressInsights'
+import { markFlag } from '../components/Quests'
+import { computeRecords } from '../lib/records'
 import { AreaChart, BarChart } from '../components/Charts'
 import { Heatmap } from '../components/Heatmap'
 import { Card, InfoTip, PageHeader, XPBar } from '../components/ui'
-import { addDays, formatDay, range, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
+import { addDays, formatDay, range, todayKey, WEEKDAY_LONG, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
 import { useProgress, type HabitProgress } from '../lib/progress'
 import { byDate, isDone, isScheduled, pointsOn, startDate } from '../lib/streaks'
 
@@ -10,7 +14,11 @@ const MON_FIRST = [1, 2, 3, 4, 5, 6, 0]
 
 export default function Stats() {
   const progress = useProgress()
-  if (!progress) return null
+  const records = useMemo(() => (progress ? computeRecords(progress) : null), [progress])
+  useEffect(() => {
+    markFlag(todayKey(), 'visited_stats')
+  }, [])
+  if (!progress || !records) return null
   const { today } = progress
   const active = progress.habits.filter((p) => !p.habit.archived)
   const build = active.filter((p) => p.habit.type === 'build')
@@ -118,6 +126,38 @@ export default function Stats() {
         ))}
       </div>
 
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {[
+          ['/review', '📅', 'Weekly review'],
+          [`/recap/${addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)}`, '🗓️', 'Monthly recap'],
+          ['/rewards', '🎁', 'Rewards'],
+        ].map(([to, icon, label]) => (
+          <Link key={label} to={to} className="bouncy rounded-3xl border border-line bg-card p-3 text-center shadow-sm">
+            <div className="text-2xl">{icon}</div>
+            <div className="text-xs font-extrabold">{label}</div>
+          </Link>
+        ))}
+      </div>
+
+      <Card className="mb-4">
+        <div className="mb-3 font-black">🏆 Personal records</div>
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            ['🔥', `${records.bestStreak.value} ${records.bestStreak.unit}s`, 'Longest streak', records.bestStreak.habit],
+            ['💯', `${records.perfectRun.best} days`, 'Perfect days in a row', records.perfectRun.current > 0 ? `now: ${records.perfectRun.current}` : undefined],
+            ['⚡', String(records.mostInADay.value), 'Most habits in a day', records.mostInADay.date && formatDay(records.mostInADay.date, { month: 'short', day: 'numeric' })],
+            ['📅', records.bestWeek.week ? `${Math.round(records.bestWeek.rate * 100)}%` : '–', 'Best week', records.bestWeek.week && `week of ${formatDay(records.bestWeek.week, { month: 'short', day: 'numeric' })}`],
+          ].map(([icon, value, label, sub]) => (
+            <div key={label} className="rounded-2xl bg-soft p-3">
+              <div className="text-xs font-extrabold text-muted">{icon} {label}</div>
+              <div className="text-xl font-black">{value}</div>
+              {sub && <div className="truncate text-[11px] font-bold text-muted">{sub}</div>}
+            </div>
+          ))}
+        </div>
+        <p className="mt-2 text-xs font-semibold text-muted">{records.perfectDays} perfect day{records.perfectDays === 1 ? '' : 's'} so far. Beat your records to get a celebration!</p>
+      </Card>
+
       <ProgressInsights progress={progress} />
 
       <Card className="mb-4">
@@ -145,7 +185,7 @@ export default function Stats() {
       <Card className="mb-4">
         <div className="font-black">Your best days</div>
         <p className="mb-3 text-xs font-semibold text-muted">
-          {byWeekday.some((v) => v !== null) ? `You're most consistent on ${WEEKDAY_SHORT[MON_FIRST[bestDay]]}days. Plan tough habits for those days.` : 'Check off habits for a while to see your best days.'}
+          {byWeekday.some((v) => v !== null) ? `You're most consistent on ${WEEKDAY_LONG[MON_FIRST[bestDay]]}s. Plan tough habits for those days.` : 'Check off habits for a while to see your best days.'}
         </p>
         <BarChart values={byWeekday} labels={MON_FIRST.map((d) => WEEKDAY_SHORT[d])} color="var(--color-sky)" highlightLast={false} height={90} />
       </Card>

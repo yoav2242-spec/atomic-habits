@@ -163,19 +163,41 @@ export function useConfirm() {
 
 type ToastAction = { label: string; onClick: () => void }
 const ToastCtx = createContext<(msg: string, action?: ToastAction) => void>(() => {})
+const DismissCtx = createContext<(holdUntilReleased?: boolean) => void>(() => {})
 export const useToast = () => useContext(ToastCtx)
+/** Hides the current toast, e.g. when a big celebration opens so the two don't overlap.
+ *  dismiss(true) also holds new toasts back until dismiss(false) releases them. */
+export const useDismissToast = () => useContext(DismissCtx)
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [msg, setMsg] = useState<{ text: string; key: number; action?: ToastAction } | null>(null)
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined)
+  const held = useRef<{ text: string; action?: ToastAction }[] | null>(null)
   const show = useCallback((text: string, action?: ToastAction) => {
+    if (held.current) {
+      held.current.push({ text, action })
+      return
+    }
     setMsg({ text, key: Date.now(), action })
     clearTimeout(timer.current)
     timer.current = setTimeout(() => setMsg(null), action ? 4500 : 2600)
   }, [])
+  const dismiss = useCallback((hold?: boolean) => {
+    if (hold === false) {
+      // Released: show the last message that waited (without its Undo, which is stale by now).
+      const waiting = held.current?.at(-1)
+      held.current = null
+      if (waiting) show(waiting.text)
+      return
+    }
+    clearTimeout(timer.current)
+    setMsg(null)
+    if (hold) held.current = []
+  }, [show])
   useEffect(() => () => clearTimeout(timer.current), [])
   return (
     <ToastCtx.Provider value={show}>
+      <DismissCtx.Provider value={dismiss}>
       {children}
       {msg && (
         <div key={msg.key} className="pointer-events-none fixed inset-x-0 bottom-28 z-50 flex justify-center px-4">
@@ -189,6 +211,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           </div>
         </div>
       )}
+      </DismissCtx.Provider>
     </ToastCtx.Provider>
   )
 }

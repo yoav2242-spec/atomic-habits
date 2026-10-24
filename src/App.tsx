@@ -8,6 +8,9 @@ import Identity from './pages/Identity'
 import Scorecard from './pages/Scorecard'
 import Settings from './pages/Settings'
 import Stats from './pages/Stats'
+import Recap from './pages/Recap'
+import Review from './pages/Review'
+import Rewards from './pages/Rewards'
 import Tips from './pages/Tips'
 import Today from './pages/Today'
 import Workspace from './pages/Workspace'
@@ -30,6 +33,9 @@ export default function App() {
             <Route path="settings" element={<Settings />} />
             <Route path="workspace" element={<Workspace />} />
             <Route path="tips" element={<Tips />} />
+            <Route path="review" element={<Review />} />
+            <Route path="recap/:ym" element={<Recap />} />
+            <Route path="rewards" element={<Rewards />} />
           </Route>
         </Routes>
       </HashRouter>

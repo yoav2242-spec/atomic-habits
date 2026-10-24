@@ -62,6 +62,15 @@ export interface Checkin extends Synced {
   note: string
 }
 
+/** Something earned outside of check-ins: a quest, a surprise box, a weekly review… */
+export interface Reward extends Synced {
+  date: string
+  kind: 'quest' | 'box' | 'review'
+  points: number
+  /** What was won: "sticker:🦊", "theme:sky", "fact:…", or the quest id. */
+  item: string
+}
+
 export interface ScorecardItem extends Synced {
   routine: string
   rating: '+' | '-' | '='

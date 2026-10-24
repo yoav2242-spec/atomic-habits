@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie'
-import type { Checkin, Habit, Identity, ScorecardItem } from './types'
+import type { Checkin, Habit, Identity, Reward, ScorecardItem } from './types'
 import { inSandbox } from './workspace'
 
 // Everything is stored on the phone in the browser's built-in database.
@@ -9,6 +9,7 @@ export class AtomicDB extends Dexie {
   habits!: Table<Habit, string>
   checkins!: Table<Checkin, string>
   scorecard_items!: Table<ScorecardItem, string>
+  rewards!: Table<Reward, string>
   meta!: Table<{ key: string; value: string }, string>
 
   constructor(name: string) {
@@ -31,13 +32,15 @@ export class AtomicDB extends Dexie {
         s.habit_id ??= null
       })
     })
+    // v3: rewards from quests, surprise boxes and weekly reviews.
+    this.version(3).stores({ rewards: 'id, date' })
   }
 }
 
 /** The real data, or the separate test copy while the private test workspace is on. */
 export const db = new AtomicDB(inSandbox ? 'atomic-sandbox' : 'atomic')
 
-export const DATA_TABLES = ['identities', 'habits', 'checkins', 'scorecard_items'] as const
+export const DATA_TABLES = ['identities', 'habits', 'checkins', 'scorecard_items', 'rewards'] as const
 export type DataTable = (typeof DATA_TABLES)[number]
 
 export async function getMeta(key: string) {

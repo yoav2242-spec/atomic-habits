@@ -1,11 +1,12 @@
 import { useEffect } from 'react'
 import { bigCelebration } from '../lib/celebrate'
-import { Button, Modal } from './ui'
+import { Button, Modal, useDismissToast } from './ui'
 
 export type CelebrationInfo =
   | { kind: 'badge'; days: number; unit: 'day' | 'week'; habitName: string; emoji: string }
   | { kind: 'level'; level: number }
   | { kind: 'day'; points: number; streakHabits: number }
+  | { kind: 'record'; title: string; body: string }
 
 const BADGE_WORDS: Record<number, string> = {
   3: 'A great start.',
@@ -20,21 +21,27 @@ const BADGE_WORDS: Record<number, string> = {
 }
 
 export function Celebration({ info, onClose }: { info: CelebrationInfo | null; onClose: () => void }) {
+  const dismissToast = useDismissToast()
   useEffect(() => {
-    if (info) bigCelebration()
-  }, [info])
+    if (!info) return
+    dismissToast(true)
+    bigCelebration()
+    return () => dismissToast(false)
+  }, [info, dismissToast])
   if (!info) return null
 
   const content =
     info.kind === 'badge' ? {
       icon: '🏅', title: `${info.days}-${info.unit} streak!`,
       body: `${info.emoji} ${info.habitName}. ${BADGE_WORDS[info.days] ?? 'Keep going!'} +25 bonus points.`,
+    } : info.kind === 'record' ? {
+      icon: '🏆', title: info.title, body: info.body,
     } : info.kind === 'level' ? {
       icon: '⭐', title: `Level ${info.level}!`,
       body: 'All those small check-offs are adding up. Keep casting votes for who you want to become.',
     } : {
       icon: '🎉', title: 'Day complete!',
-      body: `You did everything today and earned ${info.points} points. ${info.streakHabits > 0 ? `${info.streakHabits} streak${info.streakHabits === 1 ? '' : 's'} kept alive.` : ''} See you tomorrow!`,
+      body: `You did everything today and earned ${info.points} points. ${info.streakHabits > 0 ? `${info.streakHabits} streak${info.streakHabits === 1 ? '' : 's'} kept alive.` : ''} Your surprise box is ready to open! 🎁`,
     }
 
   return (

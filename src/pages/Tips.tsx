@@ -1,9 +1,15 @@
+import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { markFlag } from '../components/Quests'
+import { todayKey } from '../lib/dates'
 import { Card } from '../components/ui'
 import { TIP_GROUPS } from '../lib/dailyTips'
 
 export default function Tips() {
   const navigate = useNavigate()
+  useEffect(() => {
+    markFlag(todayKey(), 'read_tip')
+  }, [])
   return (
     <div>
       <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Back</button>

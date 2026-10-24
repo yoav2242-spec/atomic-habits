@@ -1,13 +1,17 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Celebration, type CelebrationInfo } from '../components/Celebration'
+import { Garden } from '../components/Garden'
 import { HabitCard } from '../components/HabitCard'
+import { markFlag, Quests } from '../components/Quests'
+import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { Button, buttonClass, Card, InfoTip, Modal, ProgressRing, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
-import { getMeta } from '../lib/db'
-import { addDays, diffDays, formatDay } from '../lib/dates'
+import { db, getMeta } from '../lib/db'
+import { computeRecords } from '../lib/records'
+import { addDays, diffDays, formatDay, weekday, weekStart } from '../lib/dates'
 import { useProgress } from '../lib/progress'
 import { logSlip, setNote, undoSlip } from '../lib/repo'
 import { isDone, isScheduled } from '../lib/streaks'
@@ -47,7 +51,10 @@ export default function Today() {
   const [levelUpFor, setLevelUpFor] = useState<Habit | null>(null)
   const [celebration, setCelebration] = useState<CelebrationInfo | null>(null)
   // After a tap, compare progress before/after to spot a new badge, level, or a finished day.
-  const armed = useRef<{ level: number; badges: Map<string, number>; done: number } | null>(null)
+  const armed = useRef<{ level: number; badges: Map<string, number>; done: number; perfectBest: number; mostInADay: number } | null>(null)
+  const records = useMemo(() => (progress ? computeRecords(progress) : null), [progress])
+  const focus = useLiveQuery(async () => { const f = await getMeta('focus'); return f ? (JSON.parse(f) as { habit_id: string; until: string }) : null })
+  const recapSeen = useLiveQuery(async () => (await db.meta.where('key').startsWith('recap_seen:').toArray()).map((m) => m.key.slice(11)), [], [] as string[])
 
   const today = progress?.today ?? ''
   const date = today ? addDays(today, -offset) : ''
@@ -70,6 +77,12 @@ export default function Today() {
         return setCelebration({ kind: 'badge', days: p.badges.at(-1)!, unit: p.stats.unit, habitName: p.habit.name, emoji: p.habit.emoji })
       }
     }
+    if (records && records.perfectRun.current >= 2 && records.perfectRun.current > before.perfectBest) {
+      return setCelebration({ kind: 'record', title: `${records.perfectRun.current} perfect days in a row!`, body: 'A new personal record. Every single habit, day after day.' })
+    }
+    if (records && records.mostInADay.value >= 3 && records.mostInADay.value > before.mostInADay) {
+      return setCelebration({ kind: 'record', title: `${records.mostInADay.value} habits in one day!`, body: 'Your most ever in a single day. A new personal record!' })
+    }
     if (offset === 0 && build.length > 0 && doneCount === build.length && before.done < build.length) {
       setCelebration({ kind: 'day', points: progress.todayPoints, streakHabits: progress.habits.filter((p) => p.stats.current > 0 && p.habit.type === 'build').length })
     }
@@ -79,7 +92,13 @@ export default function Today() {
 
   const arm = () => {
     if (armed.current) return // keep the earliest snapshot during quick taps
-    armed.current = { level: progress.level.level, badges: new Map(progress.habits.map((p) => [p.habit.id, p.badges.length])), done: doneCount }
+    armed.current = {
+      level: progress.level.level,
+      badges: new Map(progress.habits.map((p) => [p.habit.id, p.badges.length])),
+      done: doneCount,
+      perfectBest: records?.perfectRun.best ?? 0,
+      mostInADay: records?.mostInADay.value ?? 0,
+    }
   }
 
   const identityName = (h: Habit) => progress.identities.find((i) => i.id === h.identity_id)?.name
@@ -87,11 +106,15 @@ export default function Today() {
   const backupDue = all.length > 0 && lastBackup !== 'loading' && (!lastBackup || diffDays(lastBackup.slice(0, 10), today) >= 14)
   const share = build.length ? doneCount / build.length : 0
   const tip = tipOfTheDay(diffDays('2000-01-01', today))
+  const focusId = focus && focus.until >= today ? focus.habit_id : null
+  const reviewDue = weekday(today) === 0 && !progress.rewards.some((r) => r.id === `review_${weekStart(today)}`)
+  const lastMonth = addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)
+  const recapDue = Number(today.slice(8)) <= 7 && !recapSeen.includes(lastMonth) && progress.habits.some((p) => p.checkins.some((c) => c.date.startsWith(lastMonth)))
 
   const card = (habit: Habit, depth = 0) => {
     const p = progress.byId.get(habit.id)!
     const anchor = habit.stack_after_habit_id ? progress.byId.get(habit.stack_after_habit_id)?.habit.name.toLowerCase() : habit.stack_after_text
-    return (
+    const element = (
       <HabitCard
         key={habit.id}
         habit={habit}
@@ -111,7 +134,16 @@ export default function Today() {
         onDone={(message, undo) => toast(message, { label: 'Undo', onClick: undo })}
       />
     )
+    if (habit.id !== focusId) return element
+    return (
+      <div key={habit.id}>
+        <div className="mb-1.5 ml-2 text-xs font-black uppercase tracking-wider text-lavender">🎯 This week's focus</div>
+        {element}
+      </div>
+    )
   }
+  // The focus habit goes first.
+  const buildOrdered = focusId ? [...build.filter((b) => b.habit.id === focusId), ...build.filter((b) => b.habit.id !== focusId)] : build
 
   return (
     <div>
@@ -160,8 +192,25 @@ export default function Today() {
             </p>
           )}
 
+          {offset === 0 && reviewDue && (
+            <Link to="/review" className="bouncy mb-4 flex items-center gap-3 rounded-3xl p-4 text-white" style={{ background: 'linear-gradient(135deg, var(--color-sky), var(--color-lavender))', boxShadow: '0 4px 0 0 var(--color-lavender-deep)' }}>
+              <span className="text-3xl">📅</span>
+              <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-xs font-bold text-white/85">2 minutes · pick next week's focus · +25 points</span></span>
+              <span className="text-2xl">›</span>
+            </Link>
+          )}
+          {offset === 0 && recapDue && (
+            <Link to={`/recap/${lastMonth}`} className="bouncy mb-4 flex items-center gap-3 rounded-3xl p-4 text-white" style={{ background: 'linear-gradient(135deg, var(--color-peach), var(--color-rose))', boxShadow: '0 4px 0 0 #b86c82' }}>
+              <span className="text-3xl">🗓️</span>
+              <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here!</span><span className="text-xs font-bold text-white/85">See everything you did last month</span></span>
+              <span className="text-2xl">›</span>
+            </Link>
+          )}
+
+          {offset === 0 && <Garden habits={progress.habits.filter((p) => !p.habit.archived)} today={today} />}
+
           <div className="space-y-3">
-            {build.map(({ habit, depth }) => card(habit, depth))}
+            {buildOrdered.map(({ habit, depth }) => card(habit, depth))}
             {build.length === 0 && <p className="font-semibold text-muted">Nothing scheduled for this day. Enjoy the rest! 🌤️</p>}
           </div>
 
@@ -173,7 +222,14 @@ export default function Today() {
           )}
 
           {offset === 0 && (
-            <Link to="/tips" className="bouncy mt-5 block rounded-3xl p-4" style={{ background: 'color-mix(in srgb, var(--color-butter) 20%, var(--card))' }}>
+            <div className="mt-6">
+              <SurpriseBox progress={progress} ready={build.length > 0 && doneCount === build.length} />
+              <Quests progress={progress} />
+            </div>
+          )}
+
+          {offset === 0 && (
+            <Link to="/tips" onClick={() => markFlag(today, 'read_tip')} className="bouncy block rounded-3xl p-4" style={{ background: 'color-mix(in srgb, var(--color-butter) 20%, var(--card))' }}>
               <div className="mb-1 flex items-center justify-between text-xs font-black uppercase tracking-wider text-muted">
                 <span>💡 Tip of the day</span><span>All tips ›</span>
               </div>

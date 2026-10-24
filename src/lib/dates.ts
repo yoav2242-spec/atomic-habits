@@ -41,3 +41,4 @@ export function formatDay(k: DateKey, opts: Intl.DateTimeFormatOptions = { weekd
 }
 
 export const WEEKDAY_SHORT = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+export const WEEKDAY_LONG = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']

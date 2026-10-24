@@ -1,7 +1,9 @@
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { formatDay, todayKey } from '../lib/dates'
 import { dayOffset, inSandbox, workspaceUnlocked } from '../lib/workspace'
+import { useThemeColors } from '../lib/rewards'
 import { Onboarding } from './Onboarding'
+import { WelcomeBack } from './WelcomeBack'
 
 const icons = {
   today: <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
@@ -20,6 +22,7 @@ const tabs: { to: string; label: string; icon: keyof typeof icons }[] = [
 ]
 
 export function Layout() {
+  useThemeColors()
   const { pathname } = useLocation()
   const showTools = workspaceUnlocked() && pathname !== '/workspace'
   return (
@@ -32,6 +35,7 @@ export function Layout() {
       )}
       <Outlet />
       <Onboarding />
+      <WelcomeBack />
       {showTools && (
         <Link to="/workspace" aria-label="Test workspace"
           className="bouncy fixed bottom-28 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-xl shadow-lg">
