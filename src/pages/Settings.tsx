@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { AlarmClock, Bell, CalendarPlus, BellOff, ChevronRight, Download, HardDriveDownload, Palette, Sparkles, Trash2, Upload, User, Vibrate } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, buttonClass, Card, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
+import { Button, buttonClass, Card, InfoTip, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
 import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
@@ -185,7 +185,7 @@ export default function Settings() {
           )}
           <p className="text-xs font-semibold text-muted">
             {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
-            "Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you (set its notification to "At time of event" if you like).
+            "Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you. <InfoTip tip="calendar_on_time" className="align-middle" />
           </p>
         </Row>
       </Section>

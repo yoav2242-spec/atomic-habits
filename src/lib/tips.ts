@@ -45,6 +45,10 @@ export const TIPS = {
     title: '🤝 Habit contract',
     body: 'A promise to someone else, with a small cost if you break it. Knowing someone is watching makes it much easier to stick with it.',
   },
+  calendar_on_time: {
+    title: '⏰ On-time Calendar reminders',
+    body: 'Google Calendar usually reminds you a few minutes before an event, and other apps are not allowed to change that. To be reminded right on time, change it once in Google Calendar: open the Google Calendar app, go to Settings, choose your account, then Events, and set the default notification to "At time of event". The names may differ slightly on your phone. After that, every habit you add is reminded on time.',
+  },
   scorecard: {
     title: '📋 Habits Scorecard',
     body: 'Most habits happen on autopilot. Write down your normal day and mark each thing as good (+), neutral (=) or bad (−). Then you can track any of them as a habit, including how long you have already been doing it.',

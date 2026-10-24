@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Button, buttonClass, Field, Segmented, Stepper, Toggle } from '../components/ui'
+import { Button, buttonClass, Field, InfoTip, Segmented, Stepper, Toggle, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -55,6 +55,10 @@ export default function HabitForm() {
   const [step, setStep] = useState(id || search.has('own') ? 0 : -1)
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
+  // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
+  const [addCalendar, setAddCalendar] = useState(true)
+  const [addAlarm, setAddAlarm] = useState(true)
+  const toast = useToast()
 
   useEffect(() => {
     if (id && existing && !draft) setDraft(existing)
@@ -71,12 +75,19 @@ export default function HabitForm() {
 
   const save = async () => {
     const saved = { ...h, name: h.name.trim(), target_count: Math.max(1, h.target_count || 1), step: Math.max(1, h.step || 1) }
+    const offerReminders = isLast && saved.type === 'build' && !!saved.cue_time
+    const calendar = offerReminders && addCalendar ? googleCalendarUrl(saved) : null
+    const alarm = offerReminders && addAlarm && isAndroid() ? clockAlarmUrl(saved) : null
+    // Open Calendar right away, while it still counts as part of the tap (otherwise phones block it).
+    if (calendar) window.open(calendar, '_blank', 'noopener')
     await saveHabit(saved)
     if (!id) {
       await addPastProgress(saved, pastDays)
       bigCelebration()
     }
     navigate(id ? `/habits/${h.id}` : '/', { replace: true })
+    if (alarm && !calendar) location.href = alarm
+    else if (alarm) toast('One more tap for the Clock alarm', { label: 'Add alarm', onClick: () => { location.href = alarm } })
   }
 
   const addIdentity = async () => {
@@ -264,6 +275,9 @@ export default function HabitForm() {
       {steps[step].law && <p className="text-xs font-black uppercase tracking-wider text-sage-deep dark:text-sage">{steps[step].law}</p>}
       <h1 className="mb-5 text-[26px] font-black tracking-tight">{id && step === 0 ? 'Edit habit' : steps[step].title}</h1>
       <div key={step} className="animate-rise space-y-4">{pages[step]}</div>
+      {isLast && h.type === 'build' && (
+        <AlsoAdd h={h} calendar={addCalendar} alarm={addAlarm} setCalendar={setAddCalendar} setAlarm={setAddAlarm} pickTime={() => setStep(2)} />
+      )}
       <div className="mt-8 flex gap-2">
         {id && !isLast && <Button variant="secondary" className="flex-1" onClick={save} disabled={!h.name.trim()}>Save</Button>}
         <Button className="flex-1 text-lg" disabled={!h.name.trim()} onClick={() => (isLast ? save() : setStep(step + 1))}>
@@ -445,6 +459,44 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
         )}
         <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 text-sm')}>📅 Google Calendar</a>
       </div>
+    </div>
+  )
+}
+
+/** Last step: tick where else the habit should go, and it's added there when you press Create. */
+function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
+  h: Habit; calendar: boolean; alarm: boolean; setCalendar: (v: boolean) => void; setAlarm: (v: boolean) => void; pickTime: () => void
+}) {
+  if (!h.cue_time) {
+    return (
+      <div className="clay-in mt-6 flex items-center gap-3 rounded-2xl p-3.5">
+        <span className="flex-1 text-sm font-bold">Want it in Google Calendar or your Clock app too? Pick a time first.</span>
+        <Button variant="secondary" className="!min-h-10 !px-3 !py-1.5 text-xs" onClick={pickTime}>Pick a time</Button>
+      </div>
+    )
+  }
+  const choices = [
+    { key: 'calendar', label: '📅 Google Calendar', on: calendar, set: setCalendar, show: true },
+    { key: 'alarm', label: '⏰ Clock alarm', on: alarm, set: setAlarm, show: isAndroid() },
+  ].filter((c) => c.show)
+  return (
+    <div className="clay-in mt-6 space-y-3 rounded-2xl p-3.5">
+      <div className="flex items-center gap-1.5 text-sm font-extrabold">
+        Also add it at {h.cue_time} to:
+        <InfoTip tip="calendar_on_time" />
+      </div>
+      <div className="flex gap-2">
+        {choices.map((c) => (
+          <button key={c.key} type="button" onClick={() => c.set(!c.on)} aria-pressed={c.on}
+            className={`flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 text-sm font-extrabold ${c.on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+            {c.on ? '✓ ' : ''}{c.label}
+          </button>
+        ))}
+      </div>
+      <p className="text-xs font-semibold text-muted">
+        {calendar && 'Google Calendar opens with the event ready: tap Save. '}
+        {alarm && isAndroid() && 'Your Clock app opens next: pick a sound and save.'}
+      </p>
     </div>
   )
 }
