@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import { Onboarding } from './Onboarding'
 
 const icons = {
   today: <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
@@ -12,31 +13,36 @@ const tabs: { to: string; label: string; icon: keyof typeof icons }[] = [
   { to: '/', label: 'Today', icon: 'today' },
   { to: '/habits', label: 'Habits', icon: 'habits' },
   { to: '/stats', label: 'Progress', icon: 'stats' },
-  { to: '/identity', label: 'Identity', icon: 'identity' },
+  { to: '/identity', label: 'Me', icon: 'identity' },
   { to: '/settings', label: 'Settings', icon: 'settings' },
 ]
 
 export function Layout() {
   return (
-    <div className="mx-auto min-h-dvh max-w-md px-4 pb-28 pt-[max(1.25rem,env(safe-area-inset-top))]">
+    <div className="mx-auto min-h-dvh max-w-md px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
       <Outlet />
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/90 pb-[env(safe-area-inset-bottom)] backdrop-blur dark:border-stone-800 dark:bg-stone-950/90">
-        <div className="mx-auto flex max-w-md">
+      <Onboarding />
+      <nav className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-3xl border border-line bg-card/90 px-1 shadow-[0_8px_30px_-10px_rgba(50,50,80,0.35)] backdrop-blur">
+        <div className="flex">
           {tabs.map((t) => (
             <NavLink
               key={t.to}
               to={t.to}
               end={t.to === '/'}
               className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-1 py-2.5 text-[11px] font-medium ${
-                  isActive ? 'text-amber-600 dark:text-amber-400' : 'text-stone-500'
-                }`
+                `bouncy flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] font-extrabold ${isActive ? 'text-sage-deep dark:text-sage' : 'text-muted'}`
               }
             >
-              <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                {icons[t.icon]}
-              </svg>
-              {t.label}
+              {({ isActive }) => (
+                <>
+                  <span className={`flex h-8 w-12 items-center justify-center rounded-full transition ${isActive ? 'bg-sage/20' : ''}`}>
+                    <svg viewBox="0 0 24 24" className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      {icons[t.icon]}
+                    </svg>
+                  </span>
+                  {t.label}
+                </>
+              )}
             </NavLink>
           ))}
         </div>

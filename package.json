@@ -11,6 +11,8 @@
     "deploy": "npm test && npm run build && gh-pages -d dist -t"
   },
   "dependencies": {
+    "@fontsource-variable/nunito": "^5.3.0",
+    "canvas-confetti": "^1.9.4",
     "dexie": "^4.4.7",
     "dexie-react-hooks": "^4.4.0",
     "react": "^19.3.1",
@@ -19,6 +21,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vite-pwa/assets-generator": "^2.0.0",

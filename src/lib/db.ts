@@ -19,6 +19,17 @@ class AtomicDB extends Dexie {
       scorecard_items: 'id',
       meta: 'key',
     })
+    // v2: habit levels, and scorecard routines linked to habits.
+    this.version(2).upgrade(async (tx) => {
+      await tx.table('habits').toCollection().modify((h) => {
+        h.level ??= 1
+        h.level_history ??= []
+        h.levelup_snooze ??= null
+      })
+      await tx.table('scorecard_items').toCollection().modify((s) => {
+        s.habit_id ??= null
+      })
+    })
   }
 }
 

@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState } from 'react'
 import { Button, Card, PageHeader, useToast } from '../components/ui'
-import { getMeta } from '../lib/db'
+import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
 import { isInstalled, useInstallPrompt } from '../lib/install'
@@ -10,8 +10,8 @@ import { exportBackup, importBackup } from '../lib/repo'
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="mb-6">
-      <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-stone-500">{title}</h2>
-      <Card className="space-y-3 text-sm">{children}</Card>
+      <h2 className="mb-2 text-sm font-black uppercase tracking-wider text-muted">{title}</h2>
+      <Card className="space-y-3 text-sm font-semibold">{children}</Card>
     </section>
   )
 }
@@ -89,7 +89,7 @@ export default function Settings() {
           If you lose or reset your phone, the data is gone, so save a backup now and then. Send it to yourself by email or
           save it to Google Drive.
         </p>
-        <p className="text-stone-500">Last backup: {lastBackup ? formatDay(lastBackup.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' }) : 'never'}</p>
+        <p className="text-muted">Last backup: {lastBackup ? formatDay(lastBackup.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' }) : 'never'}</p>
         <div className="flex gap-2">
           <Button onClick={backup} className="flex-1">Save backup</Button>
           <Button variant="secondary" onClick={() => fileInput.current?.click()} className="flex-1">Restore</Button>
@@ -114,13 +114,18 @@ export default function Settings() {
         )}
       </Section>
 
+      <Section title="Help">
+        <p>New here, or want a refresher on streaks, freezes and points?</p>
+        <Button variant="secondary" className="w-full" onClick={() => db.meta.delete('onboarded')}>Show the welcome tour again</Button>
+      </Section>
+
       <Section title="The 4 laws, in short">
         <p><b>1. Make it obvious.</b> Pick a time and place, and stack it after something you already do.</p>
         <p><b>2. Make it attractive.</b> Pair it with something you enjoy.</p>
         <p><b>3. Make it easy.</b> Start with a 2-minute version.</p>
         <p><b>4. Make it satisfying.</b> Track it, and never miss twice.</p>
-        <p className="text-stone-500">To break a bad habit, flip them: make it invisible, unattractive, difficult and unsatisfying.</p>
-        <p className="text-stone-500">Ideas from <i>Atomic Habits</i> by James Clear.</p>
+        <p className="text-muted">To break a bad habit, flip them: make it invisible, unattractive, difficult and unsatisfying.</p>
+        <p className="text-muted">Ideas from <i>Atomic Habits</i> by James Clear.</p>
       </Section>
     </div>
   )

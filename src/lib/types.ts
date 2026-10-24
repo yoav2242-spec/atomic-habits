@@ -36,15 +36,28 @@ export interface Habit extends Synced {
   friction_plan: string
   // 4th law: make it satisfying (or unsatisfying)
   contract: string
+  // Goldilocks rule: step the habit up (or down) as it gets easy
+  level: number
+  level_history: LevelChange[]
+  levelup_snooze: string | null // don't suggest a level-up before this date
   archived: boolean
   sort_order: number
   created_at: string
+}
+
+export interface LevelChange {
+  date: string
+  level: number
+  name: string
+  target_count: number
 }
 
 export interface Checkin extends Synced {
   habit_id: string
   date: string // local "YYYY-MM-DD"
   count: number
+  /** The daily goal on that day, so making a habit harder later doesn't undo past days. */
+  target?: number
   kind: 'full' | 'two_min' | 'slip'
   note: string
 }
@@ -53,4 +66,5 @@ export interface ScorecardItem extends Synced {
   routine: string
   rating: '+' | '-' | '='
   sort_order: number
+  habit_id: string | null // set once the routine is tracked as a habit
 }

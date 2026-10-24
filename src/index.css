@@ -1,11 +1,47 @@
 @import "tailwindcss";
 
+/* Calm palette: warm cream / deep ink, with sage, sky, lavender and peach accents. */
+@theme {
+  --font-sans: 'Nunito Variable', ui-sans-serif, system-ui, sans-serif;
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-soft: var(--soft);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-sage: #7fb69b;
+  --color-sage-deep: #5c9479;
+  --color-sky: #7eaed4;
+  --color-lavender: #a497d6;
+  --color-lavender-deep: #8273bf;
+  --color-peach: #ee9f80;
+  --color-butter: #e3bd5f;
+  --color-rose: #e091a8;
+}
+
 :root {
   color-scheme: light dark;
+  --bg: #f5f2ec;
+  --card: #ffffff;
+  --soft: #eeeae2;
+  --line: #e6e1d7;
+  --ink: #33364a;
+  --muted: #8b8d9f;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161821;
+    --card: #1f2230;
+    --soft: #282b3a;
+    --line: #2e3243;
+    --ink: #ecebf2;
+    --muted: #9799ad;
+  }
 }
 
 body {
-  @apply bg-stone-50 text-stone-900 antialiased dark:bg-stone-950 dark:text-stone-100;
+  @apply bg-bg font-sans text-ink antialiased;
   -webkit-tap-highlight-color: transparent;
   overscroll-behavior-y: none;
 }
@@ -13,27 +49,67 @@ body {
 input,
 textarea,
 select {
-  @apply w-full rounded-xl border border-stone-300 bg-white px-3 py-2.5 text-base outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/30 dark:border-stone-700 dark:bg-stone-900;
+  @apply w-full rounded-2xl border-2 border-line bg-card px-4 py-3 text-base outline-none transition focus:border-sage;
 }
 
 input[type='checkbox'],
 input[type='file'] {
-  @apply w-auto border-0 bg-transparent p-0 ring-0;
+  @apply w-auto border-0 bg-transparent p-0;
+}
+
+/* Bouncy press: springs back with a little overshoot. */
+.bouncy {
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.15s, background-color 0.2s;
+}
+.bouncy:active {
+  transform: scale(0.92);
+}
+
+/* Chunky "3D" button that presses down. */
+.btn-3d {
+  box-shadow: 0 4px 0 0 var(--shadow, var(--color-sage-deep));
+  transition: transform 0.12s, box-shadow 0.12s;
+}
+.btn-3d:active {
+  transform: translateY(3px);
+  box-shadow: 0 1px 0 0 var(--shadow, var(--color-sage-deep));
 }
 
 @keyframes pop {
   0% { transform: scale(1); }
-  40% { transform: scale(1.25); }
+  35% { transform: scale(1.3); }
+  65% { transform: scale(0.92); }
   100% { transform: scale(1); }
 }
 .animate-pop {
-  animation: pop 0.35s ease-out;
+  animation: pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-@keyframes toast-in {
-  from { transform: translateY(16px); opacity: 0; }
+@keyframes rise {
+  from { transform: translateY(18px); opacity: 0; }
   to { transform: none; opacity: 1; }
 }
-.animate-toast {
-  animation: toast-in 0.25s ease-out;
+.animate-rise {
+  animation: rise 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes float-up {
+  0% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-36px); opacity: 0; }
+}
+.animate-float-up {
+  animation: float-up 0.9s ease-out forwards;
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-8deg); }
+  75% { transform: rotate(8deg); }
+}
+.animate-wiggle {
+  animation: wiggle 0.6s ease-in-out 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop, .animate-rise, .animate-wiggle, .animate-float-up { animation: none; }
 }

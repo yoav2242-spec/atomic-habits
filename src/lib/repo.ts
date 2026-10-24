@@ -1,3 +1,4 @@
+import { addDays, todayKey, weekday } from './dates'
 import { db, DATA_TABLES, setMeta, type DataTable } from './db'
 import { isDone } from './streaks'
 import type { Checkin, Habit, Identity, ScorecardItem } from './types'
@@ -12,15 +13,63 @@ async function save<T extends { id: string }>(table: DataTable, row: T) {
   await db.table(table).put({ ...row, updated_at: now() })
 }
 
-export const HABIT_COLORS = ['#f59e0b', '#ef4444', '#ec4899', '#a855f7', '#3b82f6', '#06b6d4', '#10b981', '#84cc16']
+/** Calm colors: sage, sky, lavender, peach, butter, rose, teal, sand. */
+export const HABIT_COLORS = ['#7fb69b', '#7eaed4', '#a497d6', '#ee9f80', '#e3bd5f', '#e091a8', '#6fb3ad', '#c4a284']
 
 export function newHabit(sort_order: number): Habit {
   return {
     id: newId(), updated_at: now(), deleted: false, type: 'build', name: '', emoji: '✨', color: HABIT_COLORS[0],
     identity_id: null, schedule: { kind: 'daily' }, target_count: 1, cue_time: null, location: '',
     stack_after_habit_id: null, stack_after_text: '', cue_trigger: '', hide_plan: '', why: '', temptation_bundle: '',
-    two_min_version: '', friction_plan: '', contract: '', archived: false, sort_order, created_at: now(),
+    two_min_version: '', friction_plan: '', contract: '', level: 1, level_history: [], levelup_snooze: null,
+    archived: false, sort_order, created_at: now(),
   }
+}
+
+/** Change how hard the habit is (new name and/or daily count), keeping a history of steps. */
+export async function changeLevel(h: Habit, name: string, target_count: number, direction: 1 | -1) {
+  const level = Math.max(1, (h.level ?? 1) + direction)
+  // Days saved before goals were stored on each day: pin them to the old goal first.
+  await db.checkins.where('habit_id').equals(h.id).modify((c) => {
+    c.target ??= Math.max(1, h.target_count)
+  })
+  const step = { date: todayKey(), level, name, target_count }
+  await save('habits', { ...h, name, target_count, level, level_history: [...(h.level_history ?? []), step], levelup_snooze: null })
+}
+
+/** "Not yet": don't suggest a level-up again for a week. */
+export const snoozeLevelUp = (h: Habit) => save('habits', { ...h, levelup_snooze: addDays(todayKey(), 7) })
+
+/**
+ * "I've already been doing this": mark the last `days` days before today as done
+ * (build habit), or start the clean-day count that many days ago (break habit).
+ */
+export async function addPastProgress(h: Habit, days: number) {
+  if (days <= 0) return
+  if (h.type === 'break') {
+    const start = addDays(todayKey(), -days)
+    if (start < h.created_at.slice(0, 10)) await save('habits', { ...h, created_at: `${start}T12:00:00` })
+    return
+  }
+  for (let i = 1; i <= days; i++) {
+    const date = addDays(todayKey(), -i)
+    if (h.schedule.kind === 'weekdays' && !h.schedule.days.includes(weekday(date))) continue
+    const live = await liveCheckin(h, date)
+    if (!isDone(h, live)) await patchCheckin(h, date, { kind: 'full', count: Math.max(1, h.target_count) })
+  }
+}
+
+export type DayState = 'done' | 'two_min' | 'none' | 'slip'
+
+/** Set any day directly, from the habit's calendar. */
+export async function setDay(h: Habit, date: string, state: DayState, count?: number) {
+  if (state === 'none') {
+    const live = await liveCheckin(h, date)
+    return live?.note ? patchCheckin(h, date, { kind: 'full', count: 0 }) : patchCheckin(h, date, null)
+  }
+  if (state === 'slip') return patchCheckin(h, date, { kind: 'slip', count: Math.max(1, count ?? 1) })
+  if (state === 'two_min') return patchCheckin(h, date, { kind: 'two_min', count: 0 })
+  return patchCheckin(h, date, { kind: 'full', count: count ?? Math.max(1, h.target_count) })
 }
 
 export const saveHabit = (h: Habit) => save('habits', h)
@@ -50,7 +99,8 @@ async function patchCheckin(h: Habit, date: string, patch: Partial<Checkin> | nu
   const base: Checkin = existing ?? {
     id: checkinId(h, date), habit_id: h.id, date, count: 0, kind: 'full', note: '', updated_at: now(), deleted: false,
   }
-  await save('checkins', { ...base, ...patch, deleted: false })
+  // Editing a day records today's goal for it; untouched past days keep theirs.
+  await save('checkins', { ...base, ...patch, target: Math.max(1, h.target_count), deleted: false })
 }
 
 /** Tap the check: mark done (full or two-minute), or undo if it's already done that way. */
@@ -85,6 +135,14 @@ export async function logSlip(h: Habit, date: string, note = '') {
 }
 
 export const undoSlip = (h: Habit, date: string) => patchCheckin(h, date, null)
+
+/** Undo: put a day back exactly as it was before the last tap. */
+export async function restoreCheckin(h: Habit, date: string, previous: Checkin | undefined) {
+  if (!previous || previous.deleted) return patchCheckin(h, date, null)
+  await save('checkins', previous)
+}
+
+export const getCheckin = (h: Habit, date: string) => liveCheckin(h, date)
 
 // --- Identities and scorecard ---
 
