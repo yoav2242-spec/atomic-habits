@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom'
-import { AreaChart, BarChart, Strip } from '../components/Charts'
+import { HabitBreakdown, ProgressInsights } from '../components/ProgressInsights'
+import { AreaChart, BarChart } from '../components/Charts'
 import { Heatmap } from '../components/Heatmap'
 import { Card, InfoTip, PageHeader, XPBar } from '../components/ui'
 import { addDays, formatDay, range, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
@@ -118,6 +118,8 @@ export default function Stats() {
         ))}
       </div>
 
+      <ProgressInsights progress={progress} />
+
       <Card className="mb-4">
         <div className="flex items-end justify-between">
           <div>
@@ -153,30 +155,7 @@ export default function Stats() {
         <Heatmap today={today} weeks={16} cell={overall} />
       </Card>
 
-      <h2 className="mb-2 mt-6 text-sm font-black uppercase tracking-wider text-muted">Each habit</h2>
-      <div className="space-y-2">
-        {active.map((p) => {
-          const h = p.habit
-          const strip = range(addDays(today, -27), today).map((d) => {
-            if (d < starts.get(h.id)!) return null
-            const c = maps.get(h.id)!.get(d)
-            if (h.type === 'break') return c?.kind === 'slip' ? 0 : 1
-            return isDone(h, c) ? (c!.kind === 'two_min' ? 0.5 : 1) : 0
-          })
-          return (
-            <Link key={h.id} to={`/habits/${h.id}`} className="bouncy block rounded-3xl border border-line bg-card p-3.5 shadow-sm">
-              <div className="mb-2 flex items-center justify-between">
-                <span className="font-extrabold">{h.emoji} {h.name}</span>
-                <span className="text-xs font-black text-muted">
-                  {h.type === 'break' ? `🌿 ${p.stats.current}d` : `🔥 ${p.stats.current}`} · {p.rate30 === null ? '–' : `${Math.round(p.rate30 * 100)}%`}
-                </span>
-              </div>
-              <Strip values={strip as (0 | 0.5 | 1 | null)[]} color={h.type === 'break' ? `${h.color}` : h.color} />
-              <div className="mt-1 flex justify-between text-[10px] font-bold text-muted"><span>4 weeks ago</span><span>today</span></div>
-            </Link>
-          )
-        })}
-      </div>
+      <HabitBreakdown progress={progress} />
     </div>
   )
 }

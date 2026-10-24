@@ -5,12 +5,14 @@ import { Celebration, type CelebrationInfo } from '../components/Celebration'
 import { HabitCard } from '../components/HabitCard'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { Button, buttonClass, Card, InfoTip, Modal, ProgressRing, useToast, XPBar } from '../components/ui'
+import { tipOfTheDay } from '../lib/dailyTips'
 import { getMeta } from '../lib/db'
 import { addDays, diffDays, formatDay } from '../lib/dates'
 import { useProgress } from '../lib/progress'
 import { logSlip, setNote, undoSlip } from '../lib/repo'
 import { isDone, isScheduled } from '../lib/streaks'
 import type { Habit } from '../lib/types'
+import { clockNow } from '../lib/workspace'
 
 /** Orders habits so each one stacked "after" another sits right below it. */
 function orderByStacks(list: Habit[]): { habit: Habit; depth: number }[] {
@@ -30,7 +32,7 @@ function orderByStacks(list: Habit[]): { habit: Habit; depth: number }[] {
 }
 
 function greeting() {
-  const h = new Date().getHours()
+  const h = clockNow().getHours()
   return h < 5 ? 'Good night' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
 }
 
@@ -84,6 +86,7 @@ export default function Today() {
   const title = offset === 0 ? `${greeting()}!` : offset === 1 ? 'Yesterday' : formatDay(date, { weekday: 'long' })
   const backupDue = all.length > 0 && lastBackup !== 'loading' && (!lastBackup || diffDays(lastBackup.slice(0, 10), today) >= 14)
   const share = build.length ? doneCount / build.length : 0
+  const tip = tipOfTheDay(diffDays('2000-01-01', today))
 
   const card = (habit: Habit, depth = 0) => {
     const p = progress.byId.get(habit.id)!
@@ -167,6 +170,15 @@ export default function Today() {
               <h2 className="mb-3 mt-7 text-sm font-black uppercase tracking-wider text-muted">Breaking free</h2>
               <div className="space-y-3">{breaking.map((h) => card(h))}</div>
             </>
+          )}
+
+          {offset === 0 && (
+            <Link to="/tips" className="bouncy mt-5 block rounded-3xl p-4" style={{ background: 'color-mix(in srgb, var(--color-butter) 20%, var(--card))' }}>
+              <div className="mb-1 flex items-center justify-between text-xs font-black uppercase tracking-wider text-muted">
+                <span>💡 Tip of the day</span><span>All tips ›</span>
+              </div>
+              <p className="font-bold leading-snug">{tip.icon} {tip.tip}</p>
+            </Link>
           )}
 
           <Link to="/habits/new" className="bouncy mt-5 flex items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-line py-4 font-extrabold text-muted">

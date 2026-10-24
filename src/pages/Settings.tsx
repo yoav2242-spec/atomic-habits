@@ -6,6 +6,8 @@ import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
 import { isInstalled, useInstallPrompt } from '../lib/install'
 import { exportBackup, importBackup } from '../lib/repo'
+import { unlockWorkspace } from '../lib/workspace'
+import { useNavigate } from 'react-router-dom'
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -23,6 +25,8 @@ export default function Settings() {
   const [persisted, setPersisted] = useState<boolean | null>(null)
   const fileInput = useRef<HTMLInputElement>(null)
   const toast = useToast()
+  const navigate = useNavigate()
+  const [taps, setTaps] = useState(0)
 
   useEffect(() => {
     navigator.storage?.persisted?.().then(setPersisted)
@@ -117,6 +121,7 @@ export default function Settings() {
       <Section title="Help">
         <p>New here, or want a refresher on streaks, freezes and points?</p>
         <Button variant="secondary" className="w-full" onClick={() => db.meta.delete('onboarded')}>Show the welcome tour again</Button>
+        <Button variant="secondary" className="w-full" onClick={() => navigate('/tips')}>💡 Read all the tips</Button>
       </Section>
 
       <Section title="The 4 laws, in short">
@@ -127,6 +132,21 @@ export default function Settings() {
         <p className="text-muted">To break a bad habit, flip them: make it invisible, unattractive, difficult and unsatisfying.</p>
         <p className="text-muted">Ideas from <i>Atomic Habits</i> by James Clear.</p>
       </Section>
+
+      {/* Tapping the version 7 times opens the private test workspace on this device. */}
+      <button
+        className="w-full py-3 text-center text-xs font-bold text-muted"
+        onClick={() => {
+          const n = taps + 1
+          setTaps(n)
+          if (n >= 7) {
+            unlockWorkspace()
+            navigate('/workspace')
+          }
+        }}
+      >
+        Atomic v3{taps >= 3 && taps < 7 ? ` · ${7 - taps}` : ''}
+      </button>
     </div>
   )
 }

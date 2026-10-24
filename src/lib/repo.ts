@@ -1,4 +1,5 @@
 import { addDays, todayKey, weekday } from './dates'
+import { clockNow } from './workspace'
 import { db, DATA_TABLES, setMeta, type DataTable } from './db'
 import { isDone } from './streaks'
 import type { Checkin, Habit, Identity, ScorecardItem } from './types'
@@ -6,7 +7,7 @@ import type { Checkin, Habit, Identity, ScorecardItem } from './types'
 // All changes go through save(), which stamps the edit time. Deleting marks a
 // row deleted instead of erasing it, so a mistaken delete can still be found in a backup.
 
-const now = () => new Date().toISOString()
+const now = () => clockNow().toISOString()
 export const newId = () => crypto.randomUUID()
 
 async function save<T extends { id: string }>(table: DataTable, row: T) {

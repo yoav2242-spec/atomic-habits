@@ -1,3 +1,5 @@
+import { clockNow } from './workspace'
+
 // Dates are local calendar days as "YYYY-MM-DD". Arithmetic runs in UTC so
 // daylight-saving changes never shift a day.
 export type DateKey = string
@@ -9,7 +11,7 @@ export function toKey(d: Date): DateKey {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
 }
 
-export const todayKey = () => toKey(new Date())
+export const todayKey = () => toKey(clockNow())
 
 function toUTC(k: DateKey): number {
   const [y, m, d] = k.split('-').map(Number)

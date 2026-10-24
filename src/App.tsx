@@ -8,7 +8,9 @@ import Identity from './pages/Identity'
 import Scorecard from './pages/Scorecard'
 import Settings from './pages/Settings'
 import Stats from './pages/Stats'
+import Tips from './pages/Tips'
 import Today from './pages/Today'
+import Workspace from './pages/Workspace'
 
 export default function App() {
   return (
@@ -26,6 +28,8 @@ export default function App() {
             <Route path="identity" element={<Identity />} />
             <Route path="scorecard" element={<Scorecard />} />
             <Route path="settings" element={<Settings />} />
+            <Route path="workspace" element={<Workspace />} />
+            <Route path="tips" element={<Tips />} />
           </Route>
         </Routes>
       </HashRouter>

@@ -1,4 +1,6 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
+import { formatDay, todayKey } from '../lib/dates'
+import { dayOffset, inSandbox, workspaceUnlocked } from '../lib/workspace'
 import { Onboarding } from './Onboarding'
 
 const icons = {
@@ -18,10 +20,24 @@ const tabs: { to: string; label: string; icon: keyof typeof icons }[] = [
 ]
 
 export function Layout() {
+  const { pathname } = useLocation()
+  const showTools = workspaceUnlocked() && pathname !== '/workspace'
   return (
     <div className="mx-auto min-h-dvh max-w-md px-4 pb-32 pt-[max(1.25rem,env(safe-area-inset-top))]">
+      {inSandbox && (
+        <Link to="/workspace" className="mb-3 flex items-center justify-center gap-1.5 rounded-full bg-butter/25 px-3 py-1.5 text-xs font-extrabold">
+          🧪 Test copy · today is {formatDay(todayKey(), { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+          {dayOffset ? ` (+${dayOffset}d)` : ''}
+        </Link>
+      )}
       <Outlet />
       <Onboarding />
+      {showTools && (
+        <Link to="/workspace" aria-label="Test workspace"
+          className="bouncy fixed bottom-28 right-4 z-40 flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-xl shadow-lg">
+          🛠
+        </Link>
+      )}
       <nav className="fixed inset-x-3 bottom-[max(0.75rem,env(safe-area-inset-bottom))] z-40 mx-auto max-w-md rounded-3xl border border-line bg-card/90 px-1 shadow-[0_8px_30px_-10px_rgba(50,50,80,0.35)] backdrop-blur">
         <div className="flex">
           {tabs.map((t) => (

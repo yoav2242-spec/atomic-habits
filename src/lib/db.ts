@@ -1,17 +1,18 @@
 import Dexie, { type Table } from 'dexie'
 import type { Checkin, Habit, Identity, ScorecardItem } from './types'
+import { inSandbox } from './workspace'
 
 // Everything is stored on the phone in the browser's built-in database.
 
-class AtomicDB extends Dexie {
+export class AtomicDB extends Dexie {
   identities!: Table<Identity, string>
   habits!: Table<Habit, string>
   checkins!: Table<Checkin, string>
   scorecard_items!: Table<ScorecardItem, string>
   meta!: Table<{ key: string; value: string }, string>
 
-  constructor() {
-    super('atomic')
+  constructor(name: string) {
+    super(name)
     this.version(1).stores({
       identities: 'id',
       habits: 'id',
@@ -33,7 +34,8 @@ class AtomicDB extends Dexie {
   }
 }
 
-export const db = new AtomicDB()
+/** The real data, or the separate test copy while the private test workspace is on. */
+export const db = new AtomicDB(inSandbox ? 'atomic-sandbox' : 'atomic')
 
 export const DATA_TABLES = ['identities', 'habits', 'checkins', 'scorecard_items'] as const
 export type DataTable = (typeof DATA_TABLES)[number]
