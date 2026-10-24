@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { buzz } from '../lib/prefs'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, Card, Field, InfoTip, Modal, Segmented, Stepper, useConfirm, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
@@ -41,7 +42,7 @@ export default function Scorecard() {
     const id = newId()
     await saveScorecardItem({ id, routine: routine.trim(), rating, sort_order: nextOrder(), habit_id: null, updated_at: '', deleted: false })
     setJustAdded(id)
-    navigator.vibrate?.(8)
+    buzz(8)
   }
 
   // Suggestions not already on the list. Using one makes the next one slide in.

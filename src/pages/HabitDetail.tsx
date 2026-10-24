@@ -49,8 +49,8 @@ export default function HabitDetail() {
     h.cue_trigger && `⚡ Trigger: ${h.cue_trigger}`,
     h.hide_plan && `🙈 Hide it: ${h.hide_plan}`,
     h.why && (h.type === 'break' ? `💸 What it costs me: ${h.why}` : `💭 Why: ${h.why}`),
-    h.temptation_bundle && `🎁 Treat: ${h.temptation_bundle}`,
-    h.two_min_version && `⏱️ 2-minute version: ${h.two_min_version}`,
+    h.type === 'build' && h.temptation_bundle && `🎁 Treat: ${h.temptation_bundle}`,
+    h.type === 'build' && h.two_min_version && `⏱️ 2-minute version: ${h.two_min_version}`,
     h.friction_plan && `🧱 Make it hard: ${h.friction_plan}`,
     h.contract && `🤝 Contract: ${h.contract}`,
   ].filter(Boolean) as string[]

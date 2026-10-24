@@ -1,7 +1,9 @@
 import { BarChart3, CircleCheckBig, FlaskConical, ListChecks, Settings2, Sparkles, Wrench } from 'lucide-react'
-import { motion } from 'motion/react'
+import { motion, MotionConfig } from 'motion/react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { formatDay, todayKey } from '../lib/dates'
+import { usePrefs, useApplyPrefs } from '../lib/prefs'
+import { useReminderSync } from '../lib/reminders'
 import { useThemeColors } from '../lib/rewards'
 import { dayOffset, inSandbox, workspaceUnlocked } from '../lib/workspace'
 import { Onboarding } from './Onboarding'
@@ -18,9 +20,13 @@ const tabs = [
 
 export function Layout() {
   useThemeColors()
+  const prefs = usePrefs()
+  useApplyPrefs(prefs)
+  useReminderSync()
   const { pathname } = useLocation()
   const showTools = workspaceUnlocked() && pathname !== '/workspace'
   return (
+    <MotionConfig reducedMotion={prefs.motion === 'calm' ? 'always' : 'user'}>
     <div className="relative mx-auto min-h-dvh max-w-md overflow-x-clip px-4 pb-36 pt-[max(1.25rem,env(safe-area-inset-top))]">
       {/* Soft clay blobs drifting behind everything. */}
       <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
@@ -69,5 +75,6 @@ export function Layout() {
         </div>
       </nav>
     </div>
+    </MotionConfig>
   )
 }

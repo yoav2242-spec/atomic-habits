@@ -34,6 +34,13 @@ export class AtomicDB extends Dexie {
     })
     // v3: rewards from quests, surprise boxes and weekly reviews.
     this.version(3).stores({ rewards: 'id, date' })
+    // v5: per-habit reminders and vibration.
+    this.version(5).upgrade(async (tx) => {
+      await tx.table('habits').toCollection().modify((h) => {
+        h.remind ??= false
+        h.vibrate ??= 'gentle'
+      })
+    })
     // v4: amount habits (2400 ml, one 800 ml bottle per tap).
     this.version(4).upgrade(async (tx) => {
       await tx.table('habits').toCollection().modify((h) => {

@@ -92,6 +92,16 @@ export function Stepper({ value, min, max, onChange, step = 1 }: { value: number
   )
 }
 
+/** A clay on/off switch. */
+export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boolean) => void; label: string }) {
+  return (
+    <button type="button" role="switch" aria-checked={on} aria-label={label} onClick={() => onChange(!on)}
+      className={`relative h-9 w-16 shrink-0 rounded-full p-1 transition-colors ${on ? 'puffy bg-sage' : 'clay-in'}`}>
+      <motion.span layout transition={spring} className="clay-sm block h-7 w-7 rounded-full" style={{ marginLeft: on ? 'auto' : 0 }} />
+    </button>
+  )
+}
+
 /** Bottom sheet: springs up, and can be dragged down to close. */
 export function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode }) {
   return (

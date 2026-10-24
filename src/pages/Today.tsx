@@ -14,6 +14,7 @@ import { tipOfTheDay } from '../lib/dailyTips'
 import { db, getMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
 import { addDays, diffDays, formatDay, weekday, weekStart } from '../lib/dates'
+import { usePrefs } from '../lib/prefs'
 import { useProgress } from '../lib/progress'
 import { logSlip, setNote, undoSlip } from '../lib/repo'
 import { isDone, isScheduled } from '../lib/streaks'
@@ -44,6 +45,7 @@ function greeting() {
 
 export default function Today() {
   const progress = useProgress()
+  const prefs = usePrefs()
   const [offset, setOffset] = useState(0)
   const lastBackup = useLiveQuery(() => getMeta('last_backup'), [], 'loading')
   const toast = useToast()
@@ -110,7 +112,7 @@ export default function Today() {
   }
 
   const identityName = (h: Habit) => progress.identities.find((i) => i.id === h.identity_id)?.name
-  const title = offset === 0 ? `${greeting()}!` : offset === 1 ? 'Yesterday' : formatDay(date, { weekday: 'long' })
+  const title = offset === 0 ? `${greeting()}${prefs.name ? `, ${prefs.name}` : ''}!` : offset === 1 ? 'Yesterday' : formatDay(date, { weekday: 'long' })
   const backupDue = all.length > 0 && lastBackup !== 'loading' && (!lastBackup || diffDays(lastBackup.slice(0, 10), today) >= 14)
   const share = build.length ? doneCount / build.length : 0
   const tip = tipOfTheDay(diffDays('2000-01-01', today))

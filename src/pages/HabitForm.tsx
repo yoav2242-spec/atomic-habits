@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Button, Field, Segmented, Stepper } from '../components/ui'
+import { Button, buttonClass, Field, Segmented, Stepper, Toggle } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -9,6 +9,8 @@ import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
+import { clockAlarmUrl, isAndroid } from '../lib/alarm'
+import { VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
 
 const EMOJIS = ['✨', '📖', '🏃', '💪', '🧘', '💧', '🥗', '😴', '✍️', '🎸', '🧠', '🌱', '🦷', '🚶', '🧹', '💊', '☀️', '🙏', '🤸', '🗣️', '📵', '🍪', '📺', '💸']
@@ -116,8 +118,14 @@ export default function HabitForm() {
     )
   }
 
+  // Fields that only make sense for one kind of habit are cleared when switching.
+  const switchType = (type: Habit['type']) =>
+    set(type === 'break'
+      ? { type, temptation_bundle: '', two_min_version: '', stack_after_text: '', stack_after_habit_id: null, target_count: 1, unit: '', step: 1, step_label: '' }
+      : { type, cue_trigger: '', hide_plan: '', friction_plan: '' })
+
   const typeSwitch = (
-    <Segmented value={h.type} onChange={(type) => set({ type })} options={[{ value: 'build', label: '🌱 Build a habit' }, { value: 'break', label: '✂️ Break a habit' }]} />
+    <Segmented value={h.type} onChange={switchType} options={[{ value: 'build', label: '🌱 Build a habit' }, { value: 'break', label: '✂️ Break a habit' }]} />
   )
 
   const pastProgress = !id && (
@@ -167,6 +175,7 @@ export default function HabitForm() {
               <Field label="What time?"><input type="time" value={h.cue_time ?? ''} onChange={(e) => set({ cue_time: e.target.value || null })} /></Field>
               <Field label="Where?"><input value={h.location} onChange={(e) => set({ location: e.target.value })} placeholder="e.g. bedroom" /></Field>
             </div>
+            <ReminderSettings h={h} set={set} />
             <Field label="Right after I…" tip="stacking" hint="Link it to something you already do every day.">
               <input value={h.stack_after_text} disabled={!!h.stack_after_habit_id} onChange={(e) => set({ stack_after_text: e.target.value })} placeholder="e.g. pour my morning coffee" />
             </Field>
@@ -325,13 +334,13 @@ function Summary({ h, identity, anchor }: { h: Habit; identity?: string; anchor?
   const rows = [
     identity && ['Identity', `I am ${identity}`],
     h.type === 'build' && (h.cue_time || h.location) && ['Plan', [h.cue_time && `at ${h.cue_time}`, h.location && `in ${h.location}`].filter(Boolean).join(', ')],
-    anchor && ['Stacked', `after I ${anchor}`],
-    h.cue_trigger && ['Trigger', h.cue_trigger],
-    h.hide_plan && ['Hide it', h.hide_plan],
+    h.type === 'build' && anchor && ['Stacked', `after I ${anchor}`],
+    h.type === 'break' && h.cue_trigger && ['Trigger', h.cue_trigger],
+    h.type === 'break' && h.hide_plan && ['Hide it', h.hide_plan],
     h.why && [h.type === 'break' ? 'Cost' : 'Why', h.why],
-    h.temptation_bundle && ['Treat', h.temptation_bundle],
-    h.two_min_version && ['2-min version', h.two_min_version],
-    h.friction_plan && ['Make it hard', h.friction_plan],
+    h.type === 'build' && h.temptation_bundle && ['Treat', h.temptation_bundle],
+    h.type === 'build' && h.two_min_version && ['2-min version', h.two_min_version],
+    h.type === 'break' && h.friction_plan && ['Make it hard', h.friction_plan],
   ].filter(Boolean) as [string, string][]
   return (
     <div className="rounded-3xl p-4" style={{ background: `${h.color}22` }}>
@@ -396,5 +405,38 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
         )}
       </div>
     </Field>
+  )
+}
+
+/** "Remind me" with this habit's own vibration, plus a Clock-app alarm for a custom sound. */
+function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
+  if (!h.cue_time) return <p className="clay-in rounded-2xl p-3.5 text-xs font-semibold text-muted">Pick a time above to get a reminder.</p>
+  const alarm = clockAlarmUrl(h)
+  return (
+    <div className="clay-in space-y-3 rounded-2xl p-3.5">
+      <div className="flex items-center gap-3">
+        <span className="flex-1">
+          <span className="block text-sm font-extrabold">Remind me at {h.cue_time}</span>
+          <span className="block text-xs font-semibold text-muted">A notification, only if it isn't done yet</span>
+        </span>
+        <Toggle label="Remind me" on={h.remind} onChange={(remind) => set({ remind })} />
+      </div>
+      {h.remind && (
+        <div>
+          <div className="mb-1.5 text-xs font-bold text-muted">Vibration for this habit (tap to feel it)</div>
+          <div className="flex flex-wrap gap-1.5">
+            {VIBRATIONS.map((v) => (
+              <button key={v.value} type="button" onClick={() => { set({ vibrate: v.value }); navigator.vibrate?.(v.pattern) }}
+                className={`min-h-10 rounded-full px-3 text-xs font-extrabold ${h.vibrate === v.value ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                {v.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      {isAndroid() && alarm && (
+        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-2 text-sm')}>⏰ Add an alarm in my Clock app (own sound)</a>
+      )}
+    </div>
   )
 }

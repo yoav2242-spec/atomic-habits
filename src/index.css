@@ -36,8 +36,9 @@
   --sh-inner: rgba(255, 255, 255, 0.75);
 }
 
+/* Dark colors: follow the phone, unless Settings picks light or dark. */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #1c1b29;
     --card: #252438;
     --soft: #19182a;
@@ -48,6 +49,23 @@
     --sh-light: #2f2d48;
     --sh-inner: rgba(255, 255, 255, 0.05);
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #1c1b29;
+  --card: #252438;
+  --soft: #19182a;
+  --line: rgba(255, 255, 255, 0.06);
+  --ink: #eeecf9;
+  --muted: #9e9abb;
+  --sh-dark: #121120;
+  --sh-light: #2f2d48;
+  --sh-inner: rgba(255, 255, 255, 0.05);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
 }
 
 body {
@@ -162,6 +180,10 @@ input[type='file'] {
 }
 .blob {
   animation: morph 12s ease-in-out infinite;
+}
+
+:root[data-motion='calm'] :is(.animate-pop, .animate-rise, .animate-wiggle, .animate-float-up, .blob) {
+  animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

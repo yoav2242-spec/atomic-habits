@@ -22,7 +22,7 @@ export function newHabit(sort_order: number): Habit {
     id: newId(), updated_at: now(), deleted: false, type: 'build', name: '', emoji: '✨', color: HABIT_COLORS[0],
     identity_id: null, schedule: { kind: 'daily' }, target_count: 1, unit: '', step: 1, step_label: '', cue_time: null, location: '',
     stack_after_habit_id: null, stack_after_text: '', cue_trigger: '', hide_plan: '', why: '', temptation_bundle: '',
-    two_min_version: '', friction_plan: '', contract: '', level: 1, level_history: [], levelup_snooze: null,
+    two_min_version: '', friction_plan: '', contract: '', remind: false, vibrate: 'gentle', level: 1, level_history: [], levelup_snooze: null,
     archived: false, sort_order, created_at: now(),
   }
 }

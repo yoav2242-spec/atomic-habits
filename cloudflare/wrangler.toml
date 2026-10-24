@@ -1,0 +1,17 @@
+# Atomic reminder helper. Deploy: npx wrangler deploy (see README in this folder).
+name = "atomic-reminders"
+main = "src/index.ts"
+compatibility_date = "2025-09-01"
+
+[triggers]
+crons = ["* * * * *"]
+
+[vars]
+VAPID_PUBLIC_KEY = "BH9CKW-z0APrqyJ2oW9sYb-6W30fK5J9xqL_Ix-1CBy9Sim8zYD2qYnDvteWWxIadzQTCU6jdmnT4Q7pRd2Z7YQ"
+VAPID_SUBJECT = "https://yoav2242-spec.github.io/atomic-habits/"
+ALLOWED_ORIGIN = "https://yoav2242-spec.github.io"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "atomic-reminders"
+database_id = "FILL_IN_AFTER_D1_CREATE"

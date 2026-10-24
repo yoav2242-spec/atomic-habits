@@ -5,3 +5,6 @@ dev-dist
 .env
 *.log
 secrets.txt
+cloudflare/vapid-private.json
+cloudflare/.wrangler
+cloudflare/node_modules

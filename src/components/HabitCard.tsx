@@ -1,4 +1,5 @@
 import { Award, Clock, Flame, Link2, MapPin, Minus, NotebookPen, Pencil, Plus, Snowflake, Sprout, Timer, TrendingUp } from 'lucide-react'
+import { buzz } from '../lib/prefs'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
@@ -108,7 +109,7 @@ export function HabitCard(p: Props) {
     await increment(h, p.date, delta)
     setPopKey((k) => k + 1)
     if (had < target && had + delta >= target) reward(POINTS.full, () => restoreCheckin(h, p.date, before))
-    else if (delta > 0) navigator.vibrate?.(8)
+    else if (delta > 0) buzz(8)
   }
 
   const next = nextMilestone(stats.current)

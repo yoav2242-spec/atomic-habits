@@ -9,6 +9,8 @@ interface Synced {
   deleted: boolean
 }
 
+export type VibrationStyle = 'gentle' | 'double' | 'heartbeat' | 'long' | 'silent'
+
 export interface Identity extends Synced {
   name: string // "a reader", "an athlete"
 }
@@ -43,6 +45,9 @@ export interface Habit extends Synced {
   friction_plan: string
   // 4th law: make it satisfying (or unsatisfying)
   contract: string
+  // Reminders: a notification at cue_time, with this habit's own vibration.
+  remind: boolean
+  vibrate: VibrationStyle
   // Goldilocks rule: step the habit up (or down) as it gets easy
   level: number
   level_history: LevelChange[]
