@@ -12,6 +12,8 @@ import { setPrefs, usePrefs } from '../lib/prefs'
 import { disableNotifications, enableNotifications, notificationsOn, notificationsSupported, remindersReady } from '../lib/reminders'
 import { exportBackup, importBackup } from '../lib/repo'
 import { THEMES } from '../lib/rewards'
+import { useGoogleStatus } from '../lib/gcal'
+import { GoogleCalendarCard } from '../components/GoogleCalendarCard'
 import { unlockWorkspace } from '../lib/workspace'
 
 function Section({ title, children }: { title: string; children: ReactNode }) {
@@ -43,6 +45,7 @@ export default function Settings() {
   const install = useInstallPrompt()
   const habits = useHabits()
   const prefs = usePrefs()
+  const google = useGoogleStatus()
   const themeId = useLiveQuery(() => getMeta('theme'), [], 'sage')
   const lastBackup = useLiveQuery(() => getMeta('last_backup'))
   const [persisted, setPersisted] = useState<boolean | null>(null)
@@ -164,6 +167,7 @@ export default function Settings() {
           </p>
         )}
         </>)}
+        <GoogleCalendarCard />
         <Row icon={<AlarmClock size={19} />} title="Alarms and calendar" hint="Reminders that work even when Atomic is closed" stacked>
           {timed.length === 0 ? (
             <p className="text-xs font-semibold text-muted">Give a habit a time (in its ✏️ edit, "Make it obvious") to add an alarm for it.</p>
@@ -177,7 +181,7 @@ export default function Settings() {
                   </div>
                   <div className="flex gap-2">
                     {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><AlarmClock size={15} /> Alarm</a>}
-                    <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><CalendarPlus size={15} /> Google Calendar</a>
+                    {!google?.on && <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><CalendarPlus size={15} /> Google Calendar</a>}
                   </div>
                 </li>
               ))}
@@ -185,7 +189,7 @@ export default function Settings() {
           )}
           <p className="text-xs font-semibold text-muted">
             {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
-            "Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you. <InfoTip tip="calendar_on_time" className="align-middle" />
+            {google?.on ? 'Your habits are in the Habits calendar automatically.' : <>"Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you. <InfoTip tip="calendar_on_time" className="align-middle" /></>}
           </p>
         </Row>
       </Section>

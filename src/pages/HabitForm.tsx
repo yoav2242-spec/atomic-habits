@@ -10,6 +10,7 @@ import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, sav
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
 import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
+import { syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
 
@@ -59,6 +60,7 @@ export default function HabitForm() {
   const [addCalendar, setAddCalendar] = useState(true)
   const [addAlarm, setAddAlarm] = useState(true)
   const toast = useToast()
+  const google = useGoogleStatus()
 
   useEffect(() => {
     if (id && existing && !draft) setDraft(existing)
@@ -76,7 +78,9 @@ export default function HabitForm() {
   const save = async () => {
     const saved = { ...h, name: h.name.trim(), target_count: Math.max(1, h.target_count || 1), step: Math.max(1, h.step || 1) }
     const offerReminders = isLast && saved.type === 'build' && !!saved.cue_time
-    const calendar = offerReminders && addCalendar ? googleCalendarUrl(saved) : null
+    // With Google connected, the Habits calendar updates by itself; otherwise open a ready-made event.
+    const autoCalendar = offerReminders && !!google?.on
+    const calendar = offerReminders && addCalendar && !autoCalendar ? googleCalendarUrl(saved) : null
     const alarm = offerReminders && addAlarm && isAndroid() ? clockAlarmUrl(saved) : null
     // Open Calendar right away, while it still counts as part of the tap (otherwise phones block it).
     if (calendar) window.open(calendar, '_blank', 'noopener')
@@ -86,6 +90,12 @@ export default function HabitForm() {
       bigCelebration()
     }
     navigate(id ? `/habits/${h.id}` : '/', { replace: true })
+    if (google?.on) {
+      // Keep the Habits calendar in step (also when the habit lost its time or was unticked).
+      const state = await syncGoogle().catch(() => 'needs-tap' as const)
+      if (state === 'needs-tap') toast('Google needs you to sign in again', { label: 'Update calendar', onClick: () => { syncGoogle(true).then(() => toast('Habits calendar updated')).catch(() => {}) } })
+      else if (autoCalendar) toast('Added to your Habits calendar')
+    }
     if (alarm && !calendar) location.href = alarm
     else if (alarm) toast('One more tap for the Clock alarm', { label: 'Add alarm', onClick: () => { location.href = alarm } })
   }
@@ -467,6 +477,7 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
 function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
   h: Habit; calendar: boolean; alarm: boolean; setCalendar: (v: boolean) => void; setAlarm: (v: boolean) => void; pickTime: () => void
 }) {
+  const google = useGoogleStatus()
   if (!h.cue_time) {
     return (
       <div className="clay-in mt-6 flex items-center gap-3 rounded-2xl p-3.5">
@@ -476,7 +487,7 @@ function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
     )
   }
   const choices = [
-    { key: 'calendar', label: '📅 Google Calendar', on: calendar, set: setCalendar, show: true },
+    { key: 'calendar', label: '📅 Google Calendar', on: calendar, set: setCalendar, show: !google?.on },
     { key: 'alarm', label: '⏰ Clock alarm', on: alarm, set: setAlarm, show: isAndroid() },
   ].filter((c) => c.show)
   return (
@@ -485,6 +496,7 @@ function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
         Also add it at {h.cue_time} to:
         <InfoTip tip="calendar_on_time" />
       </div>
+      {google?.on && <p className="text-sm font-bold">📅 It goes into your Habits calendar automatically, reminding you on time.</p>}
       <div className="flex gap-2">
         {choices.map((c) => (
           <button key={c.key} type="button" onClick={() => c.set(!c.on)} aria-pressed={c.on}
@@ -494,7 +506,7 @@ function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
         ))}
       </div>
       <p className="text-xs font-semibold text-muted">
-        {calendar && 'Google Calendar opens with the event ready: tap Save. '}
+        {calendar && !google?.on && 'Google Calendar opens with the event ready: tap Save. '}
         {alarm && isAndroid() && 'Your Clock app opens next: pick a sound and save.'}
       </p>
     </div>

@@ -3,6 +3,7 @@ import { motion, MotionConfig } from 'motion/react'
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom'
 import { formatDay, todayKey } from '../lib/dates'
 import { usePrefs, useApplyPrefs } from '../lib/prefs'
+import { useGoogleSync } from '../lib/gcal'
 import { useReminderSync } from '../lib/reminders'
 import { useThemeColors } from '../lib/rewards'
 import { dayOffset, inSandbox, workspaceUnlocked } from '../lib/workspace'
@@ -23,6 +24,7 @@ export function Layout() {
   const prefs = usePrefs()
   useApplyPrefs(prefs)
   useReminderSync()
+  useGoogleSync()
   const { pathname } = useLocation()
   const showTools = workspaceUnlocked() && pathname !== '/workspace'
   return (
