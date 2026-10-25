@@ -16,9 +16,9 @@ export interface Pebble { id: string; color: string; done: boolean; label?: stri
 export function Pebbles({ items, onPick }: { items: Pebble[]; onPick?: (id: string) => void }) {
   if (items.length === 0) return null
   // Fewer habits make bigger pebbles; many habits wrap onto a second row.
-  const size = items.length <= 4 ? 44 : items.length <= 7 ? 36 : 30
+  const size = items.length <= 4 ? 44 : items.length <= 6 ? 32 : 28
   return (
-    <ul className="flex flex-wrap gap-2" aria-label="Today's habits">
+    <ul className={`flex flex-wrap ${items.length <= 4 ? 'gap-2' : 'gap-1'}`} aria-label="Today's habits">
       {items.map((p, i) => {
         const shape = SHAPES[i % SHAPES.length]
         const body = (

@@ -201,9 +201,9 @@ export default function Today() {
                   <motion.span key={doneCount} initial={{ scale: 0.6, y: 6 }} animate={{ scale: 1, y: 0 }} transition={spring} className="inline-block text-[44px] font-black leading-none tracking-[-0.03em] tabular-nums">{doneCount}</motion.span>
                   <span className="text-xl font-extrabold text-muted">of {build.length} done</span>
                 </div>
-                <motion.span key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="pb-1 text-[16px] font-black text-sage-deep tabular-nums">
+                {progress.todayPoints > 0 && <motion.span key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="pb-1 text-[16px] font-black text-sage-deep tabular-nums">
                   +{progress.todayPoints} today
-                </motion.span>
+                </motion.span>}
               </div>
               <p className="mt-1.5 text-[16px] font-semibold leading-snug text-muted">{nextLine}</p>
               <div className="-ml-1.5 mt-3">

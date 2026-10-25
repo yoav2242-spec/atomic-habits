@@ -44,7 +44,7 @@ function Meta({ children, color }: { icon?: ReactNode; children: ReactNode; colo
 }
 
 /** A row of facts with a dot between each one. */
-const metaRow = "mt-1 leading-snug [&>*+*]:before:text-muted [&>*+*]:before:content-['_·_']"
+const metaRow = "mt-1 flex flex-wrap leading-snug [&>*+*]:before:text-muted [&>*+*]:before:content-['_·_']"
 
 /** A small word button with a fingertip-sized tap area. */
 function IconButton({ label, onClick, to, children }: { label: string; onClick?: () => void; to?: string; children: ReactNode }) {
