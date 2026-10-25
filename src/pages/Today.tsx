@@ -1,5 +1,4 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CalendarCheck, CalendarHeart, ChevronLeft, ChevronRight, Gift, Lightbulb, Pencil, Plus, Save, Sprout, Target } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
@@ -118,10 +117,10 @@ export default function Today() {
   const tip = tipOfTheDay(diffDays('2000-01-01', today))
   const boxReady = build.length > 0 && doneCount === build.length && !progress.rewards.some((r) => r.id === `box_${today}`)
   const extras = [
-    { key: 'garden', label: 'Garden', Icon: Sprout, color: 'var(--color-sage)', badge: '' },
-    { key: 'quests', label: 'Quests', Icon: Target, color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
-    { key: 'box', label: 'Box', Icon: Gift, color: 'var(--color-rose)', badge: boxReady ? '!' : '' },
-    { key: 'tip', label: 'Tip', Icon: Lightbulb, color: 'var(--color-sky)', badge: '' },
+    { key: 'garden', label: 'Garden', color: 'var(--color-sage)', badge: '' },
+    { key: 'quests', label: 'Quests', color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
+    { key: 'box', label: 'Surprise box', color: 'var(--color-rose)', badge: boxReady ? '!' : '' },
+    { key: 'tip', label: 'Tip of the day', color: 'var(--color-sky)', badge: '' },
   ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
   // The one line under the count: what to do next, in words.
@@ -160,7 +159,7 @@ export default function Today() {
     if (habit.id !== focusId) return element
     return (
       <div key={habit.id}>
-        <div className="mb-2 ml-1 text-[13px] font-black text-level">This week's focus</div>
+        <div className="mb-2 ml-1 text-[14px] font-black text-level">This week's focus</div>
         {element}
       </div>
     )
@@ -172,12 +171,12 @@ export default function Today() {
     <div>
       <header className="mb-5 flex items-end justify-between gap-3 pt-1">
         <div className="min-w-0">
-          <p className="text-[15px] font-bold text-muted">{formatDay(date, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <p className="text-[16px] font-bold text-muted">{formatDay(date, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
           <h1 className="mt-0.5 text-[30px] font-black leading-[1.05] tracking-[-0.02em]">{title}</h1>
         </div>
         <div className="flex shrink-0 gap-1.5">
-          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><ChevronLeft size={20} /></motion.button>
-          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><ChevronRight size={20} /></motion.button>
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><span className="-mt-0.5 text-[28px] font-black leading-none">‹</span></motion.button>
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><span className="-mt-0.5 text-[28px] font-black leading-none">›</span></motion.button>
         </div>
       </header>
 
@@ -202,27 +201,27 @@ export default function Today() {
                   <motion.span key={doneCount} initial={{ scale: 0.6, y: 6 }} animate={{ scale: 1, y: 0 }} transition={spring} className="inline-block text-[44px] font-black leading-none tracking-[-0.03em] tabular-nums">{doneCount}</motion.span>
                   <span className="text-xl font-extrabold text-muted">of {build.length} done</span>
                 </div>
-                <motion.span key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="pb-1 text-[15px] font-black text-sage-deep tabular-nums">
+                <motion.span key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="pb-1 text-[16px] font-black text-sage-deep tabular-nums">
                   +{progress.todayPoints} today
                 </motion.span>
               </div>
-              <p className="mt-1.5 text-[15px] font-semibold leading-snug text-muted">{nextLine}</p>
+              <p className="mt-1.5 text-[16px] font-semibold leading-snug text-muted">{nextLine}</p>
               <div className="-ml-1.5 mt-3">
                 <Pebbles items={buildOrdered.map(({ habit }) => ({ id: habit.id, color: habit.color, done: isDone(habit, checkinOn(habit)) || weekGoalMet(habit), label: habit.name }))}
                   onPick={(id) => document.getElementById(`habit-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
               </div>
               <div className="mt-3 flex min-h-11 items-center gap-3">
                 <Link to="/stats" className="flex min-h-11 flex-1 items-center gap-3">
-                  <span className="shrink-0 text-[13px] font-black text-level">Level {progress.level.level}</span>
+                  <span className="shrink-0 text-[14px] font-black text-level">Level {progress.level.level}</span>
                   <span className="flex-1"><XPBar into={progress.level.into} need={progress.level.need} /></span>
-                  <span className="shrink-0 text-[13px] font-bold text-muted tabular-nums">{progress.level.need - progress.level.into} to go</span>
+                  <span className="shrink-0 text-[14px] font-bold text-muted tabular-nums">{progress.level.need - progress.level.into} to go</span>
                 </Link>
                 <InfoTip tip="points" />
               </div>
             </Card>
           ) : (
             <div className="tray mb-5 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-bold">
-              <Pencil size={16} className="shrink-0 text-muted" /> Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
+              Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
             </div>
           )}
 
@@ -234,10 +233,9 @@ export default function Today() {
                   <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
                     animate={hot ? { rotate: [0, -4, 4, -2, 0] } : { rotate: 0 }}
                     style={hot ? { background: x.color } : undefined}
-                    className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-4 text-[15px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
-                    <x.Icon size={18} strokeWidth={2.3} className={hot ? '' : 'text-muted'} />
-                    {x.label}
-                    {x.badge && x.badge !== '!' && <span className="tray rounded-full px-1.5 text-[13px] font-black text-muted tabular-nums">{x.badge}</span>}
+                    className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full px-5 py-2 text-[17px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
+                                        {x.label}
+                    {x.badge && x.badge !== '!' && <span className="tray rounded-full px-1.5 text-[14px] font-black text-muted tabular-nums">{x.badge}</span>}
                   </motion.button>
                 )
               })}
@@ -248,16 +246,14 @@ export default function Today() {
             <div className="mb-5 space-y-2.5">
               {reviewDue && (
                 <Link to="/review" className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-sky)_50%,var(--card))] px-4 py-3">
-                  <CalendarCheck size={22} />
-                  <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-[13px] font-bold opacity-80">2 minutes · pick next week's focus · +25</span></span>
-                  <ChevronRight size={20} />
+                                    <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-[14px] font-bold opacity-80">2 minutes · pick next week's focus · +25</span></span>
+                  <span className="text-[26px] font-black leading-none">›</span>
                 </Link>
               )}
               {recapDue && (
                 <Link to={`/recap/${lastMonth}`} className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-peach)_50%,var(--card))] px-4 py-3">
-                  <CalendarHeart size={22} />
-                  <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-[13px] font-bold opacity-80">See everything you did last month</span></span>
-                  <ChevronRight size={20} />
+                                    <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-[14px] font-bold opacity-80">See everything you did last month</span></span>
+                  <span className="text-[26px] font-black leading-none">›</span>
                 </Link>
               )}
             </div>
@@ -276,12 +272,12 @@ export default function Today() {
           )}
 
           <Link to="/habits/new" className="bouncy mt-6 flex min-h-14 items-center justify-center gap-2 rounded-[22px] border-2 border-dashed border-muted/30 font-extrabold text-muted">
-            <Plus size={18} /> Add a habit
+            + Add a habit
           </Link>
 
           {backupDue && (
             <Link to="/settings" className="tray mt-4 flex min-h-12 items-center gap-2.5 rounded-2xl p-3.5 text-sm font-bold">
-              <Save size={18} className="shrink-0 text-muted" /> Your habits live only on this phone. Tap to save a backup copy.
+              Your habits live only on this phone. Tap to save a backup copy.
             </Link>
           )}
         </>

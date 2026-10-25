@@ -1,4 +1,3 @@
-import { CalendarCheck2, RefreshCw } from 'lucide-react'
 import { useState } from 'react'
 import { connectGoogle, disconnectGoogle, googleReady, syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { inSandbox } from '../lib/workspace'
@@ -31,10 +30,9 @@ export function GoogleCalendarCard() {
   return (
     <div className="clay-in space-y-3 rounded-2xl p-3.5">
       <div className="flex items-center gap-3">
-        <span className="puffy flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky/80 text-on-pastel"><CalendarCheck2 size={20} /></span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-[15px] font-extrabold">"Habits" calendar in Google</span>
-          <span className="block text-[13px] font-semibold text-muted">
+                <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-extrabold">"Habits" calendar in Google</span>
+          <span className="block text-[14px] font-semibold text-muted">
             {!googleReady ? 'Almost ready: being set up'
               : inSandbox ? 'Not available in test mode'
               : !status.on ? 'Atomic adds and updates your habits there by itself'
@@ -51,14 +49,14 @@ export function GoogleCalendarCard() {
       ) : (
         <div className="flex gap-2">
           <Button variant="secondary" className="flex-1 gap-1.5" disabled={busy} onClick={() => run(() => syncGoogle(true), 'Habits calendar updated')}>
-            <RefreshCw size={16} className={busy ? 'animate-spin' : ''} /> Update now
+            Update now
           </Button>
           <Button variant="ghost" className="!min-h-12" onClick={() => setLeaving(true)}>Disconnect</Button>
         </div>
       ))}
 
       {status.on && (
-        <p className="text-[13px] font-semibold text-muted">
+        <p className="text-[14px] font-semibold text-muted">
           Each habit with a time is a repeating event that reminds you right on time. In Google Calendar, tick or untick "Habits" in your calendar list to show or hide it.
         </p>
       )}

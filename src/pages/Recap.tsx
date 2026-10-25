@@ -86,7 +86,7 @@ export default function Recap() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
+        <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
         <div className="flex gap-1.5">
           <button onClick={() => navigate(`/recap/${prevYm}`, { replace: true })} className="clay-sm bouncy h-11 w-11 rounded-full font-black" aria-label="Previous month">‹</button>
           <button onClick={() => navigate(`/recap/${nextYm}`, { replace: true })} disabled={nextYm > today.slice(0, 7)} className="clay-sm bouncy h-11 w-11 rounded-full font-black disabled:opacity-30" aria-label="Next month">›</button>
@@ -157,7 +157,7 @@ export default function Recap() {
       )}
 
       <Button variant="lavender" className="mt-2 w-full" onClick={share}>📤 Share my month</Button>
-      <p className="mt-2 text-center text-[13px] font-semibold text-muted">Or take a screenshot to keep it.</p>
+      <p className="mt-2 text-center text-[14px] font-semibold text-muted">Or take a screenshot to keep it.</p>
     </div>
   )
 }

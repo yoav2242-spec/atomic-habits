@@ -1,4 +1,3 @@
-import { Clock } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { buzz } from '../lib/prefs'
@@ -79,8 +78,7 @@ export function TimePicker({ value, onChange, placeholder = 'Pick a time' }: { v
     <>
       <motion.button type="button" whileTap={{ scaleX: 1.04, scaleY: 0.94 }} transition={spring} onClick={openPicker}
         className="clay-in flex min-h-[52px] w-full items-center gap-2.5 rounded-2xl px-4 text-left">
-        <Clock size={18} className="shrink-0 text-muted" />
-        <span className={`text-lg tabular-nums ${value ? 'font-black' : 'font-semibold text-muted'}`}>{value ?? placeholder}</span>
+                <span className={`text-lg tabular-nums ${value ? 'font-black' : 'font-semibold text-muted'}`}>{value ?? placeholder}</span>
       </motion.button>
 
       <Modal open={open} onClose={() => setOpen(false)} title="What time?">
@@ -88,12 +86,12 @@ export function TimePicker({ value, onChange, placeholder = 'Pick a time' }: { v
           {QUICK.map((q) => (
             <button key={q.time} type="button" onClick={() => pick(q.time)}
               className={`min-h-14 rounded-[18px] px-2 py-2 text-center ${value === q.time ? "puffy bg-sage text-on-pastel" : "clay-sm"}`}>
-              <span className="block text-[13px] font-bold opacity-75">{q.label}</span>
+              <span className="block text-[14px] font-bold opacity-75">{q.label}</span>
               <span className="block text-base font-black tabular-nums">{q.time}</span>
             </button>
           ))}
         </div>
-        <div className="mb-2 text-[13px] font-bold text-muted">Or scroll to any time</div>
+        <div className="mb-2 text-[14px] font-bold text-muted">Or scroll to any time</div>
         <div className="flex items-center gap-2">
           <Wheel label="Hour" values={HOURS} value={hour} onChange={setHour} />
           <span className="text-3xl font-black text-muted">:</span>

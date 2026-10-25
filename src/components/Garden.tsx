@@ -47,7 +47,7 @@ export function Garden({ habits, today }: { habits: HabitProgress[]; today: stri
                 </span>
               </span>
               <span className="mt-1 h-1.5 w-10 rounded-full" style={{ background: `color-mix(in srgb, ${p.habit.color} 55%, #8a6a4a)` }} />
-              <span className="mt-1 line-clamp-1 text-[11px] font-extrabold text-muted">{p.habit.emoji} {p.habit.name}</span>
+              <span className="mt-1 line-clamp-1 text-[12px] font-extrabold text-muted">{p.habit.emoji} {p.habit.name}</span>
             </Link>
           )
         })}

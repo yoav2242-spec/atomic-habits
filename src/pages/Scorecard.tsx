@@ -115,7 +115,7 @@ export default function Scorecard() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
+      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
       <div className="flex items-center gap-2">
         <h1 className="text-3xl font-black tracking-tight">Habits Scorecard</h1>
         <InfoTip tip="scorecard" />
@@ -126,8 +126,8 @@ export default function Scorecard() {
 
       {shown.length > 0 && (
         <Card className="mb-4">
-          <div className="mb-1 text-[17px] font-black">{firstTime ? '👋 Tap what you do on a normal day' : '💡 More ideas'}</div>
-          <p className="mb-3 text-[13px] font-semibold text-muted">Tap to add it. A new idea pops up each time.</p>
+          <div className="mb-1 text-[18px] font-black">{firstTime ? '👋 Tap what you do on a normal day' : '💡 More ideas'}</div>
+          <p className="mb-3 text-[14px] font-semibold text-muted">Tap to add it. A new idea pops up each time.</p>
           <div className="flex flex-wrap gap-2">
             {shown.map((s) => (
               <button key={s.text} onClick={() => add(s.text, s.rating)}
@@ -145,7 +145,7 @@ export default function Scorecard() {
         <Button onClick={() => { add(text); setText('') }}>Add</Button>
       </div>
 
-      {items.length > 1 && <p className="mb-2 text-[13px] font-semibold text-muted">Drag ⠿ to reorder. Tap a name to edit or replace it.</p>}
+      {items.length > 1 && <p className="mb-2 text-[14px] font-semibold text-muted">Drag ⠿ to reorder. Tap a name to edit or replace it.</p>}
       <ol ref={listRef} className="space-y-2">
         {items.map((item, n) => {
           const linked = item.habit_id ? progress.byId.get(item.habit_id) : undefined
@@ -174,7 +174,7 @@ export default function Scorecard() {
                     ✓ Tracking · {linked.habit.type === 'break' ? `🌿 ${linked.stats.current} days clean` : `🔥 ${linked.stats.current} day streak`} ›
                   </Link>
                 ) : (
-                  <button onClick={() => { setTracking(item); setTrackName(item.routine); setDays(0) }} className="bouncy rounded-full tray px-3 py-1 text-[13px] font-extrabold text-muted">
+                  <button onClick={() => { setTracking(item); setTrackName(item.routine); setDays(0) }} className="bouncy rounded-full tray px-3 py-1 text-[14px] font-extrabold text-muted">
                     {item.rating === '-' ? '✂️ Track to break it' : '📈 Track this habit'}
                   </button>
                 )}
@@ -219,7 +219,7 @@ export default function Scorecard() {
               ))}
             </div>
           </Field>
-          <p className="text-[13px] font-semibold text-muted">You can add more details later with ✏️ Edit.</p>
+          <p className="text-[14px] font-semibold text-muted">You can add more details later with ✏️ Edit.</p>
           <div className="flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={() => setTracking(null)}>Cancel</Button>
             <Button className="flex-1" disabled={!trackName.trim()} onClick={track}>Start tracking</Button>

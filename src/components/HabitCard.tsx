@@ -1,4 +1,3 @@
-import { Award, Clock, Flame, Link2, MapPin, Minus, NotebookPen, Pencil, Plus, Snowflake, Sprout, Timer, TrendingUp } from 'lucide-react'
 import { buzz } from '../lib/prefs'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState, type ReactNode } from 'react'
@@ -36,18 +35,20 @@ export function streakLabel(s: HabitStats) {
 
 const squish = { scaleX: 1.14, scaleY: 0.84 }
 
-function Meta({ icon, children, color }: { icon: ReactNode; children: ReactNode; color?: string }) {
+function Meta({ children, color }: { icon?: ReactNode; children: ReactNode; color?: string }) {
   return (
-    <span className="inline-flex items-center gap-1 text-[13px] font-bold" style={{ color: color ?? 'var(--muted)' }}>
-      {icon}
+    <span className="whitespace-nowrap text-[16px] font-bold" style={{ color: color ?? 'var(--muted)' }}>
       {children}
     </span>
   )
 }
 
-/** Round icon button with a fingertip-sized tap area. */
+/** A row of facts with a dot between each one. */
+const metaRow = "mt-1 leading-snug [&>*+*]:before:text-muted [&>*+*]:before:content-['_·_']"
+
+/** A small word button with a fingertip-sized tap area. */
 function IconButton({ label, onClick, to, children }: { label: string; onClick?: () => void; to?: string; children: ReactNode }) {
-  const cls = 'bouncy flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-[var(--soft)]'
+  const cls = 'tray bouncy flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-full px-4 text-[16px] font-extrabold text-muted'
   return to ? <Link to={to} aria-label={label} className={cls}>{children}</Link> : <button onClick={onClick} aria-label={label} className={cls}>{children}</button>
 }
 
@@ -132,15 +133,15 @@ export function HabitCard(p: Props) {
         <div className="flex items-center gap-3.5">
           {emojiBubble}
           <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
-            <div className="line-clamp-2 text-[17px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</div>
-            <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+            <div className="line-clamp-2 text-[19px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</div>
+            <div className={metaRow}>
               {slipped
-                ? <Meta icon={<Sprout size={14} />} color="var(--color-rose)">Slipped{c.count > 1 ? ` ×${c.count}` : ''}</Meta>
-                : <Meta icon={<Sprout size={14} />} color="var(--color-sage-deep)">{stats.current} day{stats.current === 1 ? '' : 's'} clean</Meta>}
-              {stats.best > stats.current && <Meta icon={<Award size={14} />}>best {stats.best}</Meta>}
+                ? <Meta color="var(--flame)">Slipped{c.count > 1 ? ` ×${c.count}` : ''}</Meta>
+                : <Meta color="var(--color-sage-deep)">{stats.current} day{stats.current === 1 ? '' : 's'} clean</Meta>}
+              {stats.best > stats.current && <Meta>best {stats.best}</Meta>}
             </div>
           </Link>
-          <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}><Pencil size={17} /></IconButton>
+          <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}>Edit</IconButton>
         </div>
         <div className="mt-3 flex justify-end">
           {slipped ? (
@@ -162,19 +163,19 @@ export function HabitCard(p: Props) {
       style={{ marginLeft: p.depth ? Math.min(p.depth, 3) * 14 : 0, background: done ? tint(22) : undefined, transition: 'background 0.5s' }}
     >
       {p.stackLabel && (
-        <div className="mb-3 flex items-center gap-1.5 text-[13px] font-bold text-muted"><Link2 size={14} /> After I {p.stackLabel}</div>
+        <div className="mb-2.5 text-[16px] font-bold text-muted">After I {p.stackLabel}</div>
       )}
 
       <div className="flex items-center gap-3.5">
         {emojiBubble}
         <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
-          <motion.div animate={{ opacity: done ? 0.6 : 1 }} className="line-clamp-2 text-[17px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</motion.div>
-          <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
-            {stats.current > 0 && <Meta icon={<Flame size={14} />} color="var(--flame)">{streakLabel(stats)}</Meta>}
-            {stats.freezes > 0 && <Meta icon={<Snowflake size={14} />}><span className="sr-only">Streak freezes: </span>{stats.freezes}</Meta>}
-            {h.schedule.kind === 'weekly' && <Meta icon={<Award size={14} />}>{stats.weekDone}/{h.schedule.times} this week</Meta>}
-            {h.cue_time && <Meta icon={<Clock size={14} />}>{h.cue_time}</Meta>}
-            {!h.cue_time && h.location && <Meta icon={<MapPin size={14} />}>{h.location}</Meta>}
+          <motion.div animate={{ opacity: done ? 0.6 : 1 }} className="line-clamp-2 text-[19px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</motion.div>
+          <div className={metaRow}>
+            {stats.current > 0 && <Meta color="var(--flame)">{streakLabel(stats)} in a row</Meta>}
+            {stats.freezes > 0 && <Meta>{stats.freezes} freeze{stats.freezes === 1 ? '' : 's'}</Meta>}
+            {h.schedule.kind === 'weekly' && <Meta>{stats.weekDone}/{h.schedule.times} this week</Meta>}
+            {h.cue_time && <Meta>at {h.cue_time}</Meta>}
+            {!h.cue_time && h.location && <Meta>{h.location}</Meta>}
           </div>
         </Link>
 
@@ -193,8 +194,8 @@ export function HabitCard(p: Props) {
               aria-label={amount ? `Add one ${h.step_label || `${step} ${h.unit}`}` : 'Plus one'}
               className="puffy flex h-[60px] w-[60px] shrink-0 flex-col items-center justify-center rounded-full"
               style={{ background: done ? h.color : tint(70) }}>
-              <Plus size={24} strokeWidth={3} color="var(--color-on-pastel)" />
-              <span className="text-[11px] font-extrabold leading-none text-on-pastel">{amount ? h.step_label || `${step}` : `${c?.count ?? 0}/${target}`}</span>
+              <span className="text-[28px] font-black leading-[0.8] text-on-pastel">+</span>
+              <span className="mt-0.5 text-[13px] font-extrabold leading-none text-on-pastel">{amount ? h.step_label || `${step}` : `${c?.count ?? 0}/${target}`}</span>
             </motion.button>
           ) : (
             <CheckButton done={done} half={c?.kind === 'two_min'} color={h.color} onClick={() => tap(c?.kind === 'two_min' ? 'two_min' : 'full')} refEl={checkRef} />
@@ -207,14 +208,16 @@ export function HabitCard(p: Props) {
           <div className="clay-in h-3.5 overflow-hidden rounded-full p-[3px]">
             <motion.div className="puffy h-full rounded-full" initial={false} animate={{ width: `${Math.max(count ? 6 : 0, Math.min(100, (count / target) * 100))}%` }} transition={softSpring} style={{ background: h.color }} />
           </div>
-          <div className="mt-1.5 flex items-center gap-2 text-[14px] font-bold">
-            <motion.span key={popKey} initial={{ scale: 0.85 }} animate={{ scale: 1 }} transition={spring} className="tabular-nums">
-              {c?.kind === 'two_min' ? '2-minute version done' : progressText(h, count)}
-            </motion.span>
-            {servingsText(h, count) && <span className="text-muted">· {servingsText(h, count)}</span>}
-            <span className="-mr-2 ml-auto flex">
-              <IconButton label="Take one back" onClick={() => count > 0 && bump(-step)}><Minus size={17} /></IconButton>
-              {amount && <IconButton label="Other amount" onClick={() => { setAmountText(''); setAmountOpen(true) }}><Pencil size={16} /></IconButton>}
+          <div className="mt-2 flex items-center gap-2 text-[16px] font-bold">
+            <div className="min-w-0 flex-1 leading-snug">
+              <motion.span key={popKey} initial={{ scale: 0.85 }} animate={{ scale: 1 }} transition={spring} className="inline-block whitespace-nowrap tabular-nums">
+                {c?.kind === 'two_min' ? '2-minute version done' : progressText(h, count)}
+              </motion.span>
+              {servingsText(h, count) && <span className="whitespace-nowrap text-muted"> · {servingsText(h, count)}</span>}
+            </div>
+            <span className="flex shrink-0 gap-1.5">
+              <IconButton label="Take one back" onClick={() => count > 0 && bump(-step)}><span className="text-[20px] leading-none">−</span></IconButton>
+              {amount && <IconButton label="Other amount" onClick={() => { setAmountText(''); setAmountOpen(true) }}>Other</IconButton>}
             </span>
           </div>
         </div>
@@ -235,9 +238,8 @@ export function HabitCard(p: Props) {
       <AnimatePresence initial={false}>
         {isToday && !done && (stats.atRisk || stats.justReset) && (
           <motion.div key="warn" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={softSpring} className="overflow-hidden">
-            <div className="tray mt-3.5 flex items-start gap-2.5 rounded-2xl px-3.5 py-3 text-[14px] font-semibold leading-snug">
-              {stats.atRisk ? <Snowflake size={18} className="mt-0.5 shrink-0 text-muted" /> : <Sprout size={18} className="mt-0.5 shrink-0 text-sage-deep" />}
-              <span className="flex-1">
+            <div className="tray mt-3.5 flex items-start gap-2.5 rounded-2xl px-3.5 py-3 text-[16px] font-semibold leading-snug">
+                            <span className="flex-1">
                 {stats.atRisk
                   ? "A freeze saved your streak yesterday. Freezes can't be used two days in a row, so do it today."
                   : "Your streak reset, and that's okay. Never miss twice: start a new one today."}
@@ -250,28 +252,27 @@ export function HabitCard(p: Props) {
 
       {p.levelUp && isToday && (
         <motion.button whileTap={{ scale: 0.97 }} onClick={p.onLevelUp}
-          className="mt-3.5 flex min-h-12 w-full items-center gap-2.5 rounded-2xl bg-[color-mix(in_srgb,var(--color-lavender)_38%,var(--card))] px-3.5 py-2.5 text-left text-[14px] font-bold leading-snug">
-          <TrendingUp size={18} />
-          <span className="flex-1">This is getting easy. Ready to make it a little harder?</span>
+          className="mt-3.5 flex min-h-12 w-full items-center gap-2.5 rounded-2xl bg-[color-mix(in_srgb,var(--color-lavender)_38%,var(--card))] px-3.5 py-2.5 text-left text-[16px] font-bold leading-snug">
+                    <span className="flex-1">This is getting easy. Ready to make it a little harder?</span>
           <span className="shrink-0 font-black text-level">Level up</span>
         </motion.button>
       )}
 
-      <div className="-mb-1 -mr-1.5 mt-3 flex items-center gap-1">
-        {h.two_min_version && !done ? (
-          <button onClick={() => tap('two_min')} className="tray bouncy mr-1 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full px-3.5 text-left text-[14px] font-bold text-muted">
-            <Timer size={16} className="shrink-0" />
-            <span className="truncate">Busy? Just {h.two_min_version}</span>
-          </button>
-        ) : toBadge !== null && stats.current > 0 && toBadge <= 3 ? (
-          <span className="flex flex-1 items-center gap-1.5 text-[14px] font-bold text-muted">
-            <Award size={16} /> {toBadge} more to the {next}-{stats.unit} badge
+      {h.two_min_version && !done && (
+        <button onClick={() => tap('two_min')} className="tray bouncy mt-3 flex min-h-11 w-full items-center rounded-[18px] px-4 py-2.5 text-left text-[16px] font-bold leading-snug text-muted">
+          Busy? Just {h.two_min_version}
+        </button>
+      )}
+      <div className="mt-2.5 flex items-center gap-1.5">
+        {toBadge !== null && stats.current > 0 && toBadge <= 3 ? (
+          <span className="flex-1 text-[16px] font-bold text-muted">
+            {toBadge} more to the {next}-{stats.unit} badge
           </span>
         ) : <span className="flex-1" />}
         <IconButton label={c?.note ? 'Edit note' : 'Add note'} onClick={p.onNote}>
-          <NotebookPen size={17} className={c?.note ? 'text-sage-deep' : ''} />
+          <span className={c?.note ? 'text-sage-deep' : ''}>Note</span>
         </IconButton>
-        <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}><Pencil size={17} /></IconButton>
+        <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}>Edit</IconButton>
       </div>
     </motion.div>
   )

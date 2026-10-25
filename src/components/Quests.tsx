@@ -1,5 +1,4 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { CircleCheck } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useEffect } from 'react'
 import { burst } from '../lib/celebrate'
@@ -54,7 +53,7 @@ export function QuestList({ status }: { status: QuestStatus }) {
         <motion.li layout transition={spring} key={q.id}
           className={`flex min-h-14 items-center gap-3 rounded-2xl px-3.5 py-3 ${done ? 'puffy bg-sage/70' : q.id === 'comeback' ? 'puffy bg-butter/60' : 'clay-in'}`}>
           <motion.span key={String(done)} initial={{ scale: 0.4, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={spring} className="text-xl">
-            {done ? <CircleCheck size={22} className="text-on-pastel" /> : q.icon}
+            {done ? <span className="font-black text-on-pastel">✓</span> : q.icon}
           </motion.span>
           <span className={`flex-1 text-sm font-bold leading-tight ${done ? 'text-on-pastel line-through decoration-2' : ''}`}>
             {q.title}

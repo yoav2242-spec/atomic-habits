@@ -33,27 +33,27 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
     <>
       <div className="mb-4 grid grid-cols-2 gap-2">
         <Card className="!p-4" style={{ background: 'color-mix(in srgb, var(--color-sage) 16%, var(--card))' }}>
-          <div className="text-[13px] font-extrabold text-muted">Building</div>
+          <div className="text-[14px] font-extrabold text-muted">Building</div>
           <div className="text-3xl font-black">{building.length}</div>
-          <div className="text-[13px] font-bold text-muted">good habit{building.length === 1 ? '' : 's'} · {pct(buildRate)} done (30 days)</div>
+          <div className="text-[14px] font-bold text-muted">good habit{building.length === 1 ? '' : 's'} · {pct(buildRate)} done (30 days)</div>
         </Card>
         <Card className="!p-4" style={{ background: 'color-mix(in srgb, var(--color-peach) 16%, var(--card))' }}>
-          <div className="text-[13px] font-extrabold text-muted">Breaking</div>
+          <div className="text-[14px] font-extrabold text-muted">Breaking</div>
           <div className="text-3xl font-black">{breaking.length}</div>
-          <div className="text-[13px] font-bold text-muted">bad habit{breaking.length === 1 ? '' : 's'} · {cleanDays} clean days now</div>
+          <div className="text-[14px] font-bold text-muted">bad habit{breaking.length === 1 ? '' : 's'} · {cleanDays} clean days now</div>
         </Card>
       </div>
 
       <Card className="mb-4">
-        <div className="text-[17px] font-black">Your habits' journey</div>
-        <p className="mb-3 text-[13px] font-semibold text-muted">Every habit grows from starting to automatic. Practice days move it along.</p>
+        <div className="text-[18px] font-black">Your habits' journey</div>
+        <p className="mb-3 text-[14px] font-semibold text-muted">Every habit grows from starting to automatic. Practice days move it along.</p>
         <div className="grid grid-cols-3 gap-2">
           {stages.map((s) => (
             <div key={s.key} className="rounded-2xl tray p-2.5 text-center">
               <div className="text-2xl">{s.icon}</div>
               <div className="text-xl font-black">{s.habits.length}</div>
-              <div className="text-[11px] font-extrabold text-muted">{s.label}</div>
-              <div className="text-[11px] font-semibold text-muted">{s.to === Infinity ? '66+ days' : `${s.from}–${s.to} days`}</div>
+              <div className="text-[12px] font-extrabold text-muted">{s.label}</div>
+              <div className="text-[12px] font-semibold text-muted">{s.to === Infinity ? '66+ days' : `${s.from}–${s.to} days`}</div>
             </div>
           ))}
         </div>
@@ -69,7 +69,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
           {best && (
             <Link to={`/habits/${best.habit.id}`} className="bouncy">
               <Card className="h-full !p-4">
-                <div className="text-[13px] font-extrabold text-muted">Most successful</div>
+                <div className="text-[14px] font-extrabold text-muted">Most successful</div>
                 <div className="mt-1 text-2xl">{best.habit.emoji}</div>
                 <div className="line-clamp-2 font-black leading-tight">{best.habit.name}</div>
                 <div className="text-xs font-bold text-sage-deep">{pct(best.rate30)} · {best.stats.current} in a row</div>
@@ -79,7 +79,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
           {weakest && (
             <Link to={`/habits/${weakest.habit.id}`} className="bouncy">
               <Card className="h-full !p-4">
-                <div className="text-[13px] font-extrabold text-muted">Needs some love</div>
+                <div className="text-[14px] font-extrabold text-muted">Needs some love</div>
                 <div className="mt-1 text-2xl">{weakest.habit.emoji}</div>
                 <div className="line-clamp-2 font-black leading-tight">{weakest.habit.name}</div>
                 <div className="text-xs font-bold text-[var(--flame)]">{pct(weakest.rate30)} · try the 2-minute version</div>
@@ -90,8 +90,8 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
       )}
 
       <Card className="mb-4">
-        <div className="text-[17px] font-black">You vs. the research</div>
-        <p className="mb-3 text-[13px] font-semibold text-muted">
+        <div className="text-[18px] font-black">You vs. the research</div>
+        <p className="mb-3 text-[14px] font-semibold text-muted">
           The app can't see other people's data, so here's how you compare with a well-known study of how people form new habits.
         </p>
         <div className="space-y-3 text-sm font-semibold">
@@ -100,11 +100,11 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
             <div className="h-3 overflow-hidden rounded-full tray">
               <div className="h-full rounded-full bg-sage transition-all duration-700" style={{ width: `${Math.min(100, (oldest / 66) * 100)}%` }} />
             </div>
-            <div className="mt-1 text-[13px] font-bold text-muted">
+            <div className="mt-1 text-[14px] font-bold text-muted">
               {oldest >= 66 ? `Your longest-practiced habit is past 66 days. You're ahead of the average!` : `Your longest-practiced habit: ${oldest} days. ${66 - oldest} to go to reach the average.`}
             </div>
           </div>
-          <p className="text-[13px] font-semibold text-muted">
+          <p className="text-[14px] font-semibold text-muted">
             In that study it took anywhere from 18 to 254 days, so don't worry if yours feels slow. Missing a single day didn't
             stop people from forming the habit. That's why the app only asks you to never miss twice.
           </p>
@@ -130,12 +130,12 @@ function HabitRow({ p, today }: { p: HabitProgress; today: string }) {
     <Link to={`/habits/${h.id}`} className="bouncy clay block rounded-[22px] p-4">
       <div className="mb-1 flex items-center justify-between gap-2">
         <span className="min-w-0 truncate font-extrabold">{h.emoji} {h.name}</span>
-        <span className="shrink-0 text-[13px] font-black text-muted tabular-nums">
+        <span className="shrink-0 text-[14px] font-black text-muted tabular-nums">
           {h.type === 'break' ? `${p.stats.current}d clean` : `${p.stats.current} in a row`} · {pct(p.rate30)}
           {t !== null && Math.abs(t) >= 0.05 && <span className={t > 0 ? 'text-sage-deep' : 'text-[var(--flame)]'}> {t > 0 ? '▲' : '▼'}</span>}
         </span>
       </div>
-      <div className="mb-2 flex items-center gap-2 text-[11px] font-bold text-muted">
+      <div className="mb-2 flex items-center gap-2 text-[12px] font-bold text-muted">
         <span>{stage.icon} {stage.label}</span>
         <div className="h-1.5 flex-1 overflow-hidden rounded-full tray">
           <div className="h-full rounded-full" style={{ width: `${stageProgress * 100}%`, background: h.color }} />
@@ -143,7 +143,7 @@ function HabitRow({ p, today }: { p: HabitProgress; today: string }) {
         <span>{toNext ? `${toNext} days to ${STAGES[STAGES.findIndex((s) => s.key === stage.key) + 1].label.toLowerCase()}` : `${days} days`}</span>
       </div>
       <Strip values={strip as (0 | 0.5 | 1 | null)[]} color={h.color} />
-      <div className="mt-1 flex justify-between text-[11px] font-bold text-muted"><span>4 weeks ago</span><span>today</span></div>
+      <div className="mt-1 flex justify-between text-[12px] font-bold text-muted"><span>4 weeks ago</span><span>today</span></div>
     </Link>
   )
 }

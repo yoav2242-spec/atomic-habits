@@ -91,6 +91,14 @@ export async function swapOrder(a: Habit, b: Habit) {
   await save('habits', { ...b, sort_order: a.sort_order })
 }
 
+/** Saves a new order for a list of habits (after dragging them around). Only changed ones are written. */
+export async function setOrder(list: Habit[]) {
+  const slots = list.map((h) => h.sort_order).sort((x, y) => x - y)
+  // Reuse the list's own sort numbers, so habits outside the list (e.g. paused) keep their places.
+  const unique = new Set(slots).size === slots.length ? slots : list.map((_, i) => i)
+  for (const [i, h] of list.entries()) if (h.sort_order !== unique[i]) await save('habits', { ...h, sort_order: unique[i] })
+}
+
 // --- Check-ins: one row per habit per day ---
 
 const checkinId = (h: Habit, date: string) => `${h.id}_${date}`

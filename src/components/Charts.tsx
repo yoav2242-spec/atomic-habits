@@ -27,7 +27,7 @@ export function BarChart({ values, labels, color = 'var(--color-sage)', highligh
       </svg>
       <div className="mt-1.5 flex">
         {labels.map((l, i) => (
-          <span key={i} className="flex-1 text-center text-[11px] font-bold text-muted">{l}</span>
+          <span key={i} className="flex-1 text-center text-[12px] font-bold text-muted">{l}</span>
         ))}
       </div>
     </div>

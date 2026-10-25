@@ -27,7 +27,7 @@ export function buttonClass(variant: Variant = 'primary', className = '') {
     ghost: 'bouncy text-muted',
     danger: 'btn-3d bg-rose text-on-pastel',
   }[variant]
-  return `inline-flex min-h-12 items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[15px] font-extrabold ${styles} ${className}`
+  return `inline-flex min-h-12 items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[16px] font-extrabold ${styles} ${className}`
 }
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
@@ -39,9 +39,9 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
     <header className="mb-6 flex items-end justify-between gap-3 pt-1">
       <div>
         <h1 className="text-[30px] font-black leading-[1.05] tracking-[-0.02em]">{title}</h1>
-        {subtitle && <p className="mt-2 text-[15px] font-semibold leading-snug text-muted">{subtitle}</p>}
+        {subtitle && <p className="mt-2 text-[16px] font-semibold leading-snug text-muted">{subtitle}</p>}
       </div>
-      {action}
+      {action && <div className="shrink-0 whitespace-nowrap">{action}</div>}
     </header>
   )
 }
@@ -49,12 +49,12 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
 export function Field({ label, hint, tip, children }: { label: string; hint?: string; tip?: TipKey; children: ReactNode }) {
   return (
     <div className="block">
-      <div className="mb-2 flex items-center gap-1.5 text-[15px] font-extrabold">
+      <div className="mb-2 flex items-center gap-1.5 text-[16px] font-extrabold">
         {label}
         {tip && <InfoTip tip={tip} />}
       </div>
       {children}
-      {hint && <span className="mt-1.5 block text-[13px] font-semibold leading-snug text-muted">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-[14px] font-semibold leading-snug text-muted">{hint}</span>}
     </div>
   )
 }
@@ -144,7 +144,7 @@ export function InfoTip({ tip, className = '' }: { tip: TipKey; className?: stri
         aria-label={`What is ${TIPS[tip].title}?`}
         className={`bouncy relative -m-2.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${className}`}
       >
-        <span className="tray inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-black text-muted">?</span>
+        <span className="tray inline-flex h-6 w-6 items-center justify-center rounded-full text-[13px] font-black text-muted">?</span>
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title={TIPS[tip].title}>
         <p className="mb-6 text-base font-semibold leading-relaxed">{TIPS[tip].body}</p>

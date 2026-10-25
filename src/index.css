@@ -92,6 +92,11 @@
   color-scheme: light;
 }
 
+/* A little larger than the browser's default everywhere: easier to read at arm's length. */
+html {
+  font-size: 106.25%;
+}
+
 body {
   @apply bg-bg font-sans text-ink antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -177,7 +182,7 @@ input[type='file'] {
 
 /* A small heading inside a screen: sentence case, quiet, readable. */
 .label {
-  @apply text-[15px] font-extrabold text-muted;
+  @apply text-[16px] font-extrabold text-muted;
 }
 
 @keyframes pop {
