@@ -34,6 +34,12 @@ export class AtomicDB extends Dexie {
     })
     // v3: rewards from quests, surprise boxes and weekly reviews.
     this.version(3).stores({ rewards: 'id, date' })
+    // v6: choose per habit whether it appears in the Google Habits calendar (not for amounts like water).
+    this.version(6).upgrade(async (tx) => {
+      await tx.table('habits').toCollection().modify((h) => {
+        h.calendar ??= !h.unit
+      })
+    })
     // v5: per-habit reminders and vibration.
     this.version(5).upgrade(async (tx) => {
       await tx.table('habits').toCollection().modify((h) => {

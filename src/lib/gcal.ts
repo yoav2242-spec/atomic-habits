@@ -98,7 +98,7 @@ const BYDAY = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
 const pad = (n: number) => String(n).padStart(2, '0')
 
 function wantsEvent(h: Habit) {
-  return !h.deleted && !h.archived && h.type === 'build' && !!h.cue_time
+  return !h.deleted && !h.archived && h.type === 'build' && !!h.cue_time && h.calendar !== false
 }
 
 function eventFor(h: Habit) {

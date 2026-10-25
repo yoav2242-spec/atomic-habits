@@ -1,7 +1,8 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { Button, buttonClass, Field, InfoTip, Segmented, Stepper, Toggle, useToast } from '../components/ui'
+import { TimePicker } from '../components/TimePicker'
+import { Button, buttonClass, Field, Segmented, Stepper, Toggle, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -9,7 +10,7 @@ import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
-import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
+import { clockAlarmUrl, isAndroid } from '../lib/alarm'
 import { syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
@@ -57,7 +58,6 @@ export default function HabitForm() {
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
   // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
-  const [addCalendar, setAddCalendar] = useState(true)
   const [addAlarm, setAddAlarm] = useState(true)
   const toast = useToast()
   const google = useGoogleStatus()
@@ -78,12 +78,7 @@ export default function HabitForm() {
   const save = async () => {
     const saved = { ...h, name: h.name.trim(), target_count: Math.max(1, h.target_count || 1), step: Math.max(1, h.step || 1) }
     const offerReminders = isLast && saved.type === 'build' && !!saved.cue_time
-    // With Google connected, the Habits calendar updates by itself; otherwise open a ready-made event.
-    const autoCalendar = offerReminders && !!google?.on
-    const calendar = offerReminders && addCalendar && !autoCalendar ? googleCalendarUrl(saved) : null
-    const alarm = offerReminders && addAlarm && isAndroid() ? clockAlarmUrl(saved) : null
-    // Open Calendar right away, while it still counts as part of the tap (otherwise phones block it).
-    if (calendar) window.open(calendar, '_blank', 'noopener')
+    const alarm = offerReminders && addAlarm && !isAmount(saved) && isAndroid() ? clockAlarmUrl(saved) : null
     await saveHabit(saved)
     if (!id) {
       await addPastProgress(saved, pastDays)
@@ -94,10 +89,10 @@ export default function HabitForm() {
       // Keep the Habits calendar in step (also when the habit lost its time or was unticked).
       const state = await syncGoogle().catch(() => 'needs-tap' as const)
       if (state === 'needs-tap') toast('Google needs you to sign in again', { label: 'Update calendar', onClick: () => { syncGoogle(true).then(() => toast('Habits calendar updated')).catch(() => {}) } })
-      else if (autoCalendar) toast('Added to your Habits calendar')
+      else if (offerReminders && saved.calendar) toast('Added to your Habits calendar')
     }
-    if (alarm && !calendar) location.href = alarm
-    else if (alarm) toast('One more tap for the Clock alarm', { label: 'Add alarm', onClick: () => { location.href = alarm } })
+    // The Clock app opens over Atomic; its back button comes straight back here.
+    if (alarm) location.href = alarm
   }
 
   const addIdentity = async () => {
@@ -170,32 +165,40 @@ export default function HabitForm() {
           </IdentityStep>,
           <>
             <Tip>Pick an exact time and place. A clear plan makes you much more likely to actually do it.</Tip>
-            <Field label="Which days?">
-              <Segmented value={h.schedule.kind} onChange={setSchedule} options={[{ value: 'daily', label: 'Every day' }, { value: 'weekdays', label: 'Some days' }, { value: 'weekly', label: 'X a week' }]} />
+            {isAmount(h) ? (
+              <p className="clay-in rounded-2xl p-3.5 text-sm font-bold">
+                {h.emoji} This is an every-day amount. You set how much, and in how many {h.step_label || 'drinks'}s, in "Make it easy".
+              </p>
+            ) : (
+              <>
+                <Field label="Which days?">
+                  <Segmented value={h.schedule.kind} onChange={setSchedule} options={[{ value: 'daily', label: 'Every day' }, { value: 'weekdays', label: 'Some days' }, { value: 'weekly', label: 'X a week' }]} />
+                </Field>
+                {h.schedule.kind === 'weekdays' && (
+                  <div className="flex gap-1.5">
+                    {MON_FIRST.map((d) => {
+                      const days = (h.schedule as { days: number[] }).days
+                      const on = days.includes(d)
+                      return (
+                        <button key={d} type="button" onClick={() => set({ schedule: { kind: 'weekdays', days: on ? days.filter((x) => x !== d) : [...days, d] } })}
+                          className={`min-h-11 flex-1 rounded-xl text-sm font-extrabold ${on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                          {WEEKDAY_SHORT[d].slice(0, 2)}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
+                {h.schedule.kind === 'weekly' && (
+                  <Field label="How many times a week?">
+                    <Stepper value={h.schedule.times} min={1} max={7} onChange={(times) => set({ schedule: { kind: 'weekly', times } })} />
+                  </Field>
+                )}
+              </>
+            )}
+            <Field label={isAmount(h) ? 'Remind me to start at (optional)' : 'What time?'}>
+              <TimePicker value={h.cue_time} onChange={(cue_time) => set({ cue_time })} />
             </Field>
-            {h.schedule.kind === 'weekdays' && (
-              <div className="flex gap-1.5">
-                {MON_FIRST.map((d) => {
-                  const days = (h.schedule as { days: number[] }).days
-                  const on = days.includes(d)
-                  return (
-                    <button key={d} type="button" onClick={() => set({ schedule: { kind: 'weekdays', days: on ? days.filter((x) => x !== d) : [...days, d] } })}
-                      className={`bouncy flex-1 rounded-xl py-2.5 text-sm font-extrabold ${on ? 'bg-sage text-on-pastel' : 'bg-soft text-muted'}`}>
-                      {WEEKDAY_SHORT[d].slice(0, 2)}
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-            {h.schedule.kind === 'weekly' && (
-              <Field label="How many times a week?">
-                <Stepper value={h.schedule.times} min={1} max={7} onChange={(times) => set({ schedule: { kind: 'weekly', times } })} />
-              </Field>
-            )}
-            <div className="grid grid-cols-2 gap-3">
-              <Field label="What time?"><input type="time" value={h.cue_time ?? ''} onChange={(e) => set({ cue_time: e.target.value || null })} /></Field>
-              <Field label="Where?"><input value={h.location} onChange={(e) => set({ location: e.target.value })} placeholder="e.g. bedroom" /></Field>
-            </div>
+            <Field label="Where?"><input value={h.location} onChange={(e) => set({ location: e.target.value })} placeholder="e.g. bedroom" /></Field>
             <ReminderSettings h={h} set={set} />
             <Field label="Right after I…" tip="stacking" hint="Link it to something you already do every day.">
               <input value={h.stack_after_text} disabled={!!h.stack_after_habit_id} onChange={(e) => set({ stack_after_text: e.target.value })} placeholder="e.g. pour my morning coffee" />
@@ -286,7 +289,7 @@ export default function HabitForm() {
       <h1 className="mb-5 text-[26px] font-black tracking-tight">{id && step === 0 ? 'Edit habit' : steps[step].title}</h1>
       <div key={step} className="animate-rise space-y-4">{pages[step]}</div>
       {isLast && h.type === 'build' && (
-        <AlsoAdd h={h} calendar={addCalendar} alarm={addAlarm} setCalendar={setAddCalendar} setAlarm={setAddAlarm} pickTime={() => setStep(2)} />
+        <AlsoAdd h={h} set={set} alarm={addAlarm} setAlarm={setAddAlarm} pickTime={() => setStep(2)} />
       )}
       <div className="mt-8 flex gap-2">
         {id && !isLast && <Button variant="secondary" className="flex-1" onClick={save} disabled={!h.name.trim()}>Save</Button>}
@@ -385,8 +388,11 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
   const setMode = (m: string) =>
     set(m === 'once' ? { target_count: 1, unit: '', step: 1, step_label: '' }
       : m === 'times' ? { target_count: Math.max(2, isAmount(h) ? 3 : h.target_count), unit: '', step: 1, step_label: '' }
-      : { target_count: 2000, unit: 'ml', step: 500, step_label: 'bottle' })
+      : { target_count: 2000, unit: 'ml', step: 500, step_label: 'bottle', calendar: false, schedule: { kind: 'daily' } })
   const presets = CONTAINERS[h.unit] ?? []
+  // Keep the number of bottles the same when the bottle size changes.
+  const servings = Math.max(1, Math.round(h.target_count / Math.max(1, h.step)))
+  const setContainer = (size: number, label: string) => set({ step: size, step_label: label, target_count: servings * Math.max(1, size) })
   return (
     <Field label="What counts as done each day?">
       <div className="space-y-3">
@@ -395,9 +401,30 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
         {mode === 'amount' && (
           <div className="space-y-3 rounded-2xl bg-soft p-3">
             <div>
-              <div className="mb-1 text-xs font-bold text-muted">Daily goal</div>
+              <div className="mb-1 text-xs font-bold text-muted">What do you drink from?</div>
+              {presets.length > 0 && (
+                <div className="mb-2 flex flex-wrap gap-1.5">
+                  {presets.map((c) => (
+                    <button key={`${c.label}${c.size}`} type="button" onClick={() => setContainer(c.size, c.label)}
+                      className={`min-h-10 rounded-full px-3 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                      {c.label} · {c.size} {h.unit}
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex gap-2">
-                <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-1/2" />
+                <input type="number" inputMode="decimal" min={1} value={h.step || ''} onChange={(e) => setContainer(Math.max(0, Number(e.target.value)), h.step_label)} className="!w-1/2" aria-label="Size of one" />
+                <input value={h.step_label} onChange={(e) => set({ step_label: e.target.value })} placeholder="name, e.g. bottle" className="!w-1/2" />
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-extrabold">How many {h.step_label || 'times'}s a day?</span>
+              <Stepper value={servings} min={1} max={40} onChange={(n) => set({ target_count: n * Math.max(1, h.step) })} />
+            </div>
+            <div>
+              <div className="mb-1 text-xs font-bold text-muted">Or type the daily total</div>
+              <div className="flex gap-2">
+                <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-1/2" aria-label="Daily total" />
                 <select value={UNITS.includes(h.unit) ? h.unit : 'other'} onChange={(e) => set({ unit: e.target.value === 'other' ? 'times' : e.target.value })} className="!w-1/2">
                   {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
                   <option value="other">other…</option>
@@ -405,23 +432,6 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
               </div>
               {!UNITS.includes(h.unit) && (
                 <input className="mt-2" value={h.unit} onChange={(e) => set({ unit: e.target.value || 'times' })} placeholder="Your unit, e.g. push-ups" />
-              )}
-            </div>
-            <div>
-              <div className="mb-1 text-xs font-bold text-muted">One tap of + adds</div>
-              <div className="flex gap-2">
-                <input type="number" inputMode="decimal" min={1} value={h.step || ''} onChange={(e) => set({ step: Math.max(0, Number(e.target.value)) })} className="!w-1/2" />
-                <input value={h.step_label} onChange={(e) => set({ step_label: e.target.value })} placeholder="name, e.g. bottle" className="!w-1/2" />
-              </div>
-              {presets.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-1.5">
-                  {presets.map((c) => (
-                    <button key={`${c.label}${c.size}`} type="button" onClick={() => set({ step: c.size, step_label: c.label })}
-                      className={`bouncy rounded-full px-3 py-1 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'bg-sage text-on-pastel' : 'bg-card text-muted'}`}>
-                      {c.label} {c.size} {h.unit}
-                    </button>
-                  ))}
-                </div>
               )}
             </div>
             {h.target_count > 0 && h.step > 0 && <p className="text-sm font-bold">= {goalBreakdown(h)} a day</p>}
@@ -434,7 +444,8 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
 
 /** "Remind me" with this habit's own vibration, plus a Clock-app alarm for a custom sound. */
 function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
-  if (!h.cue_time) return <p className="clay-in rounded-2xl p-3.5 text-xs font-semibold text-muted">Pick a time above to get a reminder.</p>
+  const google = useGoogleStatus()
+  if (!h.cue_time) return null
   const alarm = clockAlarmUrl(h)
   return (
     <div className="clay-in space-y-3 rounded-2xl p-3.5">
@@ -460,55 +471,52 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
         </div>
       )}
       </>)}
-      {!remindersReady && (
-        <p className="text-xs font-semibold text-muted">Get reminded at {h.cue_time}: add a Clock alarm (pick any sound) or a repeating Google Calendar event.</p>
+      {google?.on && h.type === 'build' && (
+        <div className="flex items-center gap-3">
+          <span className="flex-1">
+            <span className="block text-sm font-extrabold">Show in my Habits calendar</span>
+            <span className="block text-xs font-semibold text-muted">Google Calendar reminds you at {h.cue_time}</span>
+          </span>
+          <Toggle label="Show in my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
+        </div>
       )}
-      <div className="flex gap-2">
-        {isAndroid() && alarm && (
-          <a href={alarm} className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 text-sm')}>⏰ Clock alarm</a>
-        )}
-        <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 text-sm')}>📅 Google Calendar</a>
-      </div>
+      {isAndroid() && alarm && (
+        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-1.5 !px-3 text-sm')}>⏰ Add a Clock alarm (pick its sound)</a>
+      )}
     </div>
   )
 }
 
 /** Last step: tick where else the habit should go, and it's added there when you press Create. */
-function AlsoAdd({ h, calendar, alarm, setCalendar, setAlarm, pickTime }: {
-  h: Habit; calendar: boolean; alarm: boolean; setCalendar: (v: boolean) => void; setAlarm: (v: boolean) => void; pickTime: () => void
+function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
+  h: Habit; set: (p: Partial<Habit>) => void; alarm: boolean; setAlarm: (v: boolean) => void; pickTime: () => void
 }) {
   const google = useGoogleStatus()
   if (!h.cue_time) {
     return (
       <div className="clay-in mt-6 flex items-center gap-3 rounded-2xl p-3.5">
-        <span className="flex-1 text-sm font-bold">Want it in Google Calendar or your Clock app too? Pick a time first.</span>
+        <span className="flex-1 text-sm font-bold">Want a reminder? Pick a time first.</span>
         <Button variant="secondary" className="!min-h-10 !px-3 !py-1.5 text-xs" onClick={pickTime}>Pick a time</Button>
       </div>
     )
   }
-  const choices = [
-    { key: 'calendar', label: '📅 Google Calendar', on: calendar, set: setCalendar, show: !google?.on },
-    { key: 'alarm', label: '⏰ Clock alarm', on: alarm, set: setAlarm, show: isAndroid() },
-  ].filter((c) => c.show)
   return (
     <div className="clay-in mt-6 space-y-3 rounded-2xl p-3.5">
-      <div className="flex items-center gap-1.5 text-sm font-extrabold">
-        Also add it at {h.cue_time} to:
-        <InfoTip tip="calendar_on_time" />
-      </div>
-      {google?.on && <p className="text-sm font-bold">📅 It goes into your Habits calendar automatically, reminding you on time.</p>}
-      <div className="flex gap-2">
-        {choices.map((c) => (
-          <button key={c.key} type="button" onClick={() => c.set(!c.on)} aria-pressed={c.on}
-            className={`flex min-h-12 flex-1 items-center justify-center gap-1.5 rounded-2xl px-2 text-sm font-extrabold ${c.on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
-            {c.on ? '✓ ' : ''}{c.label}
-          </button>
-        ))}
-      </div>
-      <p className="text-xs font-semibold text-muted">
-        {calendar && !google?.on && 'Google Calendar opens with the event ready: tap Save. '}
-        {alarm && isAndroid() && 'Your Clock app opens next: pick a sound and save.'}
-      </p>
+      <div className="text-sm font-extrabold">Reminders at {h.cue_time}</div>
+      {google?.on ? (
+        <div className="flex items-center gap-3">
+          <span className="flex-1 text-sm font-bold">📅 Show in my Habits calendar</span>
+          <Toggle label="Show in my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
+        </div>
+      ) : (
+        <p className="text-xs font-semibold text-muted">Tip: connect Google Calendar once in Settings, and your habits appear in a "Habits" calendar by themselves.</p>
+      )}
+      {isAndroid() && !isAmount(h) && (
+        <div className="flex items-center gap-3">
+          <span className="flex-1 text-sm font-bold">⏰ Clock alarm (opens your Clock app)</span>
+          <Toggle label="Clock alarm" on={alarm} onChange={setAlarm} />
+        </div>
+      )}
     </div>
   )
 }

@@ -47,6 +47,8 @@ export interface Habit extends Synced {
   contract: string
   // Reminders: a notification at cue_time, with this habit's own vibration.
   remind: boolean
+  /** Shown in the Google "Habits" calendar (when connected). */
+  calendar: boolean
   vibrate: VibrationStyle
   // Goldilocks rule: step the habit up (or down) as it gets easy
   level: number

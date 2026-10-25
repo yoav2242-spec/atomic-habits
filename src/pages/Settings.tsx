@@ -2,15 +2,15 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { AlarmClock, Bell, CalendarPlus, BellOff, ChevronRight, Download, HardDriveDownload, Palette, Sparkles, Trash2, Upload, User, Vibrate } from 'lucide-react'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, buttonClass, Card, InfoTip, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
-import { clockAlarmUrl, googleCalendarUrl, isAndroid } from '../lib/alarm'
+import { Button, buttonClass, Card, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
+import { clockAlarmUrl, isAndroid } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
 import { isInstalled, useInstallPrompt } from '../lib/install'
 import { setPrefs, usePrefs } from '../lib/prefs'
 import { disableNotifications, enableNotifications, notificationsOn, notificationsSupported, remindersReady } from '../lib/reminders'
-import { exportBackup, importBackup } from '../lib/repo'
+import { exportBackup, importBackup, saveHabit } from '../lib/repo'
 import { THEMES } from '../lib/rewards'
 import { useGoogleStatus } from '../lib/gcal'
 import { GoogleCalendarCard } from '../components/GoogleCalendarCard'
@@ -181,7 +181,12 @@ export default function Settings() {
                   </div>
                   <div className="flex gap-2">
                     {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><AlarmClock size={15} /> Alarm</a>}
-                    {!google?.on && <a href={googleCalendarUrl(h)!} target="_blank" rel="noopener" className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><CalendarPlus size={15} /> Google Calendar</a>}
+                    {google?.on && (
+                      <button onClick={() => saveHabit({ ...h, calendar: !h.calendar })} aria-pressed={h.calendar}
+                        className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-extrabold ${h.calendar ? 'puffy bg-sky/80 text-on-pastel' : 'clay-sm text-muted'}`}>
+                        <CalendarPlus size={15} /> {h.calendar ? 'In calendar' : 'Not in calendar'}
+                      </button>
+                    )}
                   </div>
                 </li>
               ))}
@@ -189,7 +194,7 @@ export default function Settings() {
           )}
           <p className="text-xs font-semibold text-muted">
             {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
-            {google?.on ? 'Your habits are in the Habits calendar automatically.' : <>"Google Calendar" opens a repeating event at the habit's time: tap Save, and Calendar notifies you. <InfoTip tip="calendar_on_time" className="align-middle" /></>}
+            {google?.on ? 'Tap "In calendar" to show or hide a habit in your Habits calendar.' : 'Connect Google Calendar above to add your habits to a "Habits" calendar by themselves.'}
           </p>
         </Row>
       </Section>

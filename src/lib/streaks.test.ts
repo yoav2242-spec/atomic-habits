@@ -10,7 +10,7 @@ function habit(schedule: Schedule = { kind: 'daily' }, extra: Partial<Habit> = {
     id: 'h', updated_at: '', deleted: false, type: 'build', name: 'Read', emoji: '📖', color: '#f59e0b',
     identity_id: null, schedule, target_count: 1, unit: '', step: 1, step_label: '', cue_time: null, location: '', stack_after_habit_id: null,
     stack_after_text: '', cue_trigger: '', hide_plan: '', why: '', temptation_bundle: '', two_min_version: '', friction_plan: '',
-    contract: '', remind: false, vibrate: 'gentle', level: 1, level_history: [], levelup_snooze: null, archived: false, sort_order: 0,
+    contract: '', remind: false, calendar: true, vibrate: 'gentle', level: 1, level_history: [], levelup_snooze: null, archived: false, sort_order: 0,
     created_at: '2026-10-01T08:00:00', ...extra,
   }
 }
