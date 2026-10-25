@@ -6,6 +6,8 @@ import { VitePWA } from 'vite-plugin-pwa'
 export default defineConfig({
   // Relative paths so the app works from any web address (e.g. a GitHub Pages folder).
   base: './',
+  // When this version was built, shown in Settings so you can tell which version a phone runs.
+  define: { __APP_BUILT__: JSON.stringify(new Date().toISOString()) },
   plugins: [
     react(),
     tailwindcss(),
@@ -14,7 +16,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
-      injectRegister: 'auto',
+      injectRegister: false, // registered in main.tsx, which also checks for updates
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon.svg'],
       manifest: {
         name: 'Atomic — Habit Tracker',

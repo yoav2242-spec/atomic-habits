@@ -11,7 +11,7 @@ import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, sav
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount, UNITS } from '../lib/amounts'
 import { clockAlarmUrl, isAndroid } from '../lib/alarm'
-import { syncGoogle, useGoogleStatus } from '../lib/gcal'
+import { connectGoogle, googleReady, syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
 
@@ -58,7 +58,7 @@ export default function HabitForm() {
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
   // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
-  const [addAlarm, setAddAlarm] = useState(true)
+  const [addAlarm, setAddAlarm] = useState(false)
   const toast = useToast()
   const google = useGoogleStatus()
 
@@ -444,7 +444,6 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
 
 /** "Remind me" with this habit's own vibration, plus a Clock-app alarm for a custom sound. */
 function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
-  const google = useGoogleStatus()
   if (!h.cue_time) return null
   const alarm = clockAlarmUrl(h)
   return (
@@ -471,15 +470,7 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
         </div>
       )}
       </>)}
-      {google?.on && h.type === 'build' && (
-        <div className="flex items-center gap-3">
-          <span className="flex-1">
-            <span className="block text-sm font-extrabold">Show in my Habits calendar</span>
-            <span className="block text-xs font-semibold text-muted">Google Calendar reminds you at {h.cue_time}</span>
-          </span>
-          <Toggle label="Show in my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
-        </div>
-      )}
+      {h.type === 'build' && <CalendarChoice h={h} set={set} />}
       {isAndroid() && alarm && (
         <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-1.5 !px-3 text-sm')}>⏰ Add a Clock alarm (pick its sound)</a>
       )}
@@ -491,7 +482,6 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
 function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
   h: Habit; set: (p: Partial<Habit>) => void; alarm: boolean; setAlarm: (v: boolean) => void; pickTime: () => void
 }) {
-  const google = useGoogleStatus()
   if (!h.cue_time) {
     return (
       <div className="clay-in mt-6 flex items-center gap-3 rounded-2xl p-3.5">
@@ -503,19 +493,50 @@ function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
   return (
     <div className="clay-in mt-6 space-y-3 rounded-2xl p-3.5">
       <div className="text-sm font-extrabold">Reminders at {h.cue_time}</div>
-      {google?.on ? (
-        <div className="flex items-center gap-3">
-          <span className="flex-1 text-sm font-bold">📅 Show in my Habits calendar</span>
-          <Toggle label="Show in my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
-        </div>
-      ) : (
-        <p className="text-xs font-semibold text-muted">Tip: connect Google Calendar once in Settings, and your habits appear in a "Habits" calendar by themselves.</p>
-      )}
+      <CalendarChoice h={h} set={set} />
       {isAndroid() && !isAmount(h) && (
         <div className="flex items-center gap-3">
           <span className="flex-1 text-sm font-bold">⏰ Clock alarm (opens your Clock app)</span>
           <Toggle label="Clock alarm" on={alarm} onChange={setAlarm} />
         </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * "Add to my Habits calendar": off unless switched on. If Google Calendar isn't connected yet,
+ * switching it on offers to connect right here.
+ */
+function CalendarChoice({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
+  const google = useGoogleStatus()
+  const toast = useToast()
+  const [connecting, setConnecting] = useState(false)
+  if (!googleReady) return null
+  const connect = async () => {
+    setConnecting(true)
+    try {
+      await connectGoogle()
+      toast('Google Calendar connected')
+    } catch (e) {
+      toast(e instanceof Error ? e.message : "Couldn't connect to Google")
+    } finally {
+      setConnecting(false)
+    }
+  }
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-3">
+        <span className="flex-1">
+          <span className="block text-sm font-extrabold">📅 Add to my Habits calendar</span>
+          <span className="block text-xs font-semibold text-muted">{h.calendar ? `Google Calendar will remind you at ${h.cue_time}` : 'Off: this habit stays out of your calendar'}</span>
+        </span>
+        <Toggle label="Add to my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
+      </div>
+      {h.calendar && google && !google.on && (
+        <Button variant="secondary" className="w-full !min-h-11 text-sm" disabled={connecting} onClick={connect}>
+          {connecting ? 'Connecting…' : 'Connect Google Calendar first'}
+        </Button>
       )}
     </div>
   )
