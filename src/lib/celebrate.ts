@@ -1,24 +1,21 @@
 import confetti from 'canvas-confetti'
 import { buzz, confettiAllowed } from './prefs'
 
-const COLORS = ['#7fb69b', '#7eaed4', '#a497d6', '#ee9f80', '#e3bd5f', '#e091a8']
+// Calm, grown-up confetti: few pieces, the app's own greens and blues, and gone quickly.
+const COLORS = ['#8cc4a6', '#5c9479', '#8fb9de', '#c3cbc4']
 
-/** A small burst of confetti from an element (the check button), plus a short buzz. */
+/** A small puff from an element (the check button), plus a short buzz. */
 export function burst(el?: Element | null) {
-  buzz(15)
+  buzz(12)
   if (!confettiAllowed()) return
   const r = el?.getBoundingClientRect()
   const origin = r ? { x: (r.left + r.width / 2) / innerWidth, y: (r.top + r.height / 2) / innerHeight } : { x: 0.5, y: 0.6 }
-  confetti({ particleCount: 36, spread: 70, startVelocity: 26, scalar: 0.8, ticks: 110, origin, colors: COLORS, disableForReducedMotion: true })
+  confetti({ particleCount: 12, spread: 50, startVelocity: 16, scalar: 0.6, ticks: 60, gravity: 1.2, origin, colors: COLORS, shapes: ['circle'], disableForReducedMotion: true })
 }
 
-/** The big one: day complete, new badge, level up. */
+/** For real milestones: a day complete, a new streak record, a new level. */
 export function bigCelebration() {
-  buzz([20, 60, 30])
+  buzz([18, 50, 24])
   if (!confettiAllowed()) return
-  const fire = (x: number, angle: number) =>
-    confetti({ particleCount: 70, angle, spread: 65, startVelocity: 48, origin: { x, y: 0.75 }, colors: COLORS, disableForReducedMotion: true })
-  fire(0, 60)
-  fire(1, 120)
-  setTimeout(() => confetti({ particleCount: 90, spread: 110, startVelocity: 35, origin: { x: 0.5, y: 0.35 }, colors: COLORS, disableForReducedMotion: true }), 250)
+  confetti({ particleCount: 30, spread: 75, startVelocity: 30, scalar: 0.75, ticks: 120, origin: { x: 0.5, y: 0.3 }, colors: COLORS, shapes: ['circle'], disableForReducedMotion: true })
 }

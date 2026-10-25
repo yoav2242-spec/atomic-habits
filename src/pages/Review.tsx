@@ -76,7 +76,7 @@ export default function Review() {
       </Card>
 
       <Card className="mb-4 space-y-3 text-sm font-semibold">
-        <div className="text-[18px] font-black">🎉 Wins</div>
+        <div className="text-[18px] font-black">Wins</div>
         {wins.length ? <p>You did these every time this week: <b>{wins.map((p) => `${p.habit.emoji} ${p.habit.name}`).join(', ')}</b></p> : <p className="text-muted">No perfect habits this week, but every check-in still counted.</p>}
         {best && <p>⭐ Best habit: <b>{best.habit.emoji} {best.habit.name}</b> ({Math.round((weekRate(best) ?? 0) * 100)}%)</p>}
         {struggling && (weekRate(struggling) ?? 0) < 0.7 && (

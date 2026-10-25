@@ -37,7 +37,7 @@ export function useQuests(progress: Progress | undefined): QuestStatus | null {
       saveReward({ id: `quest_${date}_${q.id}`, date, kind: 'quest', points: q.points, item: q.id }).then((isNew) => {
         if (!isNew) return
         burst()
-        toast(`${q.icon} Quest complete! +${q.points}`)
+        toast(`Quest done · +${q.points} points`)
       })
     }
   }) // eslint-disable-line react-hooks/exhaustive-deps
@@ -51,15 +51,16 @@ export function QuestList({ status }: { status: QuestStatus }) {
     <ul className="space-y-2.5">
       {status.list.map(({ q, done }) => (
         <motion.li layout transition={spring} key={q.id}
-          className={`flex min-h-14 items-center gap-3 rounded-2xl px-3.5 py-3 ${done ? 'puffy bg-sage/70' : q.id === 'comeback' ? 'puffy bg-butter/60' : 'clay-in'}`}>
-          <motion.span key={String(done)} initial={{ scale: 0.4, rotate: -30 }} animate={{ scale: 1, rotate: 0 }} transition={spring} className="text-xl">
-            {done ? <span className="font-black text-on-pastel">✓</span> : q.icon}
+          className={`flex min-h-14 items-center gap-3 rounded-2xl px-3.5 py-3 ${done ? 'bg-[color-mix(in_srgb,var(--color-sage)_45%,var(--card))]' : 'tray'}`}>
+          <motion.span key={String(done)} initial={{ scale: 0.4 }} animate={{ scale: 1 }} transition={spring}
+            className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[15px] font-black ${done ? 'puffy bg-sage text-on-pastel' : 'border-2 border-muted/40'}`}>
+            {done ? '✓' : ''}
           </motion.span>
-          <span className={`flex-1 text-sm font-bold leading-tight ${done ? 'text-on-pastel line-through decoration-2' : ''}`}>
+          <span className={`flex-1 text-[16px] font-bold leading-tight ${done ? 'text-muted' : ''}`}>
             {q.title}
             {q.id === 'weakest' && status.weakest && <span className="block text-xs font-semibold opacity-70">({status.weakest})</span>}
           </span>
-          <span className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-black ${done ? 'bg-card/70 text-on-pastel' : 'clay-sm text-muted'}`}>+{q.points}</span>
+          <span className={`shrink-0 text-[16px] font-black tabular-nums ${done ? 'text-sage-deep' : 'text-muted'}`}>+{q.points}</span>
         </motion.li>
       ))}
     </ul>

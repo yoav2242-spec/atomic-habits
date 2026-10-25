@@ -20,7 +20,7 @@ export default function Rewards() {
   return (
     <div>
       <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
-      <h1 className="text-3xl font-black tracking-tight">🎁 Rewards</h1>
+      <h1 className="text-[30px] font-black tracking-[-0.02em]">Rewards</h1>
       <p className="mb-5 font-semibold text-muted">Level up to unlock new colors. Open surprise boxes to collect stickers.</p>
 
       <Card className="mb-4">

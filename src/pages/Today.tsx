@@ -88,10 +88,10 @@ export default function Today() {
       }
     }
     if (records && records.perfectRun.current >= 2 && records.perfectRun.current > before.perfectBest) {
-      return setCelebration({ kind: 'record', title: `${records.perfectRun.current} perfect days in a row!`, body: 'A new personal record. Every single habit, day after day.' })
+      return setCelebration({ kind: 'record', title: `${records.perfectRun.current} perfect days in a row!`, body: 'Every single habit, day after day.' })
     }
     if (records && records.mostInADay.value >= 3 && records.mostInADay.value > before.mostInADay) {
-      return setCelebration({ kind: 'record', title: `${records.mostInADay.value} habits in one day!`, body: 'Your most ever in a single day. A new personal record!' })
+      return setCelebration({ kind: 'record', title: `${records.mostInADay.value} habits in one day!`, body: 'Your most ever in a single day.' })
     }
     if (offset === 0 && build.length > 0 && doneCount === build.length && before.done < build.length) {
       setCelebration({ kind: 'day', points: progress.todayPoints, streakHabits: progress.habits.filter((p) => p.stats.current > 0 && p.habit.type === 'build').length })
@@ -119,7 +119,7 @@ export default function Today() {
   const extras = [
     { key: 'garden', label: 'Garden', color: 'var(--color-sage)', badge: '' },
     { key: 'quests', label: 'Quests', color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
-    { key: 'box', label: 'Surprise box', color: 'var(--color-rose)', badge: boxReady ? '!' : '' },
+    { key: 'box', label: 'Daily bonus', color: 'var(--color-sage)', badge: boxReady ? '!' : '' },
     { key: 'tip', label: 'Tip of the day', color: 'var(--color-sky)', badge: '' },
   ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
@@ -127,7 +127,7 @@ export default function Today() {
   const left = build.filter(({ habit }) => !(isDone(habit, checkinOn(habit)) || weekGoalMet(habit)))
   const nextUp = left.find(({ habit }) => habit.cue_time)?.habit ?? left[0]?.habit
   const nextLine = build.length === 0 ? 'Nothing scheduled today. Enjoy the rest.'
-    : !nextUp ? (boxReady ? 'Everything done. Your surprise box is ready.' : 'Everything done. See you tomorrow.')
+    : !nextUp ? (boxReady ? 'Everything done. Your daily bonus is ready.' : 'Everything done. See you tomorrow.')
     : `Next: ${nextUp.name}${nextUp.cue_time ? ` at ${nextUp.cue_time}` : ''}${left.length > 1 ? ` · then ${left.length - 1} more` : ''}`
   const reviewDue = weekday(today) === 0 && !progress.rewards.some((r) => r.id === `review_${weekStart(today)}`)
   const lastMonth = addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)
@@ -231,7 +231,6 @@ export default function Today() {
                 const hot = x.key === 'box' && boxReady
                 return (
                   <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
-                    animate={hot ? { rotate: [0, -4, 4, -2, 0] } : { rotate: 0 }}
                     style={hot ? { background: x.color } : undefined}
                     className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full px-5 py-2 text-[17px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
                                         {x.label}
@@ -288,10 +287,10 @@ export default function Today() {
         <Garden habits={progress.habits.filter((p) => !p.habit.archived)} today={today} />
       </Modal>
       <Modal open={sheet === 'quests'} onClose={() => setSheet(null)} title="Daily quests">
-        <p className="mb-4 text-sm font-semibold text-muted">Bonus points for small challenges. New ones every day.</p>
+        <p className="mb-4 text-[16px] font-semibold text-muted">Extra points for small challenges. New ones every day.</p>
         {quests && <QuestList status={quests} />}
       </Modal>
-      <Modal open={sheet === 'box'} onClose={() => setSheet(null)} title="Surprise box">
+      <Modal open={sheet === 'box'} onClose={() => setSheet(null)} title="Daily bonus">
         <SurpriseBox progress={progress} ready={build.length > 0 && doneCount === build.length} />
       </Modal>
       <Modal open={sheet === 'tip'} onClose={() => setSheet(null)} title="Tip of the day">
