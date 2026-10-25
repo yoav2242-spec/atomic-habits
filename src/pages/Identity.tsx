@@ -46,7 +46,7 @@ export default function Identity() {
                 </div>
                 <div className="shrink-0 text-right">
                   <div className="text-3xl font-black" style={{ color }}>{total}</div>
-                  <div className="text-xs font-bold text-muted">votes</div>
+                  <div className="text-[13px] font-bold text-muted">votes</div>
                 </div>
               </div>
               <div className="mt-3 flex items-center gap-2">
@@ -73,7 +73,7 @@ export default function Identity() {
       <Link to="/scorecard" className="bouncy mt-8 block">
         <Card className="flex items-center justify-between">
           <div>
-            <div className="font-black">📋 Habits Scorecard</div>
+            <div className="text-[17px] font-black">📋 Habits Scorecard</div>
             <div className="text-sm font-semibold text-muted">List what you do each day, and track it with your progress so far.</div>
           </div>
           <span className="text-2xl text-muted">›</span>

@@ -47,8 +47,8 @@ export function LevelUpModal({ habit, direction, suggested, onClose }: { habit: 
             ? `You've been steady with “${habit.name}”. Make it just a little harder, about 10–20% more. Not too easy, not too hard.`
             : "Too hard right now? That's fine. Making it easier keeps you showing up, and showing up is what counts."}
         </p>
-        <div className="rounded-2xl bg-soft p-3 text-sm font-bold">
-          Level {habit.level ?? 1} → <span className={harder ? 'text-lavender' : 'text-sage-deep'}>Level {Math.max(1, (habit.level ?? 1) + direction)}</span>
+        <div className="rounded-2xl tray p-3 text-sm font-bold">
+          Level {habit.level ?? 1} → <span className={harder ? 'text-level' : 'text-sage-deep'}>Level {Math.max(1, (habit.level ?? 1) + direction)}</span>
         </div>
         <Field label="New version of the habit" hint={harder ? 'e.g. more pages, more minutes, a little further.' : undefined}>
           <input value={name} onChange={(e) => setName(e.target.value)} />

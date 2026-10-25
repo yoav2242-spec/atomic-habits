@@ -1,3 +1,4 @@
+import { ChevronLeft, Pause, Pencil, Play, TrendingDown, TrendingUp } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DayEditor } from '../components/DayEditor'
@@ -44,58 +45,59 @@ export default function HabitDetail() {
   }
 
   const plan = [
-    h.type === 'build' && (h.cue_time || h.location) && `🕒 I will ${h.name.toLowerCase()}${h.cue_time ? ` at ${h.cue_time}` : ''}${h.location ? ` in ${h.location}` : ''}.`,
-    h.type === 'build' && anchor && `🔗 After I ${anchor}, I will ${h.name.toLowerCase()}.`,
-    h.cue_trigger && `⚡ Trigger: ${h.cue_trigger}`,
-    h.hide_plan && `🙈 Hide it: ${h.hide_plan}`,
-    h.why && (h.type === 'break' ? `💸 What it costs me: ${h.why}` : `💭 Why: ${h.why}`),
-    h.type === 'build' && h.temptation_bundle && `🎁 Treat: ${h.temptation_bundle}`,
-    h.type === 'build' && h.two_min_version && `⏱️ 2-minute version: ${h.two_min_version}`,
-    h.friction_plan && `🧱 Make it hard: ${h.friction_plan}`,
-    h.contract && `🤝 Contract: ${h.contract}`,
+    h.type === 'build' && (h.cue_time || h.location) && `I will ${h.name.toLowerCase()}${h.cue_time ? ` at ${h.cue_time}` : ''}${h.location ? ` in ${h.location}` : ''}.`,
+    h.type === 'build' && anchor && `After I ${anchor}, I will ${h.name.toLowerCase()}.`,
+    h.cue_trigger && `Trigger: ${h.cue_trigger}`,
+    h.hide_plan && `Hide it: ${h.hide_plan}`,
+    h.why && (h.type === 'break' ? `What it costs me: ${h.why}` : `Why: ${h.why}`),
+    h.type === 'build' && h.temptation_bundle && `Treat: ${h.temptation_bundle}`,
+    h.type === 'build' && h.two_min_version && `2-minute version: ${h.two_min_version}`,
+    h.friction_plan && `Make it hard: ${h.friction_plan}`,
+    h.contract && `Contract: ${h.contract}`,
   ].filter(Boolean) as string[]
 
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="text-sm font-bold text-muted">‹ Back</button>
-        <Link to={`/habits/${h.id}/edit`} className={buttonClass('secondary', '!px-4 !py-2 text-sm')}>✏️ Edit habit</Link>
+        <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center gap-0.5 pr-3 text-[15px] font-bold text-muted"><ChevronLeft size={20} /> Back</button>
+        <Link to={`/habits/${h.id}/edit`} className={buttonClass('secondary', '!min-h-11 !px-4 !py-2 text-sm')}><Pencil size={16} /> Edit</Link>
       </div>
 
-      <div className="mb-5 flex items-center gap-3">
-        <span className="flex h-16 w-16 items-center justify-center rounded-3xl text-4xl" style={{ background: `${h.color}33` }}>{h.emoji}</span>
+      <div className="mb-5 flex items-center gap-3.5">
+        <span className="puffy flex h-16 w-16 shrink-0 items-center justify-center rounded-[22px] text-4xl" style={{ background: `color-mix(in srgb, ${h.color} 55%, var(--card))` }}>{h.emoji}</span>
         <div className="min-w-0">
-          <h1 className="text-2xl font-black leading-tight tracking-tight">{h.name}</h1>
-          <p className="text-sm font-bold text-muted">{scheduleLabel(h)}{identity && ` · I am ${identity}`}{h.archived && ' · paused'}</p>
+          <h1 className="text-[26px] font-black leading-[1.1] tracking-[-0.02em]">{h.name}</h1>
+          <p className="mt-1 text-[15px] font-bold text-muted">{scheduleLabel(h)}{identity && ` · I am ${identity}`}{h.archived && ' · paused'}</p>
         </div>
       </div>
 
-      <div className="mb-4 grid grid-cols-4 gap-2">
-        {[
-          [h.type === 'break' ? '🌿' : '🔥', h.type === 'break' ? 'Clean' : 'Streak', streakLabel(s).replace(' days', 'd').replace(' day', 'd').replace(' weeks', 'w').replace(' week', 'w')],
-          ['🏆', 'Best', String(s.best)],
-          ['🧊', 'Freezes', String(s.freezes)],
-          ['⭐', 'Points', String(p.points)],
-        ].map(([icon, k, v]) => (
-          <Card key={k} className="!p-2.5 text-center">
-            <div className="text-lg">{icon}</div>
-            <div className="text-lg font-black">{v}</div>
-            <div className="text-[11px] font-bold text-muted">{k}</div>
-          </Card>
-        ))}
-      </div>
+      <Card className="mb-4 !p-0">
+        <dl className="grid grid-cols-4 py-4 text-center">
+          {[
+            [h.type === 'break' ? 'Clean' : 'Streak', streakLabel(s).replace(' days', 'd').replace(' day', 'd').replace(' weeks', 'w').replace(' week', 'w')],
+            ['Best', String(s.best)],
+            ['Freezes', String(s.freezes)],
+            ['Points', p.points.toLocaleString()],
+          ].map(([k, v], i) => (
+            <div key={k} className={i ? 'border-l-2 border-[var(--line)]' : ''}>
+              <dd className={`text-[22px] font-black leading-tight tabular-nums ${i === 0 && s.current > 0 ? 'text-[var(--flame)]' : ''}`}>{v}</dd>
+              <dt className="text-[13px] font-bold text-muted">{k}</dt>
+            </div>
+          ))}
+        </dl>
+      </Card>
 
       <Card className="mb-4">
         <div className="mb-1 flex items-center justify-between">
-          <span className="font-black">Calendar</span>
-          <span className="text-xs font-bold text-muted">30 days: {pct(p.rate30)} · {votes(h, checkins, today)} votes</span>
+          <h2 className="text-[17px] font-black">Calendar</h2>
+          <span className="text-[13px] font-bold text-muted">30 days: {pct(p.rate30)} · {votes(h, checkins, today)} votes</span>
         </div>
-        <p className="mb-3 text-xs font-semibold text-muted">Tap any day to change it or fill in a day you missed.</p>
+        <p className="mb-3 text-[13px] font-semibold text-muted">Tap any day to change it or fill in a day you missed.</p>
         <Heatmap today={today} weeks={16} cell={cell} onPick={setEditDay} />
-        <div className="mt-3 flex flex-wrap gap-3 text-[11px] font-bold text-muted">
+        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[13px] font-bold text-muted">
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ background: h.type === 'break' ? `${h.color}aa` : h.color }} />{h.type === 'break' ? 'clean' : 'done'}</span>
           {h.type === 'build' && <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ background: `${h.color}88` }} />2-min</span>}
-          {h.type === 'build' && <span>🧊 freeze used</span>}
+          {h.type === 'build' && <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ background: 'color-mix(in srgb, var(--color-sky) 45%, transparent)' }} />freeze used</span>}
           {h.type === 'break' && <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-rose align-middle" />slip</span>}
         </div>
       </Card>
@@ -103,7 +105,7 @@ export default function HabitDetail() {
       {h.type === 'build' && (
         <Card className="mb-4">
           <div className="mb-2 flex items-center gap-1.5">
-            <span className="font-black">Difficulty: level {h.level ?? 1}</span>
+            <h2 className="text-[17px] font-black">Difficulty: level {h.level ?? 1}</h2>
             <InfoTip tip="level_up" />
           </div>
           {(h.level_history ?? []).length > 0 && (
@@ -114,21 +116,22 @@ export default function HabitDetail() {
             </ul>
           )}
           <div className="flex gap-2">
-            <Button variant="lavender" className="flex-1 !py-2.5 text-sm" onClick={() => setLevelDir(1)}>📈 Make it harder</Button>
-            <Button variant="secondary" className="flex-1 !py-2.5 text-sm" onClick={() => setLevelDir(-1)}>🌱 Make it easier</Button>
+            <Button variant="lavender" className="flex-1 !py-2.5 text-sm" onClick={() => setLevelDir(1)}><TrendingUp size={17} /> Harder</Button>
+            <Button variant="secondary" className="flex-1 !py-2.5 text-sm" onClick={() => setLevelDir(-1)}><TrendingDown size={17} /> Easier</Button>
           </div>
         </Card>
       )}
 
       <Card className="mb-4">
-        <div className="mb-3 flex items-center gap-1.5"><span className="font-black">Badges</span><InfoTip tip="badges" /></div>
+        <div className="mb-3 flex items-center gap-1.5"><h2 className="text-[17px] font-black">Badges</h2><InfoTip tip="badges" /></div>
         <div className="grid grid-cols-5 gap-2">
           {MILESTONES.map((m) => {
             const got = p.badges.includes(m)
             return (
-              <div key={m} className={`flex aspect-square flex-col items-center justify-center rounded-2xl text-center ${got ? '' : 'bg-soft opacity-50'}`} style={got ? { background: `${h.color}33` } : undefined}>
-                <span className={`text-xl ${got ? '' : 'grayscale'}`}>🏅</span>
-                <span className="text-[10px] font-black">{m}{s.unit === 'week' ? 'w' : 'd'}</span>
+              <div key={m} className={`flex aspect-square flex-col items-center justify-center rounded-full text-center ${got ? 'puffy text-on-pastel' : 'clay-in text-muted'}`} style={got ? { background: h.color } : undefined}
+                aria-label={`${m}-${s.unit} badge${got ? ', earned' : ''}`}>
+                <span className="text-[17px] font-black leading-none tabular-nums">{m}</span>
+                <span className="text-[11px] font-black">{s.unit === 'week' ? 'weeks' : 'days'}</span>
               </div>
             )
           })}
@@ -136,15 +139,15 @@ export default function HabitDetail() {
       </Card>
 
       {plan.length > 0 && (
-        <Card className="mb-4 space-y-1.5 text-sm font-semibold">
-          <div className="mb-1 font-black">Your plan</div>
+        <Card className="mb-4 space-y-1.5 text-[15px] font-semibold leading-snug">
+          <h2 className="mb-1 text-[17px] font-black">Your plan</h2>
           {plan.map((x) => <p key={x}>{x}</p>)}
         </Card>
       )}
 
       {notes.length > 0 && (
         <Card className="mb-4">
-          <div className="mb-2 font-black">Notes</div>
+          <h2 className="mb-2 text-[17px] font-black">Notes</h2>
           <ul className="space-y-2 text-sm font-semibold">
             {notes.map((n) => (
               <li key={n.id}><button onClick={() => setEditDay(n.date)} className="text-left"><span className="text-muted">{formatDay(n.date, { month: 'short', day: 'numeric' })}:</span> {n.note}</button></li>
@@ -154,7 +157,7 @@ export default function HabitDetail() {
       )}
 
       <div className="flex gap-2">
-        <Button variant="secondary" className="flex-1" onClick={() => setArchived(h, !h.archived)}>{h.archived ? '▶️ Resume' : '⏸️ Pause'}</Button>
+        <Button variant="secondary" className="flex-1" onClick={() => setArchived(h, !h.archived)}>{h.archived ? <><Play size={17} /> Resume</> : <><Pause size={17} /> Pause</>}</Button>
         <Button variant="danger" className="flex-1"
           onClick={() => confirm.ask('Delete this habit?', 'Its history will be removed too. If you just need a break, use Pause instead.', async () => { await deleteHabit(h); navigate('/habits', { replace: true }) })}>
           Delete

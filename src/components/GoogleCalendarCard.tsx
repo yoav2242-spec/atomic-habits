@@ -34,7 +34,7 @@ export function GoogleCalendarCard() {
         <span className="puffy flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky/80 text-on-pastel"><CalendarCheck2 size={20} /></span>
         <span className="min-w-0 flex-1">
           <span className="block text-[15px] font-extrabold">"Habits" calendar in Google</span>
-          <span className="block text-xs font-semibold text-muted">
+          <span className="block text-[13px] font-semibold text-muted">
             {!googleReady ? 'Almost ready: being set up'
               : inSandbox ? 'Not available in test mode'
               : !status.on ? 'Atomic adds and updates your habits there by itself'
@@ -58,7 +58,7 @@ export function GoogleCalendarCard() {
       ))}
 
       {status.on && (
-        <p className="text-xs font-semibold text-muted">
+        <p className="text-[13px] font-semibold text-muted">
           Each habit with a time is a repeating event that reminds you right on time. In Google Calendar, tick or untick "Habits" in your calendar list to show or hide it.
         </p>
       )}

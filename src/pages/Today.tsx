@@ -9,7 +9,8 @@ import { HabitCard } from '../components/HabitCard'
 import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
-import { Button, buttonClass, Card, InfoTip, Modal, ProgressRing, spring, useToast, XPBar } from '../components/ui'
+import { Pebbles } from '../components/Pebbles'
+import { Button, buttonClass, Card, InfoTip, Modal, spring, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
 import { db, getMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
@@ -114,7 +115,6 @@ export default function Today() {
   const identityName = (h: Habit) => progress.identities.find((i) => i.id === h.identity_id)?.name
   const title = offset === 0 ? `${greeting()}${prefs.name ? `, ${prefs.name}` : ''}!` : offset === 1 ? 'Yesterday' : formatDay(date, { weekday: 'long' })
   const backupDue = all.length > 0 && lastBackup !== 'loading' && (!lastBackup || diffDays(lastBackup.slice(0, 10), today) >= 14)
-  const share = build.length ? doneCount / build.length : 0
   const tip = tipOfTheDay(diffDays('2000-01-01', today))
   const boxReady = build.length > 0 && doneCount === build.length && !progress.rewards.some((r) => r.id === `box_${today}`)
   const extras = [
@@ -124,6 +124,12 @@ export default function Today() {
     { key: 'tip', label: 'Tip', Icon: Lightbulb, color: 'var(--color-sky)', badge: '' },
   ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
+  // The one line under the count: what to do next, in words.
+  const left = build.filter(({ habit }) => !(isDone(habit, checkinOn(habit)) || weekGoalMet(habit)))
+  const nextUp = left.find(({ habit }) => habit.cue_time)?.habit ?? left[0]?.habit
+  const nextLine = build.length === 0 ? 'Nothing scheduled today. Enjoy the rest.'
+    : !nextUp ? (boxReady ? 'Everything done. Your surprise box is ready.' : 'Everything done. See you tomorrow.')
+    : `Next: ${nextUp.name}${nextUp.cue_time ? ` at ${nextUp.cue_time}` : ''}${left.length > 1 ? ` · then ${left.length - 1} more` : ''}`
   const reviewDue = weekday(today) === 0 && !progress.rewards.some((r) => r.id === `review_${weekStart(today)}`)
   const lastMonth = addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)
   const recapDue = Number(today.slice(8)) <= 7 && !recapSeen.includes(lastMonth) && progress.habits.some((p) => p.checkins.some((c) => c.date.startsWith(lastMonth)))
@@ -154,7 +160,7 @@ export default function Today() {
     if (habit.id !== focusId) return element
     return (
       <div key={habit.id}>
-        <div className="mb-1.5 ml-2 text-xs font-black uppercase tracking-wider text-lavender">🎯 This week's focus</div>
+        <div className="mb-2 ml-1 text-[13px] font-black text-level">This week's focus</div>
         {element}
       </div>
     )
@@ -164,12 +170,12 @@ export default function Today() {
 
   return (
     <div>
-      <header className="mb-5 flex items-end justify-between">
-        <div>
-          <p className="text-[13px] font-extrabold uppercase tracking-wider text-muted">{formatDay(date)}</p>
-          <h1 className="mt-1 text-[32px] font-black leading-none tracking-tight">{title}</h1>
+      <header className="mb-5 flex items-end justify-between gap-3 pt-1">
+        <div className="min-w-0">
+          <p className="text-[15px] font-bold text-muted">{formatDay(date, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+          <h1 className="mt-0.5 text-[30px] font-black leading-[1.05] tracking-[-0.02em]">{title}</h1>
         </div>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-1.5">
           <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><ChevronLeft size={20} /></motion.button>
           <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><ChevronRight size={20} /></motion.button>
         </div>
@@ -177,8 +183,10 @@ export default function Today() {
 
       {all.length === 0 ? (
         <Card className="animate-rise !p-6 text-center">
-          <div className="puffy mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-[28px] bg-sage/70 text-4xl">🌱</div>
-          <h2 className="mb-2 text-2xl font-black">Let's plant your first habit</h2>
+          <div className="flex justify-center">
+            <Pebbles items={[{ id: 'a', color: 'var(--color-sage)', done: true }, { id: 'b', color: 'var(--color-butter)', done: false }, { id: 'c', color: 'var(--color-sky)', done: false }]} />
+          </div>
+          <h2 className="mb-2 mt-5 text-2xl font-black tracking-[-0.01em]">Plant your first habit</h2>
           <p className="mb-6 font-semibold text-muted">Start tiny, so small it feels too easy. Pick a ready-made habit or make your own.</p>
           <Link to="/habits/new" className={buttonClass('primary', 'w-full')}>Choose a habit</Link>
           <Link to="/scorecard" className="mt-4 block min-h-11 py-2 text-sm font-bold text-muted underline">
@@ -188,60 +196,67 @@ export default function Today() {
       ) : (
         <>
           {offset === 0 ? (
-            <Card className="mb-5 flex items-center gap-5 !p-5">
-              <ProgressRing value={share} size={124} stroke={13}>
-                <motion.span key={doneCount} initial={{ scale: 0.6 }} animate={{ scale: 1 }} transition={spring} className="text-[28px] font-black leading-none">
-                  {doneCount}<span className="text-lg text-muted">/{build.length}</span>
-                </motion.span>
-                <span className="mt-1 text-[11px] font-extrabold uppercase tracking-wider text-muted">{share === 1 ? 'all done' : 'done'}</span>
-              </ProgressRing>
-              <Link to="/stats" className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="puffy rounded-full bg-lavender/80 px-3 py-1 text-xs font-black text-on-pastel">Level {progress.level.level}</span>
-                  <InfoTip tip="points" />
+            <Card className="mb-4 !p-5">
+              <div className="flex items-end justify-between gap-3">
+                <div className="flex items-baseline gap-1.5" aria-label={`${doneCount} of ${build.length} done`}>
+                  <motion.span key={doneCount} initial={{ scale: 0.6, y: 6 }} animate={{ scale: 1, y: 0 }} transition={spring} className="inline-block text-[44px] font-black leading-none tracking-[-0.03em] tabular-nums">{doneCount}</motion.span>
+                  <span className="text-xl font-extrabold text-muted">of {build.length} done</span>
                 </div>
-                <div className="mt-3"><XPBar into={progress.level.into} need={progress.level.need} /></div>
-                <div className="mt-1.5 text-xs font-bold text-muted">{progress.level.need - progress.level.into} to level {progress.level.level + 1}</div>
-                <motion.div key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="mt-2 text-xl font-black text-sage-deep">
-                  +{progress.todayPoints} <span className="text-sm text-muted">today</span>
-                </motion.div>
-              </Link>
+                <motion.span key={progress.todayPoints} initial={{ y: 6, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={spring} className="pb-1 text-[15px] font-black text-sage-deep tabular-nums">
+                  +{progress.todayPoints} today
+                </motion.span>
+              </div>
+              <p className="mt-1.5 text-[15px] font-semibold leading-snug text-muted">{nextLine}</p>
+              <div className="-ml-1.5 mt-3">
+                <Pebbles items={buildOrdered.map(({ habit }) => ({ id: habit.id, color: habit.color, done: isDone(habit, checkinOn(habit)) || weekGoalMet(habit), label: habit.name }))}
+                  onPick={(id) => document.getElementById(`habit-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
+              </div>
+              <div className="mt-3 flex min-h-11 items-center gap-3">
+                <Link to="/stats" className="flex min-h-11 flex-1 items-center gap-3">
+                  <span className="shrink-0 text-[13px] font-black text-level">Level {progress.level.level}</span>
+                  <span className="flex-1"><XPBar into={progress.level.into} need={progress.level.need} /></span>
+                  <span className="shrink-0 text-[13px] font-bold text-muted tabular-nums">{progress.level.need - progress.level.into} to go</span>
+                </Link>
+                <InfoTip tip="points" />
+              </div>
             </Card>
           ) : (
-            <div className="clay-in mb-5 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-bold">
+            <div className="tray mb-5 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-bold">
               <Pencil size={16} className="shrink-0 text-muted" /> Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
             </div>
           )}
 
           {offset === 0 && (
-            <div className="mb-5 grid grid-cols-4 gap-2.5">
-              {extras.map((x) => (
-                <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
-                  className="clay relative flex aspect-square flex-col items-center justify-center gap-1 rounded-[22px]">
-                  <span className="puffy flex h-10 w-10 items-center justify-center rounded-2xl text-on-pastel" style={{ background: x.color }}><x.Icon size={20} strokeWidth={2.4} /></span>
-                  <span className="text-[11px] font-extrabold">{x.label}</span>
-                  {x.badge && (
-                    <motion.span initial={{ scale: 0 }} animate={{ scale: [1, 1.15, 1] }} transition={{ repeat: Infinity, duration: 1.8 }}
-                      className="puffy absolute -right-1 -top-1 rounded-full bg-rose px-1.5 py-0.5 text-[10px] font-black text-on-pastel">{x.badge}</motion.span>
-                  )}
-                </motion.button>
-              ))}
+            <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {extras.map((x) => {
+                const hot = x.key === 'box' && boxReady
+                return (
+                  <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
+                    animate={hot ? { rotate: [0, -4, 4, -2, 0] } : { rotate: 0 }}
+                    style={hot ? { background: x.color } : undefined}
+                    className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-4 text-[15px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
+                    <x.Icon size={18} strokeWidth={2.3} className={hot ? '' : 'text-muted'} />
+                    {x.label}
+                    {x.badge && x.badge !== '!' && <span className="tray rounded-full px-1.5 text-[13px] font-black text-muted tabular-nums">{x.badge}</span>}
+                  </motion.button>
+                )
+              })}
             </div>
           )}
 
           {offset === 0 && (reviewDue || recapDue) && (
             <div className="mb-5 space-y-2.5">
               {reviewDue && (
-                <Link to="/review" className="puffy bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-sky/70 px-4 py-3 text-on-pastel">
+                <Link to="/review" className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-sky)_50%,var(--card))] px-4 py-3">
                   <CalendarCheck size={22} />
-                  <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-xs font-bold opacity-75">2 minutes · pick next week's focus · +25</span></span>
+                  <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-[13px] font-bold opacity-80">2 minutes · pick next week's focus · +25</span></span>
                   <ChevronRight size={20} />
                 </Link>
               )}
               {recapDue && (
-                <Link to={`/recap/${lastMonth}`} className="puffy bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-peach/70 px-4 py-3 text-on-pastel">
+                <Link to={`/recap/${lastMonth}`} className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-peach)_50%,var(--card))] px-4 py-3">
                   <CalendarHeart size={22} />
-                  <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-xs font-bold opacity-75">See everything you did last month</span></span>
+                  <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-[13px] font-bold opacity-80">See everything you did last month</span></span>
                   <ChevronRight size={20} />
                 </Link>
               )}
@@ -255,17 +270,17 @@ export default function Today() {
 
           {breaking.length > 0 && (
             <>
-              <h2 className="mb-3 mt-8 text-[13px] font-extrabold uppercase tracking-wider text-muted">Breaking free</h2>
+              <h2 className="label mb-3 ml-1 mt-8">Breaking free</h2>
               <div className="space-y-4">{breaking.map((h) => card(h))}</div>
             </>
           )}
 
-          <Link to="/habits/new" className="clay-in bouncy mt-6 flex min-h-14 items-center justify-center gap-2 rounded-[22px] font-extrabold text-muted">
+          <Link to="/habits/new" className="bouncy mt-6 flex min-h-14 items-center justify-center gap-2 rounded-[22px] border-2 border-dashed border-muted/30 font-extrabold text-muted">
             <Plus size={18} /> Add a habit
           </Link>
 
           {backupDue && (
-            <Link to="/settings" className="clay-sm mt-4 flex items-center gap-2.5 rounded-2xl p-3.5 text-sm font-bold">
+            <Link to="/settings" className="tray mt-4 flex min-h-12 items-center gap-2.5 rounded-2xl p-3.5 text-sm font-bold">
               <Save size={18} className="shrink-0 text-muted" /> Your habits live only on this phone. Tap to save a backup copy.
             </Link>
           )}
@@ -284,11 +299,11 @@ export default function Today() {
         <SurpriseBox progress={progress} ready={build.length > 0 && doneCount === build.length} />
       </Modal>
       <Modal open={sheet === 'tip'} onClose={() => setSheet(null)} title="Tip of the day">
-        <p className="mb-6 text-lg font-bold leading-snug">{tip.icon} {tip.tip}</p>
+        <p className="mb-6 text-lg font-bold leading-snug">{tip.tip}</p>
         <Link to="/tips" className={buttonClass('secondary', 'w-full')}>See all tips</Link>
       </Modal>
 
-      <Modal open={!!noteFor} onClose={() => setNoteFor(null)} title={`📝 ${noteFor?.name ?? ''}`}>
+      <Modal open={!!noteFor} onClose={() => setNoteFor(null)} title={`Note · ${noteFor?.name ?? ''}`}>
         <textarea rows={4} value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="How did it go? What helped or got in the way?" autoFocus />
         <div className="mt-4 flex gap-2">
           <Button variant="secondary" className="flex-1" onClick={() => setNoteFor(null)}>Cancel</Button>
@@ -303,7 +318,7 @@ export default function Today() {
         <textarea rows={3} value={noteText} onChange={(e) => setNoteText(e.target.value)} placeholder="e.g. I was bored after dinner" />
         <div className="mt-4 flex gap-2">
           <Button variant="secondary" className="flex-1" onClick={() => setSlipFor(null)}>Cancel</Button>
-          <Button className="flex-1" onClick={async () => { await logSlip(slipFor!, date, noteText.trim()); setSlipFor(null); toast('Logged. Tomorrow is a fresh start 🌱') }}>
+          <Button className="flex-1" onClick={async () => { await logSlip(slipFor!, date, noteText.trim()); setSlipFor(null); toast('Logged. Tomorrow is a fresh start.') }}>
             Log it
           </Button>
         </div>

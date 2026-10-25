@@ -21,7 +21,7 @@ export function Heatmap({ today, weeks, cell, onPick }: {
             disabled={future || !onPick}
             onClick={() => onPick?.(d)}
             title={c ? `${formatDay(d, { month: 'short', day: 'numeric' })}: ${c.title}` : formatDay(d, { month: 'short', day: 'numeric' })}
-            className={`flex aspect-square items-center justify-center rounded-[5px] text-[8px] leading-none ${future ? 'bg-transparent' : 'bg-soft'} ${d === today ? 'ring-2 ring-ink/40' : ''} ${onPick && !future ? 'bouncy' : ''}`}
+            className={`flex aspect-square items-center justify-center rounded-[5px] text-[8px] leading-none ${future ? 'bg-transparent' : 'tray'} ${d === today ? 'ring-2 ring-ink/40' : ''} ${onPick && !future ? 'bouncy' : ''}`}
             style={c ? { background: c.color } : undefined}
           >
             {c?.icon}

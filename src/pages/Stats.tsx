@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react'
+import { CalendarCheck, CalendarHeart, Gift } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { HabitBreakdown, ProgressInsights } from '../components/ProgressInsights'
 import { markFlag } from '../components/Quests'
@@ -97,101 +98,92 @@ export default function Stats() {
     <div>
       <PageHeader title="Progress" subtitle="Small wins, adding up." />
 
-      <Card className="mb-4 !p-5" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-lavender) 28%, var(--card)), var(--card))' }}>
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-1.5 text-sm font-extrabold text-muted">Your level <InfoTip tip="points" /></div>
-            <div className="text-4xl font-black">Level {progress.level.level}</div>
-          </div>
-          <div className="text-right">
-            <div className="text-3xl font-black text-lavender">{progress.totalPoints}</div>
-            <div className="text-xs font-bold text-muted">total points</div>
-          </div>
+      {/* The screen's question first: am I getting better? */}
+      <Card className="mb-4 !p-5">
+        <h2 className="label">This week</h2>
+        <div className="mt-1 flex items-baseline gap-2.5">
+          <span className="text-[44px] font-black leading-none tracking-[-0.03em] tabular-nums">{thisWeek == null ? '–' : `${Math.round(thisWeek * 100)}%`}</span>
+          <span className="text-[15px] font-bold text-muted">of your plan done</span>
         </div>
-        <XPBar into={progress.level.into} need={progress.level.need} />
-        <div className="mt-1.5 text-xs font-bold text-muted">{progress.level.need - progress.level.into} points to level {progress.level.level + 1}</div>
+        <p className="mb-4 mt-2 text-[15px] font-semibold leading-snug">
+          {diff === null ? 'Your weekly trend shows up after your second week.'
+            : diff === 0 ? 'Same as last week. Steady counts.'
+            : diff > 0 ? <><span className="font-black text-sage-deep">Up {diff}%</span> on last week.</>
+            : <><span className="font-black text-[var(--flame)]">Down {Math.abs(diff)}%</span> on last week. Never miss twice.</>}
+        </p>
+        <BarChart values={weekRates} labels={weeks.map((w, i) => (i % 3 === 0 || i === weeks.length - 1 ? formatDay(w, { month: 'short', day: 'numeric' }) : ''))} />
       </Card>
 
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        {[
-          ['🔥', String(liveStreaks), 'active streaks'],
-          ['🏆', String(bestStreak), 'best streak'],
-          ['🏅', String(progress.badgeCount), 'badges'],
-        ].map(([icon, v, k]) => (
-          <Card key={k} className="!p-3 text-center">
-            <div className="text-xl">{icon}</div>
-            <div className="text-2xl font-black">{v}</div>
-            <div className="text-[11px] font-bold text-muted">{k}</div>
-          </Card>
-        ))}
-      </div>
+      <Card className="mb-4 !p-5">
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="flex items-center gap-1.5 text-[22px] font-black tracking-[-0.01em]">Level {progress.level.level} <InfoTip tip="points" /></h2>
+          <span className="text-[13px] font-bold text-muted tabular-nums">{progress.level.need - progress.level.into} to level {progress.level.level + 1}</span>
+        </div>
+        <div className="mt-2.5"><XPBar into={progress.level.into} need={progress.level.need} /></div>
+        <dl className="tray mt-4 grid grid-cols-4 rounded-[18px] py-3 text-center">
+          {[
+            [progress.totalPoints.toLocaleString(), 'points'],
+            [String(liveStreaks), 'streaks on'],
+            [String(bestStreak), 'best streak'],
+            [String(progress.badgeCount), 'badges'],
+          ].map(([v, k], i) => (
+            <div key={k} className={i ? 'border-l-2 border-[var(--line)]' : ''}>
+              <dd className="text-[20px] font-black leading-tight tabular-nums">{v}</dd>
+              <dt className="text-[12px] font-bold leading-tight text-muted">{k}</dt>
+            </div>
+          ))}
+        </dl>
+      </Card>
 
-      <div className="mb-4 grid grid-cols-3 gap-2">
-        {[
-          ['/review', '📅', 'Weekly review'],
-          [`/recap/${addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)}`, '🗓️', 'Monthly recap'],
-          ['/rewards', '🎁', 'Rewards'],
-        ].map(([to, icon, label]) => (
-          <Link key={label} to={to} className="bouncy rounded-3xl clay-sm p-3 text-center shadow-sm">
-            <div className="text-2xl">{icon}</div>
-            <div className="text-xs font-extrabold">{label}</div>
+      <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {([
+          ['/review', CalendarCheck, 'Weekly review'],
+          [`/recap/${addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)}`, CalendarHeart, 'Monthly recap'],
+          ['/rewards', Gift, 'Rewards'],
+        ] as const).map(([to, Icon, label]) => (
+          <Link key={label} to={to} className="clay-sm bouncy flex min-h-11 shrink-0 items-center gap-2 rounded-full py-2 pl-3.5 pr-4 text-[15px] font-extrabold">
+            <Icon size={18} className="text-muted" /> {label}
           </Link>
         ))}
       </div>
 
       <Card className="mb-4">
-        <div className="mb-3 font-black">🏆 Personal records</div>
+        <h2 className="mb-3 text-[17px] font-black">Personal records</h2>
         <div className="grid grid-cols-2 gap-2">
           {[
-            ['🔥', `${records.bestStreak.value} ${records.bestStreak.unit}s`, 'Longest streak', records.bestStreak.habit],
-            ['💯', `${records.perfectRun.best} days`, 'Perfect days in a row', records.perfectRun.current > 0 ? `now: ${records.perfectRun.current}` : undefined],
-            ['⚡', String(records.mostInADay.value), 'Most habits in a day', records.mostInADay.date && formatDay(records.mostInADay.date, { month: 'short', day: 'numeric' })],
-            ['📅', records.bestWeek.week ? `${Math.round(records.bestWeek.rate * 100)}%` : '–', 'Best week', records.bestWeek.week && `week of ${formatDay(records.bestWeek.week, { month: 'short', day: 'numeric' })}`],
-          ].map(([icon, value, label, sub]) => (
-            <div key={label} className="rounded-2xl bg-soft p-3">
-              <div className="text-xs font-extrabold text-muted">{icon} {label}</div>
-              <div className="text-xl font-black">{value}</div>
+            ['', `${records.bestStreak.value} ${records.bestStreak.unit}s`, 'Longest streak', records.bestStreak.habit],
+            ['', `${records.perfectRun.best} days`, 'Perfect days in a row', records.perfectRun.current > 0 ? `now: ${records.perfectRun.current}` : undefined],
+            ['', String(records.mostInADay.value), 'Most habits in a day', records.mostInADay.date && formatDay(records.mostInADay.date, { month: 'short', day: 'numeric' })],
+            ['', records.bestWeek.week ? `${Math.round(records.bestWeek.rate * 100)}%` : '–', 'Best week', records.bestWeek.week && `week of ${formatDay(records.bestWeek.week, { month: 'short', day: 'numeric' })}`],
+          ].map(([, value, label, sub]) => (
+            <div key={label} className="tray rounded-[18px] p-3">
+              <div className="text-[13px] font-extrabold leading-tight text-muted">{label}</div>
+              <div className="mt-1 text-xl font-black tabular-nums">{value}</div>
               {sub && <div className="truncate text-[11px] font-bold text-muted">{sub}</div>}
             </div>
           ))}
         </div>
-        <p className="mt-2 text-xs font-semibold text-muted">{records.perfectDays} perfect day{records.perfectDays === 1 ? '' : 's'} so far. Beat your records to get a celebration!</p>
+        <p className="mt-2 text-[13px] font-semibold text-muted">{records.perfectDays} perfect day{records.perfectDays === 1 ? '' : 's'} so far. Beat your records to get a celebration!</p>
       </Card>
 
       <ProgressInsights progress={progress} />
 
       <Card className="mb-4">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="text-sm font-extrabold text-muted">This week</div>
-            <div className="text-4xl font-black">{thisWeek == null ? '–' : `${Math.round(thisWeek * 100)}%`}</div>
-          </div>
-          {diff !== null && (
-            <span className={`rounded-full px-3 py-1 text-sm font-black ${diff >= 0 ? 'bg-sage/20 text-sage-deep dark:text-sage' : 'bg-peach/20 text-peach'}`}>
-              {diff >= 0 ? '▲' : '▼'} {Math.abs(diff)}% vs last week
-            </span>
-          )}
-        </div>
-        <p className="mb-3 mt-1 text-xs font-semibold text-muted">How much of your plan you completed, week by week.</p>
-        <BarChart values={weekRates} labels={weeks.map((w, i) => (i % 2 === 1 || i === weeks.length - 1 ? formatDay(w, { month: 'short', day: 'numeric' }) : ''))} />
-      </Card>
-
-      <Card className="mb-4">
-        <div className="font-black">Points, last 90 days</div>
-        <p className="mb-3 text-xs font-semibold text-muted">Get 1% better every day and you end up about 37 times better in a year. This line is your small wins adding up.</p>
+        <h2 className="text-[17px] font-black">Points, last 90 days</h2>
+        <p className="mb-3 text-[13px] font-semibold text-muted">Get 1% better every day and you end up about 37 times better in a year. This line is your small wins adding up.</p>
         <AreaChart values={cumulative} />
       </Card>
 
       <Card className="mb-4">
-        <div className="font-black">Your best days</div>
-        <p className="mb-3 text-xs font-semibold text-muted">
+        <h2 className="text-[17px] font-black">Your best days</h2>
+        <p className="mb-3 text-[13px] font-semibold text-muted">
           {byWeekday.some((v) => v !== null) ? `You're most consistent on ${WEEKDAY_LONG[MON_FIRST[bestDay]]}s. Plan tough habits for those days.` : 'Check off habits for a while to see your best days.'}
         </p>
         <BarChart values={byWeekday} labels={MON_FIRST.map((d) => WEEKDAY_SHORT[d])} color="var(--color-sky)" highlightLast={false} height={90} />
       </Card>
 
       <Card className="mb-4">
-        <div className="mb-3 font-black">Every day, last 16 weeks</div>
+        <h2 className="mb-3 text-[17px] font-black">Every day, last 16 weeks</h2>
         <Heatmap today={today} weeks={16} cell={overall} />
       </Card>
 

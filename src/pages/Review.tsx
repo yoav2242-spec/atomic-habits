@@ -58,15 +58,15 @@ export default function Review() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Back</button>
+      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
       <h1 className="text-3xl font-black tracking-tight">📅 Weekly review</h1>
       <p className="mb-5 font-semibold text-muted">Week of {formatDay(monday, { month: 'long', day: 'numeric' })}. Two minutes to look back and plan ahead.</p>
 
       <Card className="mb-4 !p-5" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-sky) 25%, var(--card)), var(--card))' }}>
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div><div className="text-3xl font-black">{thisWeek === null ? '–' : `${Math.round(thisWeek * 100)}%`}</div><div className="text-xs font-bold text-muted">of your plan</div></div>
-          <div><div className="text-3xl font-black">{checkIns}</div><div className="text-xs font-bold text-muted">check-ins</div></div>
-          <div><div className="text-3xl font-black text-lavender">+{weekPoints}</div><div className="text-xs font-bold text-muted">points</div></div>
+          <div><div className="text-3xl font-black">{thisWeek === null ? '–' : `${Math.round(thisWeek * 100)}%`}</div><div className="text-[13px] font-bold text-muted">of your plan</div></div>
+          <div><div className="text-3xl font-black">{checkIns}</div><div className="text-[13px] font-bold text-muted">check-ins</div></div>
+          <div><div className="text-3xl font-black text-level">+{weekPoints}</div><div className="text-[13px] font-bold text-muted">points</div></div>
         </div>
         {thisWeek !== null && lastWeek !== null && (
           <p className="mt-3 text-center text-sm font-bold">
@@ -76,7 +76,7 @@ export default function Review() {
       </Card>
 
       <Card className="mb-4 space-y-3 text-sm font-semibold">
-        <div className="font-black">🎉 Wins</div>
+        <div className="text-[17px] font-black">🎉 Wins</div>
         {wins.length ? <p>You did these every time this week: <b>{wins.map((p) => `${p.habit.emoji} ${p.habit.name}`).join(', ')}</b></p> : <p className="text-muted">No perfect habits this week, but every check-in still counted.</p>}
         {best && <p>⭐ Best habit: <b>{best.habit.emoji} {best.habit.name}</b> ({Math.round((weekRate(best) ?? 0) * 100)}%)</p>}
         {struggling && (weekRate(struggling) ?? 0) < 0.7 && (
@@ -85,8 +85,8 @@ export default function Review() {
       </Card>
 
       <Card className="mb-4">
-        <div className="mb-1 font-black">🎯 Pick one focus for next week</div>
-        <p className="mb-3 text-xs font-semibold text-muted">It goes to the top of your Today list with a 🎯, so it gets your best energy.</p>
+        <div className="mb-1 text-[17px] font-black">🎯 Pick one focus for next week</div>
+        <p className="mb-3 text-[13px] font-semibold text-muted">It goes to the top of your Today list with a 🎯, so it gets your best energy.</p>
         <div className="space-y-2">
           {active.map((p) => (
             <button key={p.habit.id} onClick={() => setFocusId(p.habit.id)}

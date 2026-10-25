@@ -1,4 +1,5 @@
 import { AnimatePresence, motion, type Transition } from 'motion/react'
+import { createPortal } from 'react-dom'
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { TIPS, type TipKey } from '../lib/tips'
 
@@ -8,7 +9,7 @@ export const softSpring: Transition = { type: 'spring', stiffness: 220, damping:
 
 export function Card({ children, className = '', style }: { children: ReactNode; className?: string; style?: React.CSSProperties }) {
   return (
-    <div className={`clay rounded-[28px] p-4 ${className}`} style={style}>
+    <div className={`clay rounded-[26px] p-4 ${className}`} style={style}>
       {children}
     </div>
   )
@@ -22,11 +23,11 @@ export function buttonClass(variant: Variant = 'primary', className = '') {
   const styles = {
     primary: 'btn-3d bg-sage text-on-pastel disabled:opacity-40',
     lavender: 'btn-3d bg-lavender text-on-pastel',
-    secondary: 'btn-3d bg-card text-ink',
+    secondary: 'clay-sm bouncy text-ink',
     ghost: 'bouncy text-muted',
     danger: 'btn-3d bg-rose text-on-pastel',
   }[variant]
-  return `inline-flex min-h-12 items-center justify-center text-center rounded-2xl px-5 py-3 font-extrabold ${styles} ${className}`
+  return `inline-flex min-h-12 items-center justify-center gap-2 text-center rounded-full px-5 py-3 text-[15px] font-extrabold ${styles} ${className}`
 }
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
@@ -35,10 +36,10 @@ export function Button({ variant = 'primary', className = '', ...props }: Button
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   return (
-    <header className="mb-6 flex items-end justify-between gap-3">
+    <header className="mb-6 flex items-end justify-between gap-3 pt-1">
       <div>
-        <h1 className="text-[32px] font-black leading-none tracking-tight">{title}</h1>
-        {subtitle && <p className="mt-2 text-[15px] font-semibold text-muted">{subtitle}</p>}
+        <h1 className="text-[30px] font-black leading-[1.05] tracking-[-0.02em]">{title}</h1>
+        {subtitle && <p className="mt-2 text-[15px] font-semibold leading-snug text-muted">{subtitle}</p>}
       </div>
       {action}
     </header>
@@ -48,12 +49,12 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
 export function Field({ label, hint, tip, children }: { label: string; hint?: string; tip?: TipKey; children: ReactNode }) {
   return (
     <div className="block">
-      <div className="mb-2 flex items-center gap-1.5 text-sm font-extrabold">
+      <div className="mb-2 flex items-center gap-1.5 text-[15px] font-extrabold">
         {label}
         {tip && <InfoTip tip={tip} />}
       </div>
       {children}
-      {hint && <span className="mt-1.5 block text-xs font-semibold text-muted">{hint}</span>}
+      {hint && <span className="mt-1.5 block text-[13px] font-semibold leading-snug text-muted">{hint}</span>}
     </div>
   )
 }
@@ -104,29 +105,31 @@ export function Toggle({ on, onChange, label }: { on: boolean; onChange: (v: boo
 
 /** Bottom sheet: springs up, and can be dragged down to close. */
 export function Modal({ open, onClose, title, children }: { open: boolean; onClose: () => void; title: ReactNode; children: ReactNode }) {
-  return (
+  // Drawn on <body>, so an animated screen around it can't trap it in a smaller box.
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
           key="sheet"
-          className="fixed inset-0 z-50 flex items-end justify-center bg-[#1b1830]/40 backdrop-blur-[3px] sm:items-center"
+          className="fixed inset-0 z-50 flex items-end justify-center bg-[#0d120f]/45 sm:items-center"
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
           onClick={onClose}
         >
           <motion.div
-            className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-[2.25rem] bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-10px_40px_-10px_rgba(30,20,70,0.35)] sm:rounded-[2.25rem]"
+            className="max-h-[90dvh] w-full max-w-md overflow-y-auto rounded-t-[30px] bg-card p-6 pb-[max(1.5rem,env(safe-area-inset-bottom))] shadow-[0_-12px_40px_-12px_rgba(10,20,14,0.35)] sm:rounded-[30px]"
             initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 380, damping: 34 }}
             drag="y" dragConstraints={{ top: 0, bottom: 0 }} dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, info) => { if (info.offset.y > 110 || info.velocity.y > 600) onClose() }}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="clay-in mx-auto -mt-2 mb-5 h-1.5 w-12 rounded-full" />
-            {title && <h2 className="mb-4 text-[22px] font-black leading-tight">{title}</h2>}
+            <div aria-hidden className="mx-auto -mt-2 mb-5 h-1.5 w-10 rounded-full bg-muted/30" />
+            {title && <h2 className="mb-3 text-[22px] font-black leading-tight tracking-[-0.01em]">{title}</h2>}
             {children}
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body,
   )
 }
 
@@ -139,12 +142,12 @@ export function InfoTip({ tip, className = '' }: { tip: TipKey; className?: stri
         type="button"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true) }}
         aria-label={`What is ${TIPS[tip].title}?`}
-        className={`clay-sm bouncy relative inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-black text-muted ${className}`}
+        className={`bouncy relative -m-2.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${className}`}
       >
-        ?
+        <span className="tray inline-flex h-6 w-6 items-center justify-center rounded-full text-[12px] font-black text-muted">?</span>
       </button>
       <Modal open={open} onClose={() => setOpen(false)} title={TIPS[tip].title}>
-        <p className="mb-6 text-[15px] font-semibold leading-relaxed text-muted">{TIPS[tip].body}</p>
+        <p className="mb-6 text-base font-semibold leading-relaxed">{TIPS[tip].body}</p>
         <Button className="w-full" onClick={() => setOpen(false)}>Got it</Button>
       </Modal>
     </>
@@ -171,7 +174,7 @@ export function ProgressRing({ value, size = 120, stroke = 12, color = 'var(--co
 
 export function XPBar({ into, need, color = 'var(--color-lavender)' }: { into: number; need: number; color?: string }) {
   return (
-    <div className="clay-in h-3.5 overflow-hidden rounded-full p-[3px]">
+    <div className="clay-in h-3 overflow-hidden rounded-full p-[2px]">
       <motion.div className="puffy h-full rounded-full" initial={false} animate={{ width: `${Math.max(4, (into / need) * 100)}%` }} transition={softSpring} style={{ background: color }} />
     </div>
   )
@@ -183,10 +186,10 @@ export function useConfirm() {
   const ask = (title: string, body: string, action: () => void) => setState({ title, body, action })
   const element = (
     <Modal open={!!state} onClose={() => setState(null)} title={state?.title ?? ''}>
-      <p className="mb-5 text-muted">{state?.body}</p>
-      <div className="flex justify-end gap-2">
-        <Button variant="secondary" onClick={() => setState(null)}>Cancel</Button>
-        <Button variant="danger" onClick={() => { state?.action(); setState(null) }}>Yes</Button>
+      <p className="mb-5 font-semibold text-muted">{state?.body}</p>
+      <div className="flex gap-2">
+        <Button variant="secondary" className="flex-1" onClick={() => setState(null)}>Cancel</Button>
+        <Button variant="danger" className="flex-1" onClick={() => { state?.action(); setState(null) }}>Yes</Button>
       </div>
     </Modal>
   )
@@ -237,10 +240,10 @@ export function ToastProvider({ children }: { children: ReactNode }) {
         {msg && (
           <motion.div key={msg.key} className="pointer-events-none fixed inset-x-0 bottom-28 z-50 flex justify-center px-4"
             initial={{ y: 40, opacity: 0, scale: 0.9 }} animate={{ y: 0, opacity: 1, scale: 1 }} exit={{ y: 20, opacity: 0, scale: 0.95 }} transition={spring}>
-            <div className="pointer-events-auto flex items-center gap-4 rounded-full bg-ink py-2 pl-5 pr-2 text-sm font-bold text-bg shadow-[0_12px_30px_-10px_rgba(30,20,70,0.5)]">
+            <div className="pointer-events-auto flex max-w-full items-center gap-4 rounded-full bg-ink py-2 pl-5 pr-2 text-sm font-bold text-bg shadow-[0_12px_30px_-10px_rgba(10,20,14,0.5)]">
               <span className="py-1.5">{msg.text}</span>
               {msg.action ? (
-                <button className="min-h-10 rounded-full bg-sage px-4 font-black text-on-pastel" onClick={() => { msg.action!.onClick(); setMsg(null) }}>
+                <button className="min-h-11 rounded-full bg-sage px-4 font-black text-on-pastel" onClick={() => { msg.action!.onClick(); setMsg(null) }}>
                   {msg.action.label}
                 </button>
               ) : <span className="w-2" />}

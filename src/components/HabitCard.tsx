@@ -47,7 +47,7 @@ function Meta({ icon, children, color }: { icon: ReactNode; children: ReactNode;
 
 /** Round icon button with a fingertip-sized tap area. */
 function IconButton({ label, onClick, to, children }: { label: string; onClick?: () => void; to?: string; children: ReactNode }) {
-  const cls = 'clay-sm bouncy flex h-11 w-11 items-center justify-center rounded-full text-muted'
+  const cls = 'bouncy flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted active:bg-[var(--soft)]'
   return to ? <Link to={to} aria-label={label} className={cls}>{children}</Link> : <button onClick={onClick} aria-label={label} className={cls}>{children}</button>
 }
 
@@ -61,14 +61,17 @@ function CheckButton({ done, half, color, onClick, refEl }: { done: boolean; hal
       whileTap={squish}
       animate={{ scale: done ? [1, 1.18, 0.94, 1] : 1 }}
       transition={{ ...spring, scale: { duration: 0.5 } }}
-      className={`relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full ${done ? 'puffy' : 'clay-in'}`}
+      className={`relative flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full ${done ? 'puffy' : 'clay-in'}`}
       style={done ? { background: color } : undefined}
     >
       <svg viewBox="0 0 24 24" className="h-8 w-8" fill="none" stroke="var(--color-on-pastel)" strokeWidth={3.2} strokeLinecap="round" strokeLinejoin="round">
         {half ? (
           <motion.text x="12" y="17" textAnchor="middle" fontSize="15" fontWeight="900" fill="var(--color-on-pastel)" stroke="none" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>½</motion.text>
         ) : (
-          <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={false} animate={{ pathLength: done ? 1 : 0, opacity: done ? 1 : 0 }} transition={{ ...softSpring, delay: done ? 0.08 : 0 }} />
+          <>
+            {!done && <path d="M5 12.5l4.5 4.5L19 7.5" stroke="var(--muted)" strokeOpacity={0.35} strokeWidth={2.6} />}
+            <motion.path d="M5 12.5l4.5 4.5L19 7.5" initial={false} animate={{ pathLength: done ? 1 : 0, opacity: done ? 1 : 0 }} transition={{ ...softSpring, delay: done ? 0.08 : 0 }} />
+          </>
         )}
       </svg>
     </motion.button>
@@ -117,7 +120,7 @@ export function HabitCard(p: Props) {
   const tint = (pct: number) => `color-mix(in srgb, ${h.color} ${pct}%, var(--card))`
 
   const emojiBubble = (
-    <span className="puffy flex h-14 w-14 shrink-0 items-center justify-center rounded-[20px] text-[28px]" style={{ background: tint(45) }}>
+    <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[18px] text-[26px]" style={{ background: tint(38) }}>
       {h.emoji}
     </span>
   )
@@ -125,11 +128,11 @@ export function HabitCard(p: Props) {
   if (h.type === 'break') {
     const slipped = c?.kind === 'slip'
     return (
-      <motion.div layout transition={spring} className="clay rounded-[28px] p-4">
+      <motion.div layout transition={spring} id={`habit-${h.id}`} className="clay scroll-mt-6 rounded-[26px] p-4">
         <div className="flex items-center gap-3.5">
           {emojiBubble}
           <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
-            <div className="line-clamp-2 text-[17px] font-extrabold leading-tight">{h.name}</div>
+            <div className="line-clamp-2 text-[17px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</div>
             <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
               {slipped
                 ? <Meta icon={<Sprout size={14} />} color="var(--color-rose)">Slipped{c.count > 1 ? ` ×${c.count}` : ''}</Meta>
@@ -141,7 +144,7 @@ export function HabitCard(p: Props) {
         </div>
         <div className="mt-3 flex justify-end">
           {slipped ? (
-            <button onClick={p.onUndoSlip} className="min-h-11 px-4 text-sm font-bold text-muted underline">Undo slip</button>
+            <button onClick={p.onUndoSlip} className="min-h-11 px-4 text-sm font-bold text-muted underline underline-offset-2">Undo slip</button>
           ) : (
             <Button variant="secondary" className="!min-h-11 !py-2 text-sm" onClick={p.onSlip}>I slipped</Button>
           )}
@@ -154,20 +157,21 @@ export function HabitCard(p: Props) {
     <motion.div
       layout
       transition={spring}
-      className="clay relative rounded-[28px] p-4"
-      style={{ marginLeft: p.depth ? Math.min(p.depth, 3) * 16 : 0, background: done ? tint(18) : undefined, transition: 'background 0.5s' }}
+      id={`habit-${h.id}`}
+      className="clay relative scroll-mt-6 rounded-[26px] p-4"
+      style={{ marginLeft: p.depth ? Math.min(p.depth, 3) * 14 : 0, background: done ? tint(22) : undefined, transition: 'background 0.5s' }}
     >
       {p.stackLabel && (
-        <div className="mb-2.5 flex items-center gap-1.5 text-xs font-extrabold text-muted"><Link2 size={13} /> After I {p.stackLabel}</div>
+        <div className="mb-3 flex items-center gap-1.5 text-[13px] font-bold text-muted"><Link2 size={14} /> After I {p.stackLabel}</div>
       )}
 
       <div className="flex items-center gap-3.5">
         {emojiBubble}
         <Link to={`/habits/${h.id}`} className="min-w-0 flex-1">
-          <motion.div animate={{ opacity: done ? 0.55 : 1 }} className="line-clamp-2 text-[17px] font-extrabold leading-tight">{h.name}</motion.div>
+          <motion.div animate={{ opacity: done ? 0.6 : 1 }} className="line-clamp-2 text-[17px] font-extrabold leading-tight tracking-[-0.01em]">{h.name}</motion.div>
           <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
-            {stats.current > 0 && <Meta icon={<Flame size={14} />} color="#e0844e">{streakLabel(stats)}</Meta>}
-            {stats.freezes > 0 && <Meta icon={<Snowflake size={14} />} color="var(--color-sky)">{stats.freezes}</Meta>}
+            {stats.current > 0 && <Meta icon={<Flame size={14} />} color="var(--flame)">{streakLabel(stats)}</Meta>}
+            {stats.freezes > 0 && <Meta icon={<Snowflake size={14} />}><span className="sr-only">Streak freezes: </span>{stats.freezes}</Meta>}
             {h.schedule.kind === 'weekly' && <Meta icon={<Award size={14} />}>{stats.weekDone}/{h.schedule.times} this week</Meta>}
             {h.cue_time && <Meta icon={<Clock size={14} />}>{h.cue_time}</Meta>}
             {!h.cue_time && h.location && <Meta icon={<MapPin size={14} />}>{h.location}</Meta>}
@@ -187,10 +191,10 @@ export function HabitCard(p: Props) {
           {amount || target > 1 ? (
             <motion.button ref={checkRef} whileTap={squish} transition={spring} onClick={() => bump(step)}
               aria-label={amount ? `Add one ${h.step_label || `${step} ${h.unit}`}` : 'Plus one'}
-              className={`flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-full ${done ? 'puffy' : 'puffy'}`}
+              className="puffy flex h-[60px] w-[60px] shrink-0 flex-col items-center justify-center rounded-full"
               style={{ background: done ? h.color : tint(70) }}>
               <Plus size={24} strokeWidth={3} color="var(--color-on-pastel)" />
-              <span className="text-[10px] font-extrabold leading-none text-on-pastel">{amount ? h.step_label || `${step}` : `${c?.count ?? 0}/${target}`}</span>
+              <span className="text-[11px] font-extrabold leading-none text-on-pastel">{amount ? h.step_label || `${step}` : `${c?.count ?? 0}/${target}`}</span>
             </motion.button>
           ) : (
             <CheckButton done={done} half={c?.kind === 'two_min'} color={h.color} onClick={() => tap(c?.kind === 'two_min' ? 'two_min' : 'full')} refEl={checkRef} />
@@ -200,15 +204,15 @@ export function HabitCard(p: Props) {
 
       {(amount || target > 1) && (
         <div className="mt-3.5">
-          <div className="clay-in h-4 overflow-hidden rounded-full p-[3px]">
+          <div className="clay-in h-3.5 overflow-hidden rounded-full p-[3px]">
             <motion.div className="puffy h-full rounded-full" initial={false} animate={{ width: `${Math.max(count ? 6 : 0, Math.min(100, (count / target) * 100))}%` }} transition={softSpring} style={{ background: h.color }} />
           </div>
-          <div className="mt-2 flex items-center gap-2 text-[13px] font-bold">
+          <div className="mt-1.5 flex items-center gap-2 text-[14px] font-bold">
             <motion.span key={popKey} initial={{ scale: 0.85 }} animate={{ scale: 1 }} transition={spring} className="tabular-nums">
               {c?.kind === 'two_min' ? '2-minute version done' : progressText(h, count)}
             </motion.span>
             {servingsText(h, count) && <span className="text-muted">· {servingsText(h, count)}</span>}
-            <span className="ml-auto flex gap-2">
+            <span className="-mr-2 ml-auto flex">
               <IconButton label="Take one back" onClick={() => count > 0 && bump(-step)}><Minus size={17} /></IconButton>
               {amount && <IconButton label="Other amount" onClick={() => { setAmountText(''); setAmountOpen(true) }}><Pencil size={16} /></IconButton>}
             </span>
@@ -216,7 +220,7 @@ export function HabitCard(p: Props) {
         </div>
       )}
 
-      <Modal open={amountOpen} onClose={() => setAmountOpen(false)} title={`${h.emoji} How much?`}>
+      <Modal open={amountOpen} onClose={() => setAmountOpen(false)} title="How much?">
         <p className="mb-4 text-sm font-semibold text-muted">Type any amount, like a cup you drank somewhere else.</p>
         <div className="flex items-center gap-3">
           <input type="number" inputMode="decimal" min={0} value={amountText} onChange={(e) => setAmountText(e.target.value)} placeholder={String(step)} autoFocus />
@@ -231,8 +235,8 @@ export function HabitCard(p: Props) {
       <AnimatePresence initial={false}>
         {isToday && !done && (stats.atRisk || stats.justReset) && (
           <motion.div key="warn" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={softSpring} className="overflow-hidden">
-            <div className="clay-in mt-3.5 flex items-start gap-2.5 rounded-2xl px-3.5 py-3 text-[13px] font-semibold">
-              {stats.atRisk ? <Snowflake size={18} className="mt-0.5 shrink-0 text-sky" /> : <Sprout size={18} className="mt-0.5 shrink-0 text-sage-deep" />}
+            <div className="tray mt-3.5 flex items-start gap-2.5 rounded-2xl px-3.5 py-3 text-[14px] font-semibold leading-snug">
+              {stats.atRisk ? <Snowflake size={18} className="mt-0.5 shrink-0 text-muted" /> : <Sprout size={18} className="mt-0.5 shrink-0 text-sage-deep" />}
               <span className="flex-1">
                 {stats.atRisk
                   ? "A freeze saved your streak yesterday. Freezes can't be used two days in a row, so do it today."
@@ -246,21 +250,21 @@ export function HabitCard(p: Props) {
 
       {p.levelUp && isToday && (
         <motion.button whileTap={{ scale: 0.97 }} onClick={p.onLevelUp}
-          className="puffy mt-3.5 flex min-h-12 w-full items-center gap-2.5 rounded-2xl bg-lavender/80 px-3.5 py-2.5 text-left text-[13px] font-bold text-on-pastel">
+          className="mt-3.5 flex min-h-12 w-full items-center gap-2.5 rounded-2xl bg-[color-mix(in_srgb,var(--color-lavender)_38%,var(--card))] px-3.5 py-2.5 text-left text-[14px] font-bold leading-snug">
           <TrendingUp size={18} />
           <span className="flex-1">This is getting easy. Ready to make it a little harder?</span>
-          <span className="font-black">Level up</span>
+          <span className="shrink-0 font-black text-level">Level up</span>
         </motion.button>
       )}
 
-      <div className="mt-3.5 flex items-center gap-2">
+      <div className="-mb-1 -mr-1.5 mt-3 flex items-center gap-1">
         {h.two_min_version && !done ? (
-          <button onClick={() => tap('two_min')} className="clay-in bouncy flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full px-3.5 text-left text-[13px] font-bold text-muted">
+          <button onClick={() => tap('two_min')} className="tray bouncy mr-1 flex min-h-11 min-w-0 flex-1 items-center gap-2 rounded-full px-3.5 text-left text-[14px] font-bold text-muted">
             <Timer size={16} className="shrink-0" />
             <span className="truncate">Busy? Just {h.two_min_version}</span>
           </button>
         ) : toBadge !== null && stats.current > 0 && toBadge <= 3 ? (
-          <span className="flex flex-1 items-center gap-1.5 text-[13px] font-bold text-muted">
+          <span className="flex flex-1 items-center gap-1.5 text-[14px] font-bold text-muted">
             <Award size={16} /> {toBadge} more to the {next}-{stats.unit} badge
           </span>
         ) : <span className="flex-1" />}

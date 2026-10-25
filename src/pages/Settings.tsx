@@ -19,7 +19,7 @@ import { unlockWorkspace } from '../lib/workspace'
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
     <section className="mb-7">
-      <h2 className="mb-2.5 ml-1 text-[13px] font-extrabold uppercase tracking-wider text-muted">{title}</h2>
+      <h2 className="label mb-2.5 ml-1">{title}</h2>
       <Card className="space-y-4 !p-5 text-sm font-semibold">{children}</Card>
     </section>
   )
@@ -30,10 +30,10 @@ function Row({ icon, title, hint, children, stacked }: { icon: ReactNode; title:
   return (
     <div className={stacked ? 'space-y-3' : 'flex items-center gap-3'}>
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <span className="clay-sm flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl text-muted">{icon}</span>
+        <span className="flex w-6 shrink-0 items-center justify-center text-muted" aria-hidden>{icon}</span>
         <span className="min-w-0">
           <span className="block text-[15px] font-extrabold">{title}</span>
-          {hint && <span className="block text-xs font-semibold text-muted">{hint}</span>}
+          {hint && <span className="block text-[13px] font-semibold text-muted">{hint}</span>}
         </span>
       </div>
       {children}
@@ -133,8 +133,8 @@ export default function Settings() {
       </Section>
 
       <Section title="Look and feel">
-        <Row icon={<Sparkles size={19} />} title="Light or dark" stacked>
-          <Segmented value={prefs.theme} onChange={(theme) => setPrefs({ theme })} options={[{ value: 'auto', label: 'Like my phone' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
+        <Row icon={<Sparkles size={19} />} title="Light or dark" hint="Auto follows your phone" stacked>
+          <Segmented value={prefs.theme} onChange={(theme) => setPrefs({ theme })} options={[{ value: 'auto', label: 'Auto' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
         </Row>
         <Link to="/rewards" className="block">
           <Row icon={<Palette size={19} />} title="Color theme" hint={`${theme.name} · unlock more by leveling up`}>
@@ -161,8 +161,8 @@ export default function Settings() {
           <Toggle label="Notifications" on={notifOn} onChange={toggleNotifications} />
         </Row>
         {notifOn && (
-          <p className="clay-in rounded-2xl p-3.5 text-xs font-semibold text-muted">
-            Open a habit's ✏️ edit, go to "Make it obvious", and turn on "Remind me". You can give each habit its own vibration. Only
+          <p className="tray rounded-2xl p-3.5 text-[13px] font-semibold text-muted">
+            Open a habit's Edit page, go to "Make it obvious", and turn on "Remind me". You can give each habit its own vibration. Only
             reminder times leave your phone, never habit names or progress.
           </p>
         )}
@@ -170,20 +170,20 @@ export default function Settings() {
         <GoogleCalendarCard />
         <Row icon={<AlarmClock size={19} />} title="Alarms and calendar" hint="Reminders that work even when Atomic is closed" stacked>
           {timed.length === 0 ? (
-            <p className="text-xs font-semibold text-muted">Give a habit a time (in its ✏️ edit, "Make it obvious") to add an alarm for it.</p>
+            <p className="text-[13px] font-semibold text-muted">Give a habit a time (in its Edit page, "Make it obvious") to add an alarm for it.</p>
           ) : (
             <ul className="space-y-2">
               {timed.map((h) => (
-                <li key={h.id} className="clay-in space-y-2.5 rounded-2xl p-3">
+                <li key={h.id} className="tray space-y-2.5 rounded-[20px] p-3">
                   <div className="flex items-center gap-3 px-0.5">
                     <span className="min-w-0 flex-1 truncate font-bold">{h.emoji} {h.name}</span>
                     <span className="font-black tabular-nums">{h.cue_time}</span>
                   </div>
                   <div className="flex gap-2">
-                    {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-10 gap-1.5 !px-3 !py-1.5 text-xs')}><AlarmClock size={15} /> Alarm</a>}
+                    {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 !py-1.5 text-sm')}><AlarmClock size={15} /> Alarm</a>}
                     {google?.on && (
                       <button onClick={() => saveHabit({ ...h, calendar: !h.calendar })} aria-pressed={h.calendar}
-                        className={`flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl px-3 text-xs font-extrabold ${h.calendar ? 'puffy bg-sky/80 text-on-pastel' : 'clay-sm text-muted'}`}>
+                        className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-extrabold ${h.calendar ? 'puffy bg-sky text-on-pastel' : 'clay-sm text-muted'}`}>
                         <CalendarPlus size={15} /> {h.calendar ? 'In calendar' : 'Not in calendar'}
                       </button>
                     )}
@@ -192,7 +192,7 @@ export default function Settings() {
               ))}
             </ul>
           )}
-          <p className="text-xs font-semibold text-muted">
+          <p className="text-[13px] font-semibold text-muted">
             {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
             {google?.on ? 'Tap "In calendar" to show or hide a habit in your Habits calendar.' : 'Connect Google Calendar above to add your habits to a "Habits" calendar by themselves.'}
           </p>
@@ -202,13 +202,13 @@ export default function Settings() {
       <Section title="Your data">
         <Row icon={<HardDriveDownload size={19} />} title="Saved on this phone only" hint={`Last backup: ${lastBackup ? formatDay(lastBackup.slice(0, 10), { month: 'short', day: 'numeric', year: 'numeric' }) : 'never'}${persisted ? ' · protected from cleanup' : ''}`} stacked>
           <div className="flex gap-2">
-            <Button onClick={backup} className="flex-1 gap-2"><Download size={17} /> Save backup</Button>
+            <Button onClick={backup} className="flex-1 gap-2"><Download size={17} /> Back up</Button>
             <Button variant="secondary" onClick={() => fileInput.current?.click()} className="flex-1 gap-2"><Upload size={17} /> Restore</Button>
           </div>
           <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={(e) => restore(e.target.files?.[0])} />
         </Row>
         <Row icon={<Trash2 size={19} />} title="Delete everything" hint="Start fresh. Save a backup first.">
-          <Button variant="danger" className="!min-h-10 !px-3 !py-1.5 text-xs"
+          <Button variant="danger" className="!min-h-11 !px-4 !py-1.5 text-sm"
             onClick={() => confirm.ask('Delete everything?', 'All habits, history, points and settings on this phone will be erased. This cannot be undone.', async () => { await db.delete(); location.hash = '#/'; location.reload() })}>
             Delete
           </Button>
@@ -242,7 +242,7 @@ export default function Settings() {
 
       {/* Tapping the version 7 times opens the private test workspace on this device. */}
       <button
-        className="w-full py-3 text-center text-xs font-bold text-muted"
+        className="w-full py-3 text-center text-[13px] font-bold text-muted"
         onClick={() => {
           const n = taps + 1
           setTaps(n)

@@ -115,19 +115,19 @@ export default function Scorecard() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Back</button>
+      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
       <div className="flex items-center gap-2">
         <h1 className="text-3xl font-black tracking-tight">Habits Scorecard</h1>
         <InfoTip tip="scorecard" />
       </div>
       <p className="mb-4 mt-1 text-sm font-semibold text-muted">
-        List your normal day, from waking up to going to bed. Mark each thing <b className="text-sage-deep dark:text-sage">+ good</b>, <b>= neutral</b> or <b className="text-rose">− bad</b>.
+        List your normal day, from waking up to going to bed. Mark each thing <b className="text-sage-deep">+ good</b>, <b>= neutral</b> or <b className="text-rose">− bad</b>.
       </p>
 
       {shown.length > 0 && (
         <Card className="mb-4">
-          <div className="mb-1 font-black">{firstTime ? '👋 Tap what you do on a normal day' : '💡 More ideas'}</div>
-          <p className="mb-3 text-xs font-semibold text-muted">Tap to add it. A new idea pops up each time.</p>
+          <div className="mb-1 text-[17px] font-black">{firstTime ? '👋 Tap what you do on a normal day' : '💡 More ideas'}</div>
+          <p className="mb-3 text-[13px] font-semibold text-muted">Tap to add it. A new idea pops up each time.</p>
           <div className="flex flex-wrap gap-2">
             {shown.map((s) => (
               <button key={s.text} onClick={() => add(s.text, s.rating)}
@@ -145,14 +145,14 @@ export default function Scorecard() {
         <Button onClick={() => { add(text); setText('') }}>Add</Button>
       </div>
 
-      {items.length > 1 && <p className="mb-2 text-xs font-semibold text-muted">Drag ⠿ to reorder. Tap a name to edit or replace it.</p>}
+      {items.length > 1 && <p className="mb-2 text-[13px] font-semibold text-muted">Drag ⠿ to reorder. Tap a name to edit or replace it.</p>}
       <ol ref={listRef} className="space-y-2">
         {items.map((item, n) => {
           const linked = item.habit_id ? progress.byId.get(item.habit_id) : undefined
           const dragging = drag?.from === n
           return (
             <li key={item.id}
-              className={`rounded-3xl clay-sm p-3 shadow-sm ${item.id === justAdded ? 'animate-rise' : ''} ${dragging ? 'relative z-10 scale-[1.02] shadow-xl' : ''}`}
+              className={`clay-sm rounded-[22px] p-3 ${item.id === justAdded ? 'animate-rise' : ''} ${dragging ? 'relative z-10 scale-[1.02] shadow-xl' : ''}`}
               style={{ transform: `translateY(${shiftFor(n)}px)${dragging ? ' scale(1.02)' : ''}`, transition: dragging ? 'none' : 'transform 0.2s ease' }}>
               <div className="flex items-center gap-1.5">
                 <button
@@ -163,18 +163,18 @@ export default function Scorecard() {
                 <button onClick={() => openEdit(item)} className="min-w-0 flex-1 text-left font-bold">{item.routine}</button>
                 {RATINGS.map((r) => (
                   <button key={r.value} onClick={() => saveScorecardItem({ ...item, rating: r.value })}
-                    className={`bouncy h-9 w-9 rounded-xl font-black ${item.rating === r.value ? r.on : 'bg-soft text-muted'}`}>
+                    className={`bouncy h-11 w-11 rounded-full font-black ${item.rating === r.value ? r.on : 'tray text-muted'}`}>
                     {r.label}
                   </button>
                 ))}
               </div>
               <div className="mt-2 pl-7">
                 {linked ? (
-                  <Link to={`/habits/${linked.habit.id}`} className="text-xs font-extrabold text-sage-deep dark:text-sage">
+                  <Link to={`/habits/${linked.habit.id}`} className="text-xs font-extrabold text-sage-deep">
                     ✓ Tracking · {linked.habit.type === 'break' ? `🌿 ${linked.stats.current} days clean` : `🔥 ${linked.stats.current} day streak`} ›
                   </Link>
                 ) : (
-                  <button onClick={() => { setTracking(item); setTrackName(item.routine); setDays(0) }} className="bouncy rounded-full bg-soft px-3 py-1 text-xs font-extrabold text-muted">
+                  <button onClick={() => { setTracking(item); setTrackName(item.routine); setDays(0) }} className="bouncy rounded-full tray px-3 py-1 text-[13px] font-extrabold text-muted">
                     {item.rating === '-' ? '✂️ Track to break it' : '📈 Track this habit'}
                   </button>
                 )}
@@ -215,11 +215,11 @@ export default function Scorecard() {
             <div className="flex flex-wrap items-center gap-2">
               <Stepper value={days} min={0} max={365} onChange={setDays} />
               {[7, 14, 30].map((d) => (
-                <button key={d} onClick={() => setDays(d)} className={`bouncy rounded-full px-3 py-1.5 text-xs font-extrabold ${days === d ? 'bg-sage text-on-pastel' : 'bg-soft text-muted'}`}>{d}</button>
+                <button key={d} onClick={() => setDays(d)} className={`bouncy rounded-full px-3 py-1.5 text-xs font-extrabold ${days === d ? 'bg-sage text-on-pastel' : 'tray text-muted'}`}>{d}</button>
               ))}
             </div>
           </Field>
-          <p className="text-xs font-semibold text-muted">You can add more details later with ✏️ Edit.</p>
+          <p className="text-[13px] font-semibold text-muted">You can add more details later with ✏️ Edit.</p>
           <div className="flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={() => setTracking(null)}>Cancel</Button>
             <Button className="flex-1" disabled={!trackName.trim()} onClick={track}>Start tracking</Button>

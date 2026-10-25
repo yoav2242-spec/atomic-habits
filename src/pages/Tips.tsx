@@ -12,7 +12,7 @@ export default function Tips() {
   }, [])
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Back</button>
+      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
       <h1 className="text-3xl font-black tracking-tight">💡 Tips</h1>
       <p className="mb-5 font-semibold text-muted">Small ideas that make habits stick. A new one shows on your Today screen every day.</p>
       <div className="space-y-4">

@@ -27,7 +27,7 @@ export function BarChart({ values, labels, color = 'var(--color-sage)', highligh
       </svg>
       <div className="mt-1.5 flex">
         {labels.map((l, i) => (
-          <span key={i} className="flex-1 text-center text-[10px] font-bold text-muted">{l}</span>
+          <span key={i} className="flex-1 text-center text-[11px] font-bold text-muted">{l}</span>
         ))}
       </div>
     </div>
@@ -35,20 +35,13 @@ export function BarChart({ values, labels, color = 'var(--color-sage)', highligh
 }
 
 /** A smooth filled line, any positive values. */
-export function AreaChart({ values, color = 'var(--color-lavender)', height = 110 }: { values: number[]; color?: string; height?: number }) {
+export function AreaChart({ values, color = 'var(--color-level)', height = 110 }: { values: number[]; color?: string; height?: number }) {
   const max = Math.max(1, ...values)
   const pts = values.map((v, i) => [(i / Math.max(1, values.length - 1)) * 300, height - 6 - (v / max) * (height - 12)] as const)
   const line = pts.map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`)).join(' ')
-  const id = `grad-${color.replace(/[^a-z0-9]/gi, '')}`
   return (
     <svg viewBox={`0 0 300 ${height}`} className="w-full overflow-visible" style={{ height }} preserveAspectRatio="none">
-      <defs>
-        <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.45" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={`${line} L300,${height} L0,${height} Z`} fill={`url(#${id})`} />
+      <path d={`${line} L300,${height} L0,${height} Z`} fill={color} fillOpacity={0.16} />
       <path d={line} fill="none" stroke={color} strokeWidth="3" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
     </svg>
   )

@@ -86,15 +86,15 @@ export default function Recap() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="text-sm font-bold text-muted">‹ Back</button>
+        <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
         <div className="flex gap-1.5">
-          <button onClick={() => navigate(`/recap/${prevYm}`, { replace: true })} className="bouncy h-9 w-9 rounded-full bg-card font-black shadow-sm" aria-label="Previous month">‹</button>
-          <button onClick={() => navigate(`/recap/${nextYm}`, { replace: true })} disabled={nextYm > today.slice(0, 7)} className="bouncy h-9 w-9 rounded-full bg-card font-black shadow-sm disabled:opacity-30" aria-label="Next month">›</button>
+          <button onClick={() => navigate(`/recap/${prevYm}`, { replace: true })} className="clay-sm bouncy h-11 w-11 rounded-full font-black" aria-label="Previous month">‹</button>
+          <button onClick={() => navigate(`/recap/${nextYm}`, { replace: true })} disabled={nextYm > today.slice(0, 7)} className="clay-sm bouncy h-11 w-11 rounded-full font-black disabled:opacity-30" aria-label="Next month">›</button>
         </div>
       </div>
 
       <Slide from="var(--color-lavender)" to="var(--color-rose)">
-        <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">Your month in habits</div>
+        <div className="text-sm font-extrabold text-on-pastel/70">Your month in habits</div>
         <div className="mt-1 text-4xl font-black">{monthName}</div>
         <div className="mt-6 text-6xl font-black">{checkIns}</div>
         <div className="font-bold text-on-pastel/70">check-ins. Each one a vote for who you're becoming.</div>
@@ -113,7 +113,7 @@ export default function Recap() {
 
           {star && (
             <Slide from="var(--color-butter)" to="var(--color-peach)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">⭐ Star habit</div>
+              <div className="text-sm font-extrabold text-on-pastel/70">⭐ Star habit</div>
               <div className="mt-2 text-5xl">{star.p.habit.emoji}</div>
               <div className="text-2xl font-black">{star.p.habit.name}</div>
               <div className="font-bold text-on-pastel/70">{Math.round(star.rate * 100)}% of the time. Amazing.</div>
@@ -122,7 +122,7 @@ export default function Recap() {
 
           {longest && longest.bestRun >= 2 && (
             <Slide from="var(--color-peach)" to="var(--color-rose)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">🔥 Longest run</div>
+              <div className="text-sm font-extrabold text-on-pastel/70">🔥 Longest run</div>
               <div className="mt-2 text-5xl font-black">{longest.bestRun} days</div>
               <div className="font-bold text-on-pastel/70">of {longest.p.habit.emoji} {longest.p.habit.name} in a row</div>
             </Slide>
@@ -130,7 +130,7 @@ export default function Recap() {
 
           {topDay && topDay.done > 0 && (
             <Slide from="var(--color-sky)" to="var(--color-lavender)">
-              <div className="text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">📅 Your power day</div>
+              <div className="text-sm font-extrabold text-on-pastel/70">📅 Your power day</div>
               <div className="mt-2 text-4xl font-black">{WEEKDAY_LONG[topDay.wd]}s</div>
               <div className="font-bold text-on-pastel/70">You got the most done on {WEEKDAY_LONG[topDay.wd]}s this month.</div>
             </Slide>
@@ -140,7 +140,7 @@ export default function Recap() {
             <Slide from="var(--color-lavender)" to="var(--color-sky)">
               {votesBy.length > 0 && (
                 <>
-                  <div className="mb-2 text-sm font-extrabold uppercase tracking-wider text-on-pastel/70">🪞 Who you became</div>
+                  <div className="mb-2 text-sm font-extrabold text-on-pastel/70">🪞 Who you became</div>
                   {votesBy.slice(0, 3).map((v) => (
                     <div key={v.name} className="flex justify-between text-lg font-black"><span>I am {v.name}</span><span>{v.votes} votes</span></div>
                   ))}
@@ -157,7 +157,7 @@ export default function Recap() {
       )}
 
       <Button variant="lavender" className="mt-2 w-full" onClick={share}>📤 Share my month</Button>
-      <p className="mt-2 text-center text-xs font-semibold text-muted">Or take a screenshot to keep it.</p>
+      <p className="mt-2 text-center text-[13px] font-semibold text-muted">Or take a screenshot to keep it.</p>
     </div>
   )
 }

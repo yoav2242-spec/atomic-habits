@@ -44,14 +44,14 @@ export default function Workspace() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Back</button>
+      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[15px] font-bold text-muted">‹ Back</button>
       <h1 className="text-3xl font-black tracking-tight">🛠 Test workspace</h1>
       <p className="mb-5 font-semibold text-muted">Only you can see this, and only on this device. Use it to see how the app looks after days, weeks or a year of habits.</p>
 
       <Card className={`mb-4 ${inSandbox ? '' : '!border-sage'}`}>
         {inSandbox ? (
           <>
-            <div className="mb-1 font-black">🧪 You're in test mode</div>
+            <div className="mb-1 text-[17px] font-black">🧪 You're in test mode</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               Everything you see and do now uses a separate test copy. Your real habits are safe and untouched.
             </p>
@@ -59,7 +59,7 @@ export default function Workspace() {
           </>
         ) : (
           <>
-            <div className="mb-1 font-black">Start testing</div>
+            <div className="mb-1 text-[17px] font-black">Start testing</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               Test mode switches to a separate test copy, so pretend dates and fake history never touch your real habits.
             </p>
@@ -71,7 +71,7 @@ export default function Workspace() {
       {inSandbox && (
         <>
           <Card className="mb-4">
-            <div className="font-black">📅 Pretend date</div>
+            <div className="text-[17px] font-black">📅 Pretend date</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               The app thinks today is <b className="text-ink">{formatDay(todayKey(), { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</b>
               {dayOffset ? ` (${dayOffset > 0 ? '+' : ''}${dayOffset} days)` : ' (the real date)'}.
@@ -85,11 +85,11 @@ export default function Workspace() {
               <Button variant="secondary" className="!py-2 text-xs" onClick={() => setDayOffset(dayOffset - 1)}>−1 day</Button>
               <Button variant="secondary" className="!py-2 text-xs" disabled={!dayOffset} onClick={() => setDayOffset(0)}>Back to real date</Button>
             </div>
-            <p className="mt-2 text-xs font-semibold text-muted">Tip: jump +1 day, check off your habits, repeat. That's how a real week feels.</p>
+            <p className="mt-2 text-[13px] font-semibold text-muted">Tip: jump +1 day, check off your habits, repeat. That's how a real week feels.</p>
           </Card>
 
           <Card className="mb-4">
-            <div className="font-black">⏩ Fill in fake history</div>
+            <div className="text-[17px] font-black">⏩ Fill in fake history</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               Makes up check-ins for the days before the pretend date. If the test copy has no habits, a few starter habits are added first.
             </p>
@@ -105,7 +105,7 @@ export default function Workspace() {
           </Card>
 
           <Card className="mb-4 space-y-2">
-            <div className="font-black">🗂 Test copy</div>
+            <div className="text-[17px] font-black">🗂 Test copy</div>
             <Button variant="secondary" className="w-full" disabled={busy} onClick={() => run('Copied your real habits into the test copy', copyRealData)}>
               Copy my real habits into it
             </Button>

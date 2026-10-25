@@ -1,8 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
+import { AlarmClock, CalendarDays, Check, ChevronLeft, Lightbulb, Pencil } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TimePicker } from '../components/TimePicker'
-import { Button, buttonClass, Field, Segmented, Stepper, Toggle, useToast } from '../components/ui'
+import { Button, buttonClass, Field, Segmented, spring, Stepper, Toggle, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -21,15 +23,15 @@ const MON_FIRST = [1, 2, 3, 4, 5, 6, 0]
 const STEPS = {
   build: [
     { title: 'The habit', law: '' },
-    { title: 'Who do you want to become?', law: 'Identity' },
-    { title: 'Make it obvious', law: 'Law 1 · When & where' },
-    { title: 'Make it attractive', law: 'Law 2 · Want to do it' },
-    { title: 'Make it easy', law: 'Law 3 · Start tiny' },
-    { title: 'Make it satisfying', law: 'Law 4 · Feel the win' },
+    { title: 'Who do you want to become?', law: 'Identity · who it makes you' },
+    { title: 'Make it obvious', law: 'Law 1 of 4 · when and where' },
+    { title: 'Make it attractive', law: 'Law 2 of 4 · want to do it' },
+    { title: 'Make it easy', law: 'Law 3 of 4 · start tiny' },
+    { title: 'Make it satisfying', law: 'Law 4 of 4 · feel the win' },
   ],
   break: [
     { title: 'The habit to break', law: '' },
-    { title: 'Who do you want to become?', law: 'Identity' },
+    { title: 'Who do you want to become?', law: 'Identity · who it makes you' },
     { title: 'Make it invisible', law: 'Law 1, flipped' },
     { title: 'Make it unattractive', law: 'Law 2, flipped' },
     { title: 'Make it difficult', law: 'Law 3, flipped' },
@@ -38,11 +40,16 @@ const STEPS = {
 }
 
 function Tip({ children }: { children: ReactNode }) {
-  return <p className="rounded-2xl bg-sage/12 p-3.5 text-sm font-semibold leading-relaxed">💡 {children}</p>
+  return (
+    <p className="flex gap-2.5 rounded-[20px] bg-[color-mix(in_srgb,var(--color-sage)_20%,var(--card))] p-3.5 text-[15px] font-semibold leading-relaxed">
+      <Lightbulb size={18} className="mt-0.5 shrink-0 text-sage-deep" aria-hidden />
+      <span>{children}</span>
+    </p>
+  )
 }
 
 function Sentence({ children }: { children: ReactNode }) {
-  return <p className="rounded-2xl border-2 border-dashed border-sage/50 p-3.5 text-[15px] font-bold">“{children}”</p>
+  return <p className="rounded-2xl border-2 border-dashed border-sage p-4 text-[17px] font-extrabold leading-snug tracking-[-0.01em]">“{children}”</p>
 }
 
 export default function HabitForm() {
@@ -110,23 +117,23 @@ export default function HabitForm() {
   if (step === -1) {
     return (
       <div>
-        <button onClick={() => navigate(-1)} className="mb-4 text-sm font-bold text-muted">‹ Cancel</button>
-        <h1 className="text-3xl font-black tracking-tight">Add a habit</h1>
-        <p className="mb-5 font-semibold text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
-        <button onClick={() => setStep(0)} className="bouncy mb-4 flex w-full items-center gap-3 rounded-3xl bg-sage p-4 text-left text-on-pastel shadow-[0_4px_0_0_var(--color-sage-deep)]">
-          <span className="text-3xl">✏️</span>
+        <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center gap-0.5 pr-3 text-[15px] font-bold text-muted"><ChevronLeft size={20} /> Cancel</button>
+        <h1 className="text-[30px] font-black leading-[1.05] tracking-[-0.02em]">Add a habit</h1>
+        <p className="mb-5 mt-2 font-semibold leading-snug text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
+        <button onClick={() => setStep(0)} className="btn-3d mb-5 flex w-full items-center gap-3.5 rounded-[24px] bg-sage p-4 text-left text-on-pastel">
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-card/45"><Pencil size={22} /></span>
           <span>
             <span className="block text-lg font-black">Make my own</span>
-            <span className="text-sm font-semibold text-on-pastel/70">We'll guide you step by step</span>
+            <span className="text-sm font-bold text-on-pastel/75">We'll guide you step by step</span>
           </span>
         </button>
         <div className="grid grid-cols-2 gap-2.5">
           {TEMPLATES.map((t) => (
             <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(0) }}
-              className="bouncy rounded-3xl clay-sm p-3.5 text-left shadow-sm">
-              <div className="mb-1 flex h-10 w-10 items-center justify-center rounded-2xl text-2xl" style={{ background: `${t.habit.color}33` }}>{t.habit.emoji}</div>
-              <div className="text-sm font-extrabold leading-tight">{t.habit.name}</div>
-              <div className="text-xs font-semibold text-muted">{t.habit.type === 'break' ? 'Break a bad habit' : `I am ${t.identity}`}</div>
+              className="clay-sm bouncy rounded-[22px] p-3.5 text-left">
+              <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-[16px] text-2xl" style={{ background: `color-mix(in srgb, ${t.habit.color} 38%, var(--card))` }}>{t.habit.emoji}</div>
+              <div className="text-[15px] font-extrabold leading-tight">{t.habit.name}</div>
+              <div className="mt-0.5 text-[13px] font-semibold leading-snug text-muted">{t.habit.type === 'break' ? 'Break a bad habit' : `I am ${t.identity}`}</div>
             </button>
           ))}
         </div>
@@ -141,7 +148,7 @@ export default function HabitForm() {
       : { type, cue_trigger: '', hide_plan: '', friction_plan: '' })
 
   const typeSwitch = (
-    <Segmented value={h.type} onChange={switchType} options={[{ value: 'build', label: '🌱 Build a habit' }, { value: 'break', label: '✂️ Break a habit' }]} />
+    <Segmented value={h.type} onChange={switchType} options={[{ value: 'build', label: 'Build a habit' }, { value: 'break', label: 'Break a habit' }]} />
   )
 
   const pastProgress = !id && (
@@ -166,8 +173,8 @@ export default function HabitForm() {
           <>
             <Tip>Pick an exact time and place. A clear plan makes you much more likely to actually do it.</Tip>
             {isAmount(h) ? (
-              <p className="clay-in rounded-2xl p-3.5 text-sm font-bold">
-                {h.emoji} This is an every-day amount. You set how much, and in how many {h.step_label || 'drinks'}s, in "Make it easy".
+              <p className="tray rounded-2xl p-3.5 text-[15px] font-bold">
+                This is an every-day amount. You set how much, and in how many {h.step_label || 'drinks'}s, in "Make it easy".
               </p>
             ) : (
               <>
@@ -181,7 +188,7 @@ export default function HabitForm() {
                       const on = days.includes(d)
                       return (
                         <button key={d} type="button" onClick={() => set({ schedule: { kind: 'weekdays', days: on ? days.filter((x) => x !== d) : [...days, d] } })}
-                          className={`min-h-11 flex-1 rounded-xl text-sm font-extrabold ${on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                          className={`min-h-11 flex-1 rounded-full text-sm font-extrabold ${on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
                           {WEEKDAY_SHORT[d].slice(0, 2)}
                         </button>
                       )
@@ -276,17 +283,19 @@ export default function HabitForm() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => (step === 0 ? (id ? navigate(-1) : setStep(-1)) : setStep(step - 1))} className="text-sm font-bold text-muted">‹ {step === 0 && id ? 'Cancel' : 'Back'}</button>
-        <div className="flex gap-1.5">
-          {steps.map((_, i) => (
-            <button key={i} onClick={() => setStep(i)} aria-label={`Step ${i + 1}`}
-              className={`h-2.5 rounded-full transition-all ${i === step ? 'w-7 bg-sage' : i < step ? 'w-2.5 bg-sage/60' : 'w-2.5 bg-line'}`} />
+      <div className="mb-3 flex items-center justify-between">
+        <button onClick={() => (step === 0 ? (id ? navigate(-1) : setStep(-1)) : setStep(step - 1))} className="-ml-1 flex min-h-11 items-center gap-0.5 pr-3 text-[15px] font-bold text-muted"><ChevronLeft size={20} /> {step === 0 && id ? 'Cancel' : 'Back'}</button>
+        <div className="-mr-1 flex">
+          {steps.map((s, i) => (
+            <button key={i} onClick={() => setStep(i)} aria-label={`Step ${i + 1}: ${s.title}`} aria-current={i === step ? 'step' : undefined}
+              className="flex h-11 items-center justify-center px-[3px]">
+              <motion.span layout transition={spring} className={`block h-3 rounded-full ${i === step ? 'puffy w-7 bg-sage' : i < step ? 'w-3 bg-sage/55' : 'clay-in w-3'}`} />
+            </button>
           ))}
         </div>
       </div>
-      {steps[step].law && <p className="text-xs font-black uppercase tracking-wider text-sage-deep dark:text-sage">{steps[step].law}</p>}
-      <h1 className="mb-5 text-[26px] font-black tracking-tight">{id && step === 0 ? 'Edit habit' : steps[step].title}</h1>
+      <h1 className="text-[28px] font-black leading-[1.1] tracking-[-0.02em]">{id && step === 0 ? 'Edit habit' : steps[step].title}</h1>
+      {steps[step].law ? <p className="mb-5 mt-1 text-[15px] font-bold text-sage-deep">{steps[step].law}</p> : <div className="mb-5" />}
       <div key={step} className="animate-rise space-y-4">{pages[step]}</div>
       {isLast && h.type === 'build' && (
         <AlsoAdd h={h} set={set} alarm={addAlarm} setAlarm={setAddAlarm} pickTime={() => setStep(2)} />
@@ -294,11 +303,11 @@ export default function HabitForm() {
       <div className="mt-8 flex gap-2">
         {id && !isLast && <Button variant="secondary" className="flex-1" onClick={save} disabled={!h.name.trim()}>Save</Button>}
         <Button className="flex-1 text-lg" disabled={!h.name.trim()} onClick={() => (isLast ? save() : setStep(step + 1))}>
-          {isLast ? (id ? 'Save changes' : 'Create habit 🎉') : 'Next'}
+          {isLast ? (id ? 'Save changes' : 'Create habit') : 'Next'}
         </Button>
       </div>
-      {!isLast && step > 0 && <p className="mt-3 text-center text-xs font-semibold text-muted">Everything here is optional. Skip what you like.</p>}
-      {id && <p className="mt-3 text-center text-xs font-semibold text-muted">Tap the dots at the top to jump to any part.</p>}
+      {!isLast && step > 0 && <p className="mt-3 text-center text-[13px] font-semibold text-muted">Everything here is optional. Skip what you like.</p>}
+      {id && <p className="mt-3 text-center text-[13px] font-semibold text-muted">Tap the dots at the top to jump to any part.</p>}
     </div>
   )
 }
@@ -310,19 +319,22 @@ function EmojiAndColor({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void 
         <div className="grid grid-cols-8 gap-1.5">
           {EMOJIS.map((e) => (
             <button key={e} type="button" onClick={() => set({ emoji: e })}
-              className={`bouncy aspect-square rounded-xl text-xl ${h.emoji === e ? 'ring-2 ring-sage' : 'bg-soft'}`}
-              style={h.emoji === e ? { background: `${h.color}33` } : undefined}>
+              className={`bouncy aspect-square min-h-10 rounded-[14px] text-xl ${h.emoji === e ? 'puffy' : 'tray'}`}
+              style={h.emoji === e ? { background: h.color } : undefined} aria-pressed={h.emoji === e}>
               {e}
             </button>
           ))}
         </div>
       </Field>
       <Field label="Color">
-        <div className="flex gap-2">
+        <div className="grid grid-cols-8">
           {HABIT_COLORS.map((c) => (
-            <button key={c} type="button" onClick={() => set({ color: c })} aria-label={c}
-              className={`bouncy h-9 w-9 rounded-full ${h.color === c ? 'scale-110 ring-[3px] ring-ink/70 ring-offset-2 ring-offset-bg' : ''}`}
-              style={{ background: c }} />
+            <button key={c} type="button" onClick={() => set({ color: c })} aria-label={`Colour ${c}`} aria-pressed={h.color === c}
+              className="bouncy flex h-11 items-center justify-center rounded-full">
+              <span className={`puffy flex h-9 w-9 items-center justify-center rounded-full transition-transform ${h.color === c ? 'scale-110' : ''}`} style={{ background: c }}>
+                {h.color === c && <Check size={18} strokeWidth={3.2} className="text-on-pastel" />}
+              </span>
+            </button>
           ))}
         </div>
       </Field>
@@ -341,7 +353,7 @@ function IdentityStep(p: {
         <div className="flex flex-wrap gap-2">
           {p.identities.map((i) => (
             <button key={i.id} type="button" onClick={() => p.set({ identity_id: p.h.identity_id === i.id ? null : i.id })}
-              className={`bouncy rounded-full px-4 py-2 text-sm font-extrabold ${p.h.identity_id === i.id ? 'bg-lavender text-on-pastel' : 'bg-soft text-muted'}`}>
+              className={`bouncy min-h-11 rounded-full px-4 py-2 text-sm font-extrabold ${p.h.identity_id === i.id ? 'puffy bg-lavender text-on-pastel' : 'clay-sm text-muted'}`}>
               I am {i.name}
             </button>
           ))}
@@ -370,14 +382,14 @@ function Summary({ h, identity, anchor }: { h: Habit; identity?: string; anchor?
     h.type === 'break' && h.friction_plan && ['Make it hard', h.friction_plan],
   ].filter(Boolean) as [string, string][]
   return (
-    <div className="rounded-3xl p-4" style={{ background: `${h.color}22` }}>
-      <div className="mb-2 flex items-center gap-2 text-lg font-black"><span className="text-2xl">{h.emoji}</span>{h.name || 'Your habit'}</div>
-      <dl className="space-y-1 text-sm">
+    <div className="rounded-[24px] p-4" style={{ background: `color-mix(in srgb, ${h.color} 26%, var(--card))` }}>
+      <div className="mb-3 flex items-center gap-2.5 text-lg font-black leading-tight"><span className="text-2xl">{h.emoji}</span>{h.name || 'Your habit'}</div>
+      <dl className="space-y-1.5 text-[15px]">
         {rows.map(([k, v]) => (
-          <div key={k} className="flex gap-2"><dt className="w-24 shrink-0 font-bold text-muted">{k}</dt><dd className="font-semibold">{v}</dd></div>
+          <div key={k} className="flex gap-2"><dt className="w-[6.5rem] shrink-0 font-bold opacity-70">{k}</dt><dd className="font-semibold">{v}</dd></div>
         ))}
       </dl>
-      <p className="mt-2 text-xs font-semibold text-muted">Want to change something? Tap the dots at the top.</p>
+      <p className="mt-3 text-[13px] font-semibold opacity-70">Want to change something? Tap the dots at the top.</p>
     </div>
   )
 }
@@ -399,14 +411,14 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
         <Segmented value={mode} onChange={setMode} options={[{ value: 'once', label: 'Just do it' }, { value: 'times', label: 'Times a day' }, { value: 'amount', label: 'An amount' }]} />
         {mode === 'times' && <Stepper value={h.target_count} min={2} max={30} onChange={(target_count) => set({ target_count })} />}
         {mode === 'amount' && (
-          <div className="space-y-3 rounded-2xl bg-soft p-3">
+          <div className="tray space-y-4 rounded-[20px] p-3.5">
             <div>
-              <div className="mb-1 text-xs font-bold text-muted">What do you drink from?</div>
+              <div className="mb-2 text-[13px] font-bold text-muted">What do you drink from?</div>
               {presets.length > 0 && (
                 <div className="mb-2 flex flex-wrap gap-1.5">
                   {presets.map((c) => (
                     <button key={`${c.label}${c.size}`} type="button" onClick={() => setContainer(c.size, c.label)}
-                      className={`min-h-10 rounded-full px-3 text-xs font-extrabold ${h.step === c.size && h.step_label === c.label ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                      className={`min-h-11 rounded-full px-3.5 text-[13px] font-extrabold ${h.step === c.size && h.step_label === c.label ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
                       {c.label} · {c.size} {h.unit}
                     </button>
                   ))}
@@ -422,7 +434,7 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
               <Stepper value={servings} min={1} max={40} onChange={(n) => set({ target_count: n * Math.max(1, h.step) })} />
             </div>
             <div>
-              <div className="mb-1 text-xs font-bold text-muted">Or type the daily total</div>
+              <div className="mb-2 text-[13px] font-bold text-muted">Or type the daily total</div>
               <div className="flex gap-2">
                 <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-1/2" aria-label="Daily total" />
                 <select value={UNITS.includes(h.unit) ? h.unit : 'other'} onChange={(e) => set({ unit: e.target.value === 'other' ? 'times' : e.target.value })} className="!w-1/2">
@@ -447,22 +459,22 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
   if (!h.cue_time) return null
   const alarm = clockAlarmUrl(h)
   return (
-    <div className="clay-in space-y-3 rounded-2xl p-3.5">
+    <div className="tray space-y-4 rounded-[20px] p-3.5">
       {remindersReady && (<>
       <div className="flex items-center gap-3">
         <span className="flex-1">
           <span className="block text-sm font-extrabold">Remind me at {h.cue_time}</span>
-          <span className="block text-xs font-semibold text-muted">A notification, only if it isn't done yet</span>
+          <span className="block text-[13px] font-semibold text-muted">A notification, only if it isn't done yet</span>
         </span>
         <Toggle label="Remind me" on={h.remind} onChange={(remind) => set({ remind })} />
       </div>
       {h.remind && (
         <div>
-          <div className="mb-1.5 text-xs font-bold text-muted">Vibration for this habit (tap to feel it)</div>
+          <div className="mb-2 text-[13px] font-bold text-muted">Vibration for this habit (tap to feel it)</div>
           <div className="flex flex-wrap gap-1.5">
             {VIBRATIONS.map((v) => (
               <button key={v.value} type="button" onClick={() => { set({ vibrate: v.value }); navigator.vibrate?.(v.pattern) }}
-                className={`min-h-10 rounded-full px-3 text-xs font-extrabold ${h.vibrate === v.value ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                className={`min-h-11 rounded-full px-3.5 text-[13px] font-extrabold ${h.vibrate === v.value ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
                 {v.label}
               </button>
             ))}
@@ -472,7 +484,7 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
       </>)}
       {h.type === 'build' && <CalendarChoice h={h} set={set} />}
       {isAndroid() && alarm && (
-        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-1.5 !px-3 text-sm')}>⏰ Add a Clock alarm (pick its sound)</a>
+        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-1.5 !px-3 text-sm')}><AlarmClock size={17} /> Add a Clock alarm (pick its sound)</a>
       )}
     </div>
   )
@@ -484,19 +496,19 @@ function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
 }) {
   if (!h.cue_time) {
     return (
-      <div className="clay-in mt-6 flex items-center gap-3 rounded-2xl p-3.5">
+      <div className="tray mt-6 flex items-center gap-3 rounded-[20px] p-3.5">
         <span className="flex-1 text-sm font-bold">Want a reminder? Pick a time first.</span>
-        <Button variant="secondary" className="!min-h-10 !px-3 !py-1.5 text-xs" onClick={pickTime}>Pick a time</Button>
+        <Button variant="secondary" className="!min-h-11 !px-4 !py-1.5 text-sm" onClick={pickTime}>Pick a time</Button>
       </div>
     )
   }
   return (
-    <div className="clay-in mt-6 space-y-3 rounded-2xl p-3.5">
-      <div className="text-sm font-extrabold">Reminders at {h.cue_time}</div>
+    <div className="tray mt-6 space-y-4 rounded-[20px] p-3.5">
+      <div className="text-[15px] font-extrabold">Reminders at {h.cue_time}</div>
       <CalendarChoice h={h} set={set} />
       {isAndroid() && !isAmount(h) && (
         <div className="flex items-center gap-3">
-          <span className="flex-1 text-sm font-bold">⏰ Clock alarm (opens your Clock app)</span>
+          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold"><AlarmClock size={17} className="shrink-0 text-muted" /> Clock alarm (opens your Clock app)</span>
           <Toggle label="Clock alarm" on={alarm} onChange={setAlarm} />
         </div>
       )}
@@ -528,8 +540,8 @@ function CalendarChoice({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void
     <div className="space-y-2">
       <div className="flex items-center gap-3">
         <span className="flex-1">
-          <span className="block text-sm font-extrabold">📅 Add to my Habits calendar</span>
-          <span className="block text-xs font-semibold text-muted">{h.calendar ? `Google Calendar will remind you at ${h.cue_time}` : 'Off: this habit stays out of your calendar'}</span>
+          <span className="flex items-center gap-2 text-sm font-extrabold"><CalendarDays size={17} className="shrink-0 text-muted" /> Add to my Habits calendar</span>
+          <span className="mt-0.5 block text-[13px] font-semibold text-muted">{h.calendar ? `Google Calendar will remind you at ${h.cue_time}` : 'Off: this habit stays out of your calendar'}</span>
         </span>
         <Toggle label="Add to my Habits calendar" on={h.calendar} onChange={(calendar) => set({ calendar })} />
       </div>

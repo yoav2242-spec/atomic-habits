@@ -21,7 +21,7 @@ export function Garden({ habits, today }: { habits: HabitProgress[]; today: stri
   return (
     <div className="clay-in overflow-hidden rounded-[24px]"
       style={{ background: 'linear-gradient(180deg, color-mix(in srgb, var(--color-sky) 18%, var(--card)) 0%, var(--card) 55%, color-mix(in srgb, var(--color-sage) 28%, var(--card)) 100%)' }}>
-      <div className="flex items-center justify-between px-4 pt-3 text-xs font-black uppercase tracking-wider text-muted">
+      <div className="flex items-center justify-between px-4 pt-3 text-xs font-black text-muted">
         <span>Sunny today</span>
         <span>🌤️</span>
       </div>
@@ -47,7 +47,7 @@ export function Garden({ habits, today }: { habits: HabitProgress[]; today: stri
                 </span>
               </span>
               <span className="mt-1 h-1.5 w-10 rounded-full" style={{ background: `color-mix(in srgb, ${p.habit.color} 55%, #8a6a4a)` }} />
-              <span className="mt-1 line-clamp-1 text-[10px] font-extrabold text-muted">{p.habit.emoji} {p.habit.name}</span>
+              <span className="mt-1 line-clamp-1 text-[11px] font-extrabold text-muted">{p.habit.emoji} {p.habit.name}</span>
             </Link>
           )
         })}

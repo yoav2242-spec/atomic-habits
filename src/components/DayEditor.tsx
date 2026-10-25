@@ -52,7 +52,7 @@ export function DayEditor({ habit, date, checkin, onClose }: { habit: Habit; dat
           ))}
         </div>
         {habit.type === 'build' && target > 1 && state !== 'two_min' && (
-          <div className="flex items-center justify-between rounded-2xl bg-soft p-3">
+          <div className="flex items-center justify-between rounded-2xl tray p-3">
             <span className="text-sm font-bold">{isAmount(habit) ? `How much? (${habit.unit})` : 'How many times?'}<span className="block text-xs text-muted">{progressText(habit, count)}</span></span>
             <Stepper value={count} min={0} max={Math.max(target * 2, 30)} step={step} onChange={(n) => { setCount(n); setState(n >= target ? 'done' : 'none') }} />
           </div>

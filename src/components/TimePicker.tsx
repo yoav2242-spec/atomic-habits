@@ -87,13 +87,13 @@ export function TimePicker({ value, onChange, placeholder = 'Pick a time' }: { v
         <div className="mb-4 grid grid-cols-3 gap-2">
           {QUICK.map((q) => (
             <button key={q.time} type="button" onClick={() => pick(q.time)}
-              className={`min-h-14 rounded-2xl px-2 py-2 text-center ${value === q.time ? 'puffy bg-sage text-on-pastel' : 'clay-sm'}`}>
-              <span className="block text-xs font-bold opacity-70">{q.label}</span>
+              className={`min-h-14 rounded-[18px] px-2 py-2 text-center ${value === q.time ? "puffy bg-sage text-on-pastel" : "clay-sm"}`}>
+              <span className="block text-[13px] font-bold opacity-75">{q.label}</span>
               <span className="block text-base font-black tabular-nums">{q.time}</span>
             </button>
           ))}
         </div>
-        <div className="mb-1 text-xs font-bold text-muted">Or scroll to any time</div>
+        <div className="mb-2 text-[13px] font-bold text-muted">Or scroll to any time</div>
         <div className="flex items-center gap-2">
           <Wheel label="Hour" values={HOURS} value={hour} onChange={setHour} />
           <span className="text-3xl font-black text-muted">:</span>

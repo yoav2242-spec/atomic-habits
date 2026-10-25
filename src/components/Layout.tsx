@@ -26,19 +26,13 @@ export function Layout() {
   useReminderSync()
   useGoogleSync()
   const { pathname } = useLocation()
-  const showTools = workspaceUnlocked() && pathname !== '/workspace'
+  // In the test copy the banner at the top already leads to the workspace.
+  const showTools = workspaceUnlocked() && !inSandbox && pathname !== '/workspace'
   return (
     <MotionConfig reducedMotion={prefs.motion === 'calm' ? 'always' : 'user'}>
     <div className="relative mx-auto min-h-dvh max-w-md overflow-x-clip px-4 pb-36 pt-[max(1.25rem,env(safe-area-inset-top))]">
-      {/* Soft clay blobs drifting behind everything. */}
-      <div aria-hidden className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
-        <div className="blob absolute -right-16 -top-16 h-56 w-56 bg-rose/25 blur-2xl" />
-        <div className="blob absolute -left-20 top-1/3 h-48 w-48 bg-sage/25 blur-2xl" style={{ animationDelay: '-4s' }} />
-        <div className="blob absolute -bottom-10 right-0 h-52 w-52 bg-lavender/25 blur-2xl" style={{ animationDelay: '-8s' }} />
-      </div>
-
       {inSandbox && (
-        <Link to="/workspace" className="clay-sm mb-4 flex items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-extrabold">
+        <Link to="/workspace" className="tray mb-4 flex min-h-9 items-center justify-center gap-1.5 rounded-full px-3 py-2 text-[13px] font-bold text-muted">
           <FlaskConical size={14} /> Test copy · today is {formatDay(todayKey(), { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
           {dayOffset ? ` (+${dayOffset}d)` : ''}
         </Link>
@@ -65,7 +59,7 @@ export function Layout() {
             <NavLink key={to} to={to} end={to === '/'} className="relative flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 rounded-[22px]">
               {({ isActive }) => (
                 <>
-                  {isActive && <motion.span layoutId="nav-pill" transition={spring} className="puffy absolute inset-0 rounded-[22px] bg-sage/90" />}
+                  {isActive && <motion.span layoutId="nav-pill" transition={spring} className="puffy absolute inset-0 rounded-[22px] bg-sage" />}
                   <motion.span className={`relative ${isActive ? 'text-on-pastel' : 'text-muted'}`} animate={{ y: isActive ? -1 : 0, scale: isActive ? 1.08 : 1 }} transition={spring}>
                     <Icon size={22} strokeWidth={2.3} />
                   </motion.span>
