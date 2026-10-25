@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button, Card, Segmented, useConfirm, useToast } from '../components/ui'
 import { db } from '../lib/db'
-import { formatDay, todayKey } from '../lib/dates'
+import { addDays, formatDay, todayKey } from '../lib/dates'
 import { clearTestCopy, copyRealData, simulateHistory, type Profile } from '../lib/simulate'
 import { dayOffset, inSandbox, lockWorkspace, setDayOffset, setSandbox, unlockWorkspace } from '../lib/workspace'
 
@@ -91,7 +91,7 @@ export default function Workspace() {
           <Card className="mb-4">
             <div className="text-[18px] font-black">⏩ Fill in fake history</div>
             <p className="mb-3 text-sm font-semibold text-muted">
-              Makes up check-ins for the days before the pretend date. If the test copy has no habits, a few starter habits are added first.
+              Makes up a lived-in history before the pretend date: more habits the longer it is, some started later, one paused, some made harder over time.
             </p>
             <Segmented value={profile} onChange={setProfile} options={[{ value: 'perfect', label: '🌟 Perfect' }, { value: 'good', label: '🙂 Good' }, { value: 'struggling', label: '😓 Struggling' }]} />
             <div className="mt-3 grid grid-cols-2 gap-2">
@@ -101,6 +101,18 @@ export default function Workspace() {
                   {l.label}
                 </Button>
               ))}
+            </div>
+          </Card>
+
+          <Card className="mb-4">
+            <div className="text-[18px] font-black">Recaps (preview)</div>
+            <p className="mb-3 text-[14px] font-semibold text-muted">
+              The yearly recap is still being designed, so it only shows up here for now. Fill in a year of history first to see it full.
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              <Button className="!py-2.5 text-sm" onClick={() => navigate(`/recap/year/${todayKey().slice(0, 4)}`)}>This year</Button>
+              <Button variant="secondary" className="!py-2.5 text-sm" onClick={() => navigate(`/recap/year/${Number(todayKey().slice(0, 4)) - 1}`)}>Last year</Button>
+              <Button variant="secondary" className="col-span-2 !py-2.5 text-sm" onClick={() => navigate(`/recap/${addDays(`${todayKey().slice(0, 8)}01`, -1).slice(0, 7)}`)}>Last month's recap</Button>
             </div>
           </Card>
 

@@ -8,7 +8,8 @@ import Identity from './pages/Identity'
 import Scorecard from './pages/Scorecard'
 import Settings from './pages/Settings'
 import Stats from './pages/Stats'
-import Recap from './pages/Recap'
+import Recap, { YearRecap } from './pages/Recap'
+import SharedRecap from './pages/SharedRecap'
 import Review from './pages/Review'
 import Rewards from './pages/Rewards'
 import Tips from './pages/Tips'
@@ -21,6 +22,8 @@ export default function App() {
       {/* Hash links (#/habits) work on any static host, including GitHub Pages. */}
       <HashRouter>
         <Routes>
+          {/* A recap someone shared: opens on its own, without the tabs or the welcome tour. */}
+          <Route path="shared/:data" element={<SharedRecap />} />
           <Route element={<Layout />}>
             <Route index element={<Today />} />
             <Route path="habits" element={<Habits />} />
@@ -34,6 +37,7 @@ export default function App() {
             <Route path="workspace" element={<Workspace />} />
             <Route path="tips" element={<Tips />} />
             <Route path="review" element={<Review />} />
+            <Route path="recap/year/:y" element={<YearRecap />} />
             <Route path="recap/:ym" element={<Recap />} />
             <Route path="rewards" element={<Rewards />} />
           </Route>
