@@ -2,7 +2,8 @@ import { AnimatePresence, motion, type Transition } from 'motion/react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
+import { usePrefs } from '../lib/prefs'
 import { TIPS, type TipKey } from '../lib/tips'
 
 /** The app's one spring: quick, with a soft clay-like overshoot. */
@@ -78,20 +79,26 @@ export function Field({ label, hint, tip, children }: { label: string; hint?: st
   )
 }
 
-/** Options in a pressed-in tray; the chosen one is a puffy pill that slides over. */
-export function Segmented<T extends string>({ value, options, onChange }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void }) {
-  const id = useId()
+/** Options in a pressed-in tray; the chosen one is a puffy pill that slides over.
+ *  The slide follows the Animations setting as it is after the tap, so Bouncy and Calm each show themselves. */
+export function Segmented<T extends string>({ value, options, onChange, calm: calmProp }: { value: T; options: { value: T; label: string }[]; onChange: (v: T) => void; calm?: boolean }) {
+  const prefsCalm = usePrefs().motion === 'calm'
+  const calm = calmProp ?? prefsCalm
+  const i = Math.max(0, options.findIndex((o) => o.value === value))
+  const n = options.length
   return (
-    <div className="clay-in flex rounded-2xl p-1.5">
+    <div className="clay-in relative flex rounded-2xl p-1.5">
+      <span aria-hidden className={`seg-pill clay-sm absolute bottom-1.5 top-1.5 rounded-xl ${calm ? 'seg-calm' : ''}`}
+        style={{ left: `calc(0.375rem + (100% - 0.75rem) * ${i} / ${n})`, width: `calc((100% - 0.75rem) / ${n})` }} />
       {options.map((o) => (
         <button
           key={o.value}
           type="button"
           onClick={() => onChange(o.value)}
+          aria-pressed={value === o.value}
           className={`relative min-h-11 flex-1 rounded-xl px-2 py-2 text-sm font-extrabold transition-colors ${value === o.value ? 'text-ink' : 'text-muted'}`}
         >
-          {value === o.value && <motion.span layoutId={`seg-${id}`} transition={spring} className="clay-sm absolute inset-0 rounded-xl" />}
-          <span className="relative">{o.label}</span>
+          {o.label}
         </button>
       ))}
     </div>

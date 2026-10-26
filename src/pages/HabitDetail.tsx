@@ -1,11 +1,13 @@
 import { Snowflake } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ClockAlarm } from '../components/ClockAlarm'
 import { DayEditor } from '../components/DayEditor'
 import { streakLabel } from '../components/HabitCard'
 import { Heatmap } from '../components/Heatmap'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { BackButton, Button, buttonClass, Card, InfoTip, useConfirm } from '../components/ui'
+import { isAmount } from '../lib/amounts'
 import { formatDay } from '../lib/dates'
 import { useProgress } from '../lib/progress'
 import { deleteHabit, setArchived } from '../lib/repo'
@@ -86,6 +88,8 @@ export default function HabitDetail() {
           ))}
         </dl>
       </Card>
+
+      {h.type === 'build' && !isAmount(h) && <ClockAlarm h={h} />}
 
       <Card className="mb-4">
         <div className="mb-1 flex items-center justify-between">

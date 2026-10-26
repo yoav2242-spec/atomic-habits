@@ -62,7 +62,7 @@ export default function HabitForm() {
   // Ready-made habits picked in the welcome tour (?t=2,5): set each one up in turn, all four laws.
   const [queue, setQueue] = useState<number[]>(() => (search.get('t') ?? '').split(',').filter(Boolean).map(Number).filter((n) => TEMPLATES[n]))
   const [queueTotal] = useState(queue.length)
-  const [step, setStep] = useState(id || search.has('own') || queue.length ? 0 : -1)
+  const [step, setStep] = useState(search.has('step') ? Number(search.get('step')) || 0 : id || search.has('own') || queue.length ? 0 : -1)
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
   // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
@@ -146,16 +146,21 @@ export default function HabitForm() {
             <span className="text-sm font-bold text-on-pastel/75">We'll guide you step by step</span>
           </span>
         </button>
-        <div className="grid grid-cols-2 gap-2.5">
-          {TEMPLATES.map((t) => (
-            <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(0) }}
-              className="clay-sm bouncy rounded-[22px] p-3.5 text-left">
-              <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-[16px] text-2xl" style={{ background: `color-mix(in srgb, ${t.habit.color} 38%, var(--card))` }}>{t.habit.emoji}</div>
-              <div className="text-[16px] font-extrabold leading-tight">{t.habit.name}</div>
-              <div className="mt-0.5 text-[14px] font-semibold leading-snug text-muted">{t.habit.type === 'break' ? 'Break a bad habit' : `I am ${t.identity}`}</div>
-            </button>
-          ))}
-        </div>
+        {(['build', 'break'] as const).map((kind) => (
+          <section key={kind} className="mb-6">
+            <h2 className="label mb-2.5 ml-1">{kind === 'build' ? 'Build a good habit' : 'Break a bad habit'}</h2>
+            <div className="grid grid-cols-2 gap-2.5">
+              {TEMPLATES.map((t, i) => ({ t, i })).filter(({ t }) => (t.habit.type ?? 'build') === kind).map(({ t }) => (
+                <button key={t.habit.name} onClick={async () => { setDraft(await habitFromTemplate(t, Date.now())); setStep(0) }}
+                  className="clay-sm bouncy rounded-[22px] p-3.5 text-left">
+                  <div className="mb-2.5 flex h-11 w-11 items-center justify-center rounded-[16px] text-2xl" style={{ background: `color-mix(in srgb, ${t.habit.color} 38%, var(--card))` }}>{t.habit.emoji}</div>
+                  <div className="text-[16px] font-extrabold leading-tight">{t.habit.name}</div>
+                  <div className="mt-0.5 text-[14px] font-semibold leading-snug text-muted">{kind === 'break' ? `To be ${t.identity}` : `I am ${t.identity}`}</div>
+                </button>
+              ))}
+            </div>
+          </section>
+        ))}
       </div>
     )
   }
@@ -269,6 +274,19 @@ export default function HabitForm() {
             <Field label="What habit do you want to stop?">
               <input value={h.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Scrolling in bed" autoFocus />
             </Field>
+            {!id && (
+              <div>
+                <div className="mb-2 text-[14px] font-bold text-muted">Ideas: tap one to fill in every step</div>
+                <div className="flex flex-wrap gap-2">
+                  {TEMPLATES.filter((t) => t.habit.type === 'break').map((t) => (
+                    <button key={t.habit.name} type="button" onClick={async () => setDraft(await habitFromTemplate(t, h.sort_order))}
+                      className={`min-h-11 rounded-full px-4 text-[15px] font-extrabold ${h.name === t.habit.name ? 'puffy bg-sage text-on-pastel' : 'clay-sm'}`}>
+                      {t.habit.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <EmojiAndColor h={h} set={set} />
           </>,
           <IdentityStep h={h} set={set} identities={identities} newIdentity={newIdentity} setNewIdentity={setNewIdentity} addIdentity={addIdentity}>
@@ -381,7 +399,7 @@ function IdentityStep(p: {
       )}
       <Field label="Add a new identity: “I am…”" tip="identity">
         <div className="flex gap-2">
-          <input value={p.newIdentity} onChange={(e) => p.setNewIdentity(e.target.value)} placeholder="e.g. a reader" onKeyDown={(e) => e.key === 'Enter' && p.addIdentity()} />
+          <input value={p.newIdentity} onChange={(e) => p.setNewIdentity(e.target.value)} placeholder={p.h.type === 'break' ? 'e.g. a non-smoker' : 'e.g. a reader'} onKeyDown={(e) => e.key === 'Enter' && p.addIdentity()} />
           <Button type="button" variant="secondary" onClick={p.addIdentity}>Add</Button>
         </div>
       </Field>
@@ -528,7 +546,7 @@ function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
       <CalendarChoice h={h} set={set} />
       {isAndroid() && !isAmount(h) && (
         <div className="flex items-center gap-3">
-          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold">Clock alarm (opens your Clock app)</span>
+          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold">Also set an alarm in my Clock app</span>
           <Toggle label="Clock alarm" on={alarm} onChange={setAlarm} />
         </div>
       )}

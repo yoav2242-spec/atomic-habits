@@ -7,8 +7,6 @@ import { useProgress } from '../lib/progress'
 import { practiceDays } from '../lib/stages'
 import { isDone } from '../lib/streaks'
 
-const LADDER = [0, 3, 12, 40, 160, 365]
-
 /** Every habit as a plant on one page: it grows with each practice day, and after a year it's a big, full tree. */
 export default function Garden() {
   const progress = useProgress()
@@ -76,18 +74,6 @@ export default function Garden() {
         </>
       )}
 
-      <section className="clay mt-5 rounded-[26px] p-4">
-        <h2 className="text-[18px] font-black">How a plant grows</h2>
-        <p className="mb-3 mt-1 text-[14px] font-semibold leading-snug text-muted">Days you've done the habit, from seed to a full-grown tree at a year.</p>
-        <ol className="grid grid-cols-6 items-end gap-1">
-          {LADDER.map((d) => (
-            <li key={d} className="text-center">
-              <Plant days={d} color="var(--color-rose)" id={`ladder-${d}`} sway={false} className="mx-auto block h-auto w-full" />
-              <span className="mt-1 block text-[12px] font-extrabold leading-tight text-muted tabular-nums">{d === 0 ? 'Day 0' : d === 365 ? 'A year' : `${d} days`}</span>
-            </li>
-          ))}
-        </ol>
-      </section>
     </div>
   )
 }

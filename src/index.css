@@ -237,6 +237,14 @@ input[type='file'] {
   animation: wiggle 0.6s ease-in-out 2;
 }
 
+/* The sliding pill in a Segmented control: springy, or a plain glide when Animations is Calm. */
+.seg-pill {
+  transition: left 0.5s cubic-bezier(0.34, 1.5, 0.64, 1);
+}
+.seg-pill.seg-calm {
+  transition: left 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 /* Plants in the garden move a little in the breeze. */
 @keyframes sway {
   0%, 100% { transform: rotate(-1.4deg); }

@@ -141,7 +141,7 @@ export default function Settings() {
           </Row>
         </Link>
         <Row title="Animations" hint="Calm turns off bouncing and confetti" stacked>
-          <Segmented value={prefs.motion} onChange={(motion) => setPrefs({ motion })} options={[{ value: 'full', label: 'Bouncy' }, { value: 'calm', label: 'Calm' }]} />
+          <Segmented value={prefs.motion} calm={prefs.motion === 'calm'} onChange={(motion) => setPrefs({ motion })} options={[{ value: 'full', label: 'Bouncy' }, { value: 'calm', label: 'Calm' }]} />
         </Row>
         <Row title="Confetti" hint="When you finish a habit or your day">
           <Toggle label="Confetti" on={prefs.confetti} onChange={(confetti) => setPrefs({ confetti })} />
