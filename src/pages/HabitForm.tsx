@@ -59,7 +59,10 @@ export default function HabitForm() {
   const existing = useLiveQuery(() => (id ? db.habits.get(id) : undefined), [id])
   const [draft, setDraft] = useState<Habit | null>(id ? null : newHabit(Date.now()))
   // -1: pick a starter habit. Skipped when editing, or when "make my own" was already chosen.
-  const [step, setStep] = useState(id || search.has('own') ? 0 : -1)
+  // Ready-made habits picked in the welcome tour (?t=2,5): set each one up in turn, all four laws.
+  const [queue, setQueue] = useState<number[]>(() => (search.get('t') ?? '').split(',').filter(Boolean).map(Number).filter((n) => TEMPLATES[n]))
+  const [queueTotal] = useState(queue.length)
+  const [step, setStep] = useState(id || search.has('own') || queue.length ? 0 : -1)
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
   // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
@@ -70,6 +73,15 @@ export default function HabitForm() {
   useEffect(() => {
     if (id && existing && !draft) setDraft(existing)
   }, [id, existing, draft])
+
+  // The welcome tour's picks: fill the form with the first one waiting.
+  const nextPick = queue[0]
+  useEffect(() => {
+    if (nextPick === undefined) return
+    let live = true
+    habitFromTemplate(TEMPLATES[nextPick], Date.now()).then((d) => live && setDraft(d))
+    return () => { live = false }
+  }, [nextPick])
 
   if (!draft || !habits || !identities) return null
   const h = draft
@@ -88,6 +100,16 @@ export default function HabitForm() {
     if (!id) {
       await addPastProgress(saved, pastDays)
       bigCelebration()
+    }
+    if (!id && queue.length > 1) {
+      // More picks waiting: start the next one from its first step.
+      setQueue(queue.slice(1))
+      setStep(0)
+      setPastDays(0)
+      setAddAlarm(false)
+      window.scrollTo(0, 0)
+      toast(`${saved.name} added. Next: ${TEMPLATES[queue[1]].habit.name}`)
+      return
     }
     navigate(id ? `/habits/${h.id}` : '/', { replace: true })
     if (google?.on) {
@@ -291,6 +313,7 @@ export default function HabitForm() {
           ))}
         </div>
       </div>
+      {queueTotal > 1 && <p className="mb-1 text-[14px] font-bold text-muted">Habit {queueTotal - queue.length + 1} of {queueTotal}</p>}
       <h1 className="text-[28px] font-black leading-[1.1] tracking-[-0.02em]">{id && step === 0 ? 'Edit habit' : steps[step].title}</h1>
       {steps[step].law ? <p className="mb-5 mt-1 text-[16px] font-bold text-sage-deep">{steps[step].law}</p> : <div className="mb-5" />}
       <div key={step} className="animate-rise space-y-4">{pages[step]}</div>
@@ -300,7 +323,7 @@ export default function HabitForm() {
       <div className="mt-8 flex gap-2">
         {id && !isLast && <Button variant="secondary" className="flex-1" onClick={save} disabled={!h.name.trim()}>Save</Button>}
         <Button className="flex-1 text-lg" disabled={!h.name.trim()} onClick={() => (isLast ? save() : setStep(step + 1))}>
-          {isLast ? (id ? 'Save changes' : 'Create habit') : 'Next'}
+          {isLast ? (id ? 'Save changes' : queue.length > 1 ? 'Create, then next habit' : 'Create habit') : 'Next'}
         </Button>
       </div>
       {!isLast && step > 0 && <p className="mt-3 text-center text-[14px] font-semibold text-muted">Everything here is optional. Skip what you like.</p>}

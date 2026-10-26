@@ -2,10 +2,8 @@ import { CircleCheck, Flame, Snowflake, Sprout } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { bigCelebration } from '../lib/celebrate'
 import { db, setMeta } from '../lib/db'
-import { saveHabit } from '../lib/repo'
-import { habitFromTemplate, TEMPLATES } from '../lib/templates'
+import { TEMPLATES } from '../lib/templates'
 import { Button } from './ui'
 
 const SLIDES = [
@@ -23,14 +21,10 @@ export function Onboarding() {
   const navigate = useNavigate()
   if (onboarded) return null
 
-  const finish = async (create: boolean) => {
-    if (create) {
-      let order = Date.now()
-      for (const i of picked) await saveHabit(await habitFromTemplate(TEMPLATES[i], order++))
-      if (picked.size) bigCelebration()
-    }
+  // Picked habits aren't made here: each one opens the step-by-step setup, already filled in.
+  const finish = async (picks: boolean) => {
     await setMeta('onboarded', '1')
-    navigate(create && picked.size ? '/' : '/habits/new?own=1')
+    navigate(picks && picked.size ? `/habits/new?t=${[...picked].join(',')}` : '/habits/new?own=1')
   }
 
   const toggle = (i: number) => setPicked((s) => { const n = new Set(s); if (n.has(i)) n.delete(i); else n.add(i); return n })
@@ -61,7 +55,7 @@ export function Onboarding() {
         ) : (
           <div className="animate-rise flex-1 pt-6">
             <h1 className="mb-1 text-3xl font-black tracking-tight">Pick your first habits</h1>
-            <p className="mb-5 font-semibold text-muted">Choose 1 to 3. Fewer is better to start. You can change everything later.</p>
+            <p className="mb-5 font-semibold text-muted">Choose 1 to 3. Fewer is better to start. Next, you'll go through each one step by step and make it yours.</p>
             <div className="grid grid-cols-2 gap-2.5">
               {TEMPLATES.map((t, i) => (
                 <button key={t.habit.name} onClick={() => toggle(i)}
@@ -84,7 +78,7 @@ export function Onboarding() {
           ) : (
             <>
               <Button className="w-full text-lg" disabled={picked.size === 0} onClick={() => finish(true)}>
-                Start with {picked.size || ''} habit{picked.size === 1 ? '' : 's'}
+                Set up {picked.size || ''} habit{picked.size === 1 ? '' : 's'}
               </Button>
               <button onClick={() => finish(false)} className="w-full py-2 text-sm font-bold text-muted">I'll make my own</button>
             </>
