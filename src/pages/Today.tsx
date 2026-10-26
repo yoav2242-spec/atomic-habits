@@ -2,9 +2,8 @@ import { ChevronLeft, ChevronRight, Gift, Lightbulb, Sprout, Target } from 'luci
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Celebration, type CelebrationInfo } from '../components/Celebration'
-import { Garden } from '../components/Garden'
 import { HabitCard } from '../components/HabitCard'
 import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
@@ -61,6 +60,7 @@ export default function Today() {
     setSheetState(k)
   }
   const quests = useQuests(progress)
+  const navigate = useNavigate()
   // After a tap, compare progress before/after to spot a new badge, level, or a finished day.
   const armed = useRef<{ level: number; badges: Map<string, number>; done: number; perfectBest: number; mostInADay: number } | null>(null)
   const records = useMemo(() => (progress ? computeRecords(progress) : null), [progress])
@@ -231,7 +231,7 @@ export default function Today() {
               {extras.map((x) => {
                 const hot = x.key === 'box' && boxReady
                 return (
-                  <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
+                  <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => (x.key === 'garden' ? navigate('/garden') : setSheet(x.key))}
                     aria-label={x.key === 'box' ? 'Daily bonus' : x.key === 'tip' ? 'Tip of the day' : x.label}
                     style={hot ? { background: x.color } : undefined}
                     className={`relative flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-2 text-[14px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
@@ -284,10 +284,6 @@ export default function Today() {
         </>
       )}
 
-      <Modal open={sheet === 'garden'} onClose={() => setSheet(null)} title="Your garden">
-        <p className="mb-4 text-sm font-semibold text-muted">Each habit is a plant. It grows every time you practice, and droops (but never dies) when you miss.</p>
-        <Garden habits={progress.habits.filter((p) => !p.habit.archived)} today={today} />
-      </Modal>
       <Modal open={sheet === 'quests'} onClose={() => setSheet(null)} title="Daily quests">
         <p className="mb-4 text-[16px] font-semibold text-muted">Extra points for small challenges. New ones every day.</p>
         {quests && <QuestList status={quests} />}

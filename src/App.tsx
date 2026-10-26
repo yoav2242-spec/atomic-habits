@@ -1,6 +1,7 @@
 import { HashRouter, Route, Routes } from 'react-router-dom'
 import { Layout } from './components/Layout'
 import { ToastProvider } from './components/ui'
+import Garden from './pages/Garden'
 import HabitDetail from './pages/HabitDetail'
 import HabitForm from './pages/HabitForm'
 import Habits from './pages/Habits'
@@ -31,6 +32,7 @@ export default function App() {
             <Route path="habits/:id" element={<HabitDetail />} />
             <Route path="habits/:id/edit" element={<HabitForm />} />
             <Route path="stats" element={<Stats />} />
+            <Route path="garden" element={<Garden />} />
             <Route path="identity" element={<Identity />} />
             <Route path="scorecard" element={<Scorecard />} />
             <Route path="settings" element={<Settings />} />

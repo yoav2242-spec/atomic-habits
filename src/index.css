@@ -54,6 +54,12 @@
   --sh-inner: rgba(255, 255, 255, 0.85);
   --flame: #b0531f;
   --level: #6457a6;
+  /* The garden: leaves, bark and earth. */
+  --leaf: #7fb48f;
+  --leaf-deep: #5a9470;
+  --leaf-light: #a9d2b2;
+  --trunk: #8b6a4c;
+  --soil: #cdb99f;
 }
 
 /* Dark colours: follow the phone, unless Settings picks light or dark. */
@@ -70,6 +76,11 @@
     --sh-inner: rgba(255, 255, 255, 0.045);
     --flame: #f0a070;
     --level: #bdb3ec;
+    --leaf: #6fa47f;
+    --leaf-deep: #4f8563;
+    --leaf-light: #93c29e;
+    --trunk: #9a7a5a;
+    --soil: #4a4036;
   }
 }
 
@@ -86,6 +97,11 @@
   --sh-inner: rgba(255, 255, 255, 0.045);
   --flame: #f0a070;
   --level: #bdb3ec;
+  --leaf: #6fa47f;
+  --leaf-deep: #4f8563;
+  --leaf-light: #93c29e;
+  --trunk: #9a7a5a;
+  --soil: #4a4036;
 }
 
 :root[data-theme='light'] {
@@ -221,10 +237,19 @@ input[type='file'] {
   animation: wiggle 0.6s ease-in-out 2;
 }
 
-:root[data-motion='calm'] :is(.animate-pop, .animate-rise, .animate-wiggle, .animate-float-up) {
+/* Plants in the garden move a little in the breeze. */
+@keyframes sway {
+  0%, 100% { transform: rotate(-1.4deg); }
+  50% { transform: rotate(1.4deg); }
+}
+.plant-sway {
+  animation: sway 5s ease-in-out infinite;
+}
+
+:root[data-motion='calm'] :is(.animate-pop, .animate-rise, .animate-wiggle, .animate-float-up, .plant-sway) {
   animation: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-pop, .animate-rise, .animate-wiggle, .animate-float-up { animation: none; }
+  .animate-pop, .animate-rise, .animate-wiggle, .animate-float-up, .plant-sway { animation: none; }
 }
