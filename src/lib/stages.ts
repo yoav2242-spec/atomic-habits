@@ -1,3 +1,4 @@
+import { Leaf, Sprout, TreeDeciduous } from 'lucide-react'
 import { addDays, diffDays } from './dates'
 import type { HabitProgress } from './progress'
 import { byDate, completionRate, isDone, startDate } from './streaks'
@@ -6,9 +7,9 @@ import { byDate, completionRate, isDone, startDate } from './streaks'
 // on how long habits take to form), and whether it's being kept up.
 
 export const STAGES = [
-  { key: 'starting', icon: '🌱', label: 'Starting', from: 0, to: 21, about: 'The first three weeks. The hardest part: keep it tiny.' },
-  { key: 'growing', icon: '🌿', label: 'Growing', from: 21, to: 66, about: "It's getting easier. Keep showing up." },
-  { key: 'automatic', icon: '🌳', label: 'Automatic', from: 66, to: Infinity, about: 'Part of who you are. Just keep it up, or level it up.' },
+  { key: 'starting', icon: Sprout, label: 'Starting', from: 0, to: 21, about: 'The first three weeks. The hardest part: keep it tiny.' },
+  { key: 'growing', icon: Leaf, label: 'Growing', from: 21, to: 66, about: "It's getting easier. Keep showing up." },
+  { key: 'automatic', icon: TreeDeciduous, label: 'Automatic', from: 66, to: Infinity, about: 'Part of who you are. Just keep it up, or level it up.' },
 ] as const
 
 export type StageKey = (typeof STAGES)[number]['key']

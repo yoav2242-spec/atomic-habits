@@ -73,7 +73,7 @@ export default function Identity() {
       <Link to="/scorecard" className="bouncy mt-8 block">
         <Card className="flex items-center justify-between">
           <div>
-            <div className="text-[18px] font-black">📋 Habits Scorecard</div>
+            <div className="text-[18px] font-black">Habits Scorecard</div>
             <div className="text-sm font-semibold text-muted">List what you do each day, and track it with your progress so far.</div>
           </div>
           <span className="text-2xl text-muted">›</span>

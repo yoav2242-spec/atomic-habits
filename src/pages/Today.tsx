@@ -1,3 +1,4 @@
+import { ChevronLeft, ChevronRight, Gift, Lightbulb, Sprout, Target } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { motion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -9,7 +10,7 @@ import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { Pebbles } from '../components/Pebbles'
-import { Button, buttonClass, Card, InfoTip, Modal, spring, useToast, XPBar } from '../components/ui'
+import { Button, buttonClass, Card, Chevron, InfoTip, Modal, spring, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
 import { db, getMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
@@ -117,10 +118,10 @@ export default function Today() {
   const tip = tipOfTheDay(diffDays('2000-01-01', today))
   const boxReady = build.length > 0 && doneCount === build.length && !progress.rewards.some((r) => r.id === `box_${today}`)
   const extras = [
-    { key: 'garden', label: 'Garden', color: 'var(--color-sage)', badge: '' },
-    { key: 'quests', label: 'Quests', color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
-    { key: 'box', label: 'Daily bonus', color: 'var(--color-sage)', badge: boxReady ? '!' : '' },
-    { key: 'tip', label: 'Tip of the day', color: 'var(--color-sky)', badge: '' },
+    { key: 'garden', label: 'Garden', Icon: Sprout, color: 'var(--color-sage)', badge: '' },
+    { key: 'quests', label: 'Quests', Icon: Target, color: 'var(--color-butter)', badge: quests && quests.done < quests.list.length ? `${quests.done}/${quests.list.length}` : '' },
+    { key: 'box', label: 'Bonus', Icon: Gift, color: 'var(--color-sage)', badge: boxReady ? '!' : '' },
+    { key: 'tip', label: 'Tip', Icon: Lightbulb, color: 'var(--color-sky)', badge: '' },
   ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
   // The one line under the count: what to do next, in words.
@@ -175,8 +176,8 @@ export default function Today() {
           <h1 className="mt-0.5 text-[30px] font-black leading-[1.05] tracking-[-0.02em]">{title}</h1>
         </div>
         <div className="flex shrink-0 gap-1.5">
-          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><span className="-mt-0.5 text-[28px] font-black leading-none">‹</span></motion.button>
-          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><span className="-mt-0.5 text-[28px] font-black leading-none">›</span></motion.button>
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => o + 1)} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full" aria-label="Previous day"><ChevronLeft size={24} strokeWidth={2.4} /></motion.button>
+          <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><ChevronRight size={24} strokeWidth={2.4} /></motion.button>
         </div>
       </header>
 
@@ -226,15 +227,16 @@ export default function Today() {
           )}
 
           {offset === 0 && (
-            <div className="-mx-4 mb-5 flex gap-2 overflow-x-auto px-4 py-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="mb-5 grid grid-cols-4 gap-2">
               {extras.map((x) => {
                 const hot = x.key === 'box' && boxReady
                 return (
                   <motion.button key={x.key} whileTap={{ scaleX: 1.08, scaleY: 0.9 }} transition={spring} onClick={() => setSheet(x.key)}
+                    aria-label={x.key === 'box' ? 'Daily bonus' : x.key === 'tip' ? 'Tip of the day' : x.label}
                     style={hot ? { background: x.color } : undefined}
-                    className={`flex min-h-11 shrink-0 items-center gap-2 rounded-full px-5 py-2 text-[17px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
-                                        {x.label}
-                    {x.badge && x.badge !== '!' && <span className="tray rounded-full px-1.5 text-[14px] font-black text-muted tabular-nums">{x.badge}</span>}
+                    className={`relative flex min-h-[68px] flex-col items-center justify-center gap-1 rounded-[20px] px-1 py-2 text-[14px] font-extrabold ${hot ? 'puffy text-on-pastel' : 'clay-sm'}`}>
+                    <x.Icon size={22} strokeWidth={2.2} aria-hidden className={hot ? '' : 'text-sage-deep'} />
+                    <span className="leading-none">{x.label}{x.badge && x.badge !== '!' && <span className="ml-1 font-black text-muted tabular-nums">{x.badge}</span>}</span>
                   </motion.button>
                 )
               })}
@@ -246,13 +248,13 @@ export default function Today() {
               {reviewDue && (
                 <Link to="/review" className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-sky)_50%,var(--card))] px-4 py-3">
                                     <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-[14px] font-bold opacity-80">2 minutes · pick next week's focus · +25</span></span>
-                  <span className="text-[26px] font-black leading-none">›</span>
+                  <Chevron />
                 </Link>
               )}
               {recapDue && (
                 <Link to={`/recap/${lastMonth}`} className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-peach)_50%,var(--card))] px-4 py-3">
                                     <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-[14px] font-bold opacity-80">See everything you did last month</span></span>
-                  <span className="text-[26px] font-black leading-none">›</span>
+                  <Chevron />
                 </Link>
               )}
             </div>

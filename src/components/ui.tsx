@@ -1,5 +1,7 @@
 import { AnimatePresence, motion, type Transition } from 'motion/react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { createPortal } from 'react-dom'
+import { useNavigate } from 'react-router-dom'
 import { createContext, useCallback, useContext, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { TIPS, type TipKey } from '../lib/tips'
 
@@ -32,6 +34,23 @@ export function buttonClass(variant: Variant = 'primary', className = '') {
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
   return <button className={buttonClass(variant, className)} {...props} />
+}
+
+/** The "Back" link at the top of an inner screen. Goes back in history unless told otherwise. */
+export function BackButton({ label = 'Back', onClick, className = '' }: { label?: string; onClick?: () => void; className?: string }) {
+  const navigate = useNavigate()
+  return (
+    <button type="button" onClick={onClick ?? (() => navigate(-1))}
+      className={`-ml-2 flex min-h-11 items-center gap-0.5 pr-3 text-[16px] font-bold text-muted ${className}`}>
+      <ChevronLeft size={22} strokeWidth={2.4} aria-hidden />
+      {label}
+    </button>
+  )
+}
+
+/** A row's trailing chevron: "this opens something". */
+export function Chevron({ className = '' }: { className?: string }) {
+  return <ChevronRight size={22} strokeWidth={2.4} aria-hidden className={`shrink-0 ${className}`} />
 }
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {

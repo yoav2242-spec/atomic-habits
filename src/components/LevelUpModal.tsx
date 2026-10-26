@@ -40,7 +40,7 @@ export function LevelUpModal({ habit, direction, suggested, onClose }: { habit: 
   }
 
   return (
-    <Modal open onClose={onClose} title={<span className="flex items-center gap-2">{harder ? '📈 Level up' : '🌱 Make it easier'} <InfoTip tip="level_up" /></span>}>
+    <Modal open onClose={onClose} title={<span className="flex items-center gap-2">{harder ? 'Level up' : 'Make it easier'} <InfoTip tip="level_up" /></span>}>
       <div className="space-y-4">
         <p className="text-sm font-semibold text-muted">
           {harder

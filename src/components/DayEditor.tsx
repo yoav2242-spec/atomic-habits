@@ -26,8 +26,8 @@ export function DayEditor({ habit, date, checkin, onClose }: { habit: Habit; dat
 
   const options: { value: DayState; label: string }[] =
     habit.type === 'break'
-      ? [{ value: 'none', label: '🌿 Clean day' }, { value: 'slip', label: '😕 Slipped' }]
-      : [{ value: 'done', label: '✓ Done' }, { value: 'two_min', label: '½ 2-min version' }, { value: 'none', label: '✗ Not done' }]
+      ? [{ value: 'none', label: 'Clean day' }, { value: 'slip', label: 'Slipped' }]
+      : [{ value: 'done', label: 'Done' }, { value: 'two_min', label: '2-min version' }, { value: 'none', label: 'Not done' }]
 
   const save = async () => {
     if (habit.type === 'build' && target > 1 && state !== 'two_min') {

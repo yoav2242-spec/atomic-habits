@@ -1,9 +1,10 @@
+import type { ReactNode } from 'react'
 import { addDays, formatDay, weekStart, type DateKey } from '../lib/dates'
 
 /** A grid with one column per week (Mon at top) and one rounded square per day. Tap a day to edit it. */
 export function Heatmap({ today, weeks, cell, onPick }: {
   today: DateKey; weeks: number
-  cell: (date: DateKey) => { color: string; title: string; icon?: string } | null
+  cell: (date: DateKey) => { color: string; title: string; icon?: ReactNode } | null
   onPick?: (date: DateKey) => void
 }) {
   const first = addDays(weekStart(today), -(weeks - 1) * 7)

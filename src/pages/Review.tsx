@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, useToast } from '../components/ui'
+import { BackButton, Button, Card, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { getMeta, setMeta } from '../lib/db'
 import { addDays, formatDay, range, weekStart } from '../lib/dates'
@@ -58,8 +58,8 @@ export default function Review() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
-      <h1 className="text-3xl font-black tracking-tight">📅 Weekly review</h1>
+      <BackButton className="mb-2" />
+      <h1 className="text-3xl font-black tracking-tight">Weekly review</h1>
       <p className="mb-5 font-semibold text-muted">Week of {formatDay(monday, { month: 'long', day: 'numeric' })}. Two minutes to look back and plan ahead.</p>
 
       <Card className="mb-4 !p-5" style={{ background: 'linear-gradient(135deg, color-mix(in srgb, var(--color-sky) 25%, var(--card)), var(--card))' }}>
@@ -78,15 +78,15 @@ export default function Review() {
       <Card className="mb-4 space-y-3 text-sm font-semibold">
         <div className="text-[18px] font-black">Wins</div>
         {wins.length ? <p>You did these every time this week: <b>{wins.map((p) => `${p.habit.emoji} ${p.habit.name}`).join(', ')}</b></p> : <p className="text-muted">No perfect habits this week, but every check-in still counted.</p>}
-        {best && <p>⭐ Best habit: <b>{best.habit.emoji} {best.habit.name}</b> ({Math.round((weekRate(best) ?? 0) * 100)}%)</p>}
+        {best && <p>Best habit: <b>{best.habit.emoji} {best.habit.name}</b> ({Math.round((weekRate(best) ?? 0) * 100)}%)</p>}
         {struggling && (weekRate(struggling) ?? 0) < 0.7 && (
-          <p>💛 Hardest this week: <b>{struggling.habit.emoji} {struggling.habit.name}</b>. Could you make it easier, use the 2-minute version, or stack it after something you already do?</p>
+          <p>Hardest this week: <b>{struggling.habit.emoji} {struggling.habit.name}</b>. Could you make it easier, use the 2-minute version, or stack it after something you already do?</p>
         )}
       </Card>
 
       <Card className="mb-4">
-        <div className="mb-1 text-[18px] font-black">🎯 Pick one focus for next week</div>
-        <p className="mb-3 text-[14px] font-semibold text-muted">It goes to the top of your Today list with a 🎯, so it gets your best energy.</p>
+        <div className="mb-1 text-[18px] font-black">Pick one focus for next week</div>
+        <p className="mb-3 text-[14px] font-semibold text-muted">It goes to the top of your Today list, so it gets your best energy.</p>
         <div className="space-y-2">
           {active.map((p) => (
             <button key={p.habit.id} onClick={() => setFocusId(p.habit.id)}

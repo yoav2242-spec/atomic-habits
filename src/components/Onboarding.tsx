@@ -1,3 +1,4 @@
+import { CircleCheck, Flame, Snowflake, Sprout } from 'lucide-react'
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -8,10 +9,10 @@ import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { Button } from './ui'
 
 const SLIDES = [
-  { icon: '🌱', title: 'Tiny habits, big change', body: 'Get just 1% better each day and in a year you are about 37 times better. This app helps you build small habits that add up.' },
-  { icon: '✅', title: 'Tap, earn, level up', body: 'Each day, tap a habit when you do it. You earn points, your level goes up, and every tap is a vote for the person you want to become.' },
-  { icon: '🔥', title: 'Keep the streak alive', body: "Do a habit several days in a row to grow a streak and earn badges. Busy day? Do the 2-minute version. It still counts." },
-  { icon: '🧊', title: 'Streak freezes', body: "Every 7 days in a row earns a freeze that saves your streak if you miss a day. But freezes can't be used two days in a row. Never miss twice!" },
+  { icon: Sprout, title: 'Tiny habits, big change', body: 'Get just 1% better each day and in a year you are about 37 times better. This app helps you build small habits that add up.' },
+  { icon: CircleCheck, title: 'Tap, earn, level up', body: 'Each day, tap a habit when you do it. You earn points, your level goes up, and every tap is a vote for the person you want to become.' },
+  { icon: Flame, title: 'Keep the streak alive', body: "Do a habit several days in a row to grow a streak and earn badges. Busy day? Do the 2-minute version. It still counts." },
+  { icon: Snowflake, title: 'Streak freezes', body: "Every 7 days in a row earns a freeze that saves your streak if you miss a day. But freezes can't be used two days in a row. Never miss twice!" },
 ]
 
 /** First-run tour: four short cards, then pick starter habits with one tap. */
@@ -49,8 +50,10 @@ export function Onboarding() {
 
         {!last ? (
           <div key={step} className="animate-rise flex flex-1 flex-col items-center justify-center text-center">
-            <div className="mb-6 flex h-36 w-36 items-center justify-center rounded-[2.5rem] bg-card text-7xl shadow-[0_10px_40px_-15px_rgba(60,60,90,0.4)]">
-              <span className="animate-pop">{SLIDES[step].icon}</span>
+            <div className="clay mb-8 flex h-36 w-36 items-center justify-center rounded-[2.5rem]">
+              <span className="puffy animate-pop flex h-20 w-20 items-center justify-center rounded-full bg-sage text-on-pastel">
+                {(() => { const Icon = SLIDES[step].icon; return <Icon size={40} strokeWidth={2.2} aria-hidden /> })()}
+              </span>
             </div>
             <h1 className="mb-3 text-3xl font-black tracking-tight">{SLIDES[step].title}</h1>
             <p className="text-lg font-semibold leading-relaxed text-muted">{SLIDES[step].body}</p>

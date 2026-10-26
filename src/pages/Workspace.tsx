@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Button, Card, Segmented, useConfirm, useToast } from '../components/ui'
+import { BackButton, Button, Card, Segmented, useConfirm, useToast } from '../components/ui'
 import { db } from '../lib/db'
 import { addDays, formatDay, todayKey } from '../lib/dates'
 import { clearTestCopy, copyRealData, simulateHistory, type Profile } from '../lib/simulate'
@@ -44,14 +44,14 @@ export default function Workspace() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
-      <h1 className="text-3xl font-black tracking-tight">🛠 Test workspace</h1>
+      <BackButton className="mb-2" />
+      <h1 className="text-3xl font-black tracking-tight">Test workspace</h1>
       <p className="mb-5 font-semibold text-muted">Only you can see this, and only on this device. Use it to see how the app looks after days, weeks or a year of habits.</p>
 
       <Card className={`mb-4 ${inSandbox ? '' : '!border-sage'}`}>
         {inSandbox ? (
           <>
-            <div className="mb-1 text-[18px] font-black">🧪 You're in test mode</div>
+            <div className="mb-1 text-[18px] font-black">You're in test mode</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               Everything you see and do now uses a separate test copy. Your real habits are safe and untouched.
             </p>
@@ -71,7 +71,7 @@ export default function Workspace() {
       {inSandbox && (
         <>
           <Card className="mb-4">
-            <div className="text-[18px] font-black">📅 Pretend date</div>
+            <div className="text-[18px] font-black">Pretend date</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               The app thinks today is <b className="text-ink">{formatDay(todayKey(), { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</b>
               {dayOffset ? ` (${dayOffset > 0 ? '+' : ''}${dayOffset} days)` : ' (the real date)'}.
@@ -89,11 +89,11 @@ export default function Workspace() {
           </Card>
 
           <Card className="mb-4">
-            <div className="text-[18px] font-black">⏩ Fill in fake history</div>
+            <div className="text-[18px] font-black">Fill in fake history</div>
             <p className="mb-3 text-sm font-semibold text-muted">
               Makes up a lived-in history before the pretend date: more habits the longer it is, some started later, one paused, some made harder over time.
             </p>
-            <Segmented value={profile} onChange={setProfile} options={[{ value: 'perfect', label: '🌟 Perfect' }, { value: 'good', label: '🙂 Good' }, { value: 'struggling', label: '😓 Struggling' }]} />
+            <Segmented value={profile} onChange={setProfile} options={[{ value: 'perfect', label: 'Perfect' }, { value: 'good', label: 'Good' }, { value: 'struggling', label: 'Struggling' }]} />
             <div className="mt-3 grid grid-cols-2 gap-2">
               {LENGTHS.map((l) => (
                 <Button key={l.label} disabled={busy} className="!py-2.5 text-sm"
@@ -117,7 +117,7 @@ export default function Workspace() {
           </Card>
 
           <Card className="mb-4 space-y-2">
-            <div className="text-[18px] font-black">🗂 Test copy</div>
+            <div className="text-[18px] font-black">Test copy</div>
             <Button variant="secondary" className="w-full" disabled={busy} onClick={() => run('Copied your real habits into the test copy', copyRealData)}>
               Copy my real habits into it
             </Button>

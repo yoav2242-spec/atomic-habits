@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import { buzz } from '../lib/prefs'
-import { Link, useNavigate } from 'react-router-dom'
-import { Button, Card, Field, InfoTip, Modal, Segmented, Stepper, useConfirm, useToast } from '../components/ui'
+import { Link } from 'react-router-dom'
+import { BackButton, Button, Card, Field, InfoTip, Modal, Segmented, Stepper, useConfirm, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { useScorecard } from '../lib/hooks'
 import { useProgress } from '../lib/progress'
@@ -21,7 +21,6 @@ type Drag = { from: number; to: number; startY: number; dy: number; rowH: number
 export default function Scorecard() {
   const items = useScorecard()
   const progress = useProgress()
-  const navigate = useNavigate()
   const toast = useToast()
   const confirm = useConfirm()
   const [text, setText] = useState('')
@@ -115,7 +114,7 @@ export default function Scorecard() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
+      <BackButton className="mb-2" />
       <div className="flex items-center gap-2">
         <h1 className="text-3xl font-black tracking-tight">Habits Scorecard</h1>
         <InfoTip tip="scorecard" />
@@ -126,7 +125,7 @@ export default function Scorecard() {
 
       {shown.length > 0 && (
         <Card className="mb-4">
-          <div className="mb-1 text-[18px] font-black">{firstTime ? '👋 Tap what you do on a normal day' : '💡 More ideas'}</div>
+          <div className="mb-1 text-[18px] font-black">{firstTime ? 'Tap what you do on a normal day' : 'More ideas'}</div>
           <p className="mb-3 text-[14px] font-semibold text-muted">Tap to add it. A new idea pops up each time.</p>
           <div className="flex flex-wrap gap-2">
             {shown.map((s) => (
@@ -171,11 +170,11 @@ export default function Scorecard() {
               <div className="mt-2 pl-7">
                 {linked ? (
                   <Link to={`/habits/${linked.habit.id}`} className="text-xs font-extrabold text-sage-deep">
-                    ✓ Tracking · {linked.habit.type === 'break' ? `🌿 ${linked.stats.current} days clean` : `🔥 ${linked.stats.current} day streak`} ›
+                    Tracking · {linked.habit.type === 'break' ? `${linked.stats.current} days clean` : `${linked.stats.current} day streak`} ›
                   </Link>
                 ) : (
                   <button onClick={() => { setTracking(item); setTrackName(item.routine); setDays(0) }} className="bouncy rounded-full tray px-3 py-1 text-[14px] font-extrabold text-muted">
-                    {item.rating === '-' ? '✂️ Track to break it' : '📈 Track this habit'}
+                    {item.rating === '-' ? 'Track to break it' : 'Track this habit'}
                   </button>
                 )}
               </div>
@@ -191,7 +190,7 @@ export default function Scorecard() {
         </Card>
       )}
 
-      <Modal open={!!editing} onClose={() => setEditing(null)} title="✏️ Edit">
+      <Modal open={!!editing} onClose={() => setEditing(null)} title="Edit">
         <div className="space-y-4">
           <Field label="What you do"><input value={editText} onChange={(e) => setEditText(e.target.value)} autoFocus /></Field>
           <Field label="Is it good for you?">
@@ -208,7 +207,7 @@ export default function Scorecard() {
         </div>
       </Modal>
 
-      <Modal open={!!tracking} onClose={() => setTracking(null)} title={isBad ? '✂️ Break this habit' : '📈 Track this habit'}>
+      <Modal open={!!tracking} onClose={() => setTracking(null)} title={isBad ? 'Break this habit' : 'Track this habit'}>
         <div className="space-y-4">
           <Field label="Habit name"><input value={trackName} onChange={(e) => setTrackName(e.target.value)} /></Field>
           <Field label={isBad ? 'Days since you last did it' : 'Days in a row you have already done it'} hint="Your progress so far. It counts toward your streak.">
@@ -219,7 +218,7 @@ export default function Scorecard() {
               ))}
             </div>
           </Field>
-          <p className="text-[14px] font-semibold text-muted">You can add more details later with ✏️ Edit.</p>
+          <p className="text-[14px] font-semibold text-muted">You can add more details later with Edit.</p>
           <div className="flex gap-2">
             <Button variant="secondary" className="flex-1" onClick={() => setTracking(null)}>Cancel</Button>
             <Button className="flex-1" disabled={!trackName.trim()} onClick={track}>Start tracking</Button>

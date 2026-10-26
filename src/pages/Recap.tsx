@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { RecapStory } from '../components/RecapStory'
-import { Button, Modal, useToast } from '../components/ui'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { BackButton, Button, Modal, useToast } from '../components/ui'
 import { db } from '../lib/db'
 import { addDays, formatDay } from '../lib/dates'
 import { usePrefs } from '../lib/prefs'
@@ -51,13 +52,12 @@ function ShareRecap({ data }: { data: RecapData }) {
 }
 
 function Header({ onPrev, onNext, nextDisabled, label }: { onPrev: () => void; onNext: () => void; nextDisabled: boolean; label: string }) {
-  const navigate = useNavigate()
   return (
     <div className="mb-4 flex items-center justify-between">
-      <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center pr-3 text-[17px] font-bold text-muted">‹ Back</button>
+      <BackButton />
       <div className="flex gap-1.5">
-        <button onClick={onPrev} className="clay-sm bouncy h-11 w-11 rounded-full text-[24px] font-black" aria-label={`Previous ${label}`}>‹</button>
-        <button onClick={onNext} disabled={nextDisabled} className="clay-sm bouncy h-11 w-11 rounded-full text-[24px] font-black disabled:opacity-30" aria-label={`Next ${label}`}>›</button>
+        <button onClick={onPrev} className="clay-sm bouncy flex h-11 w-11 items-center justify-center rounded-full" aria-label={`Previous ${label}`}><ChevronLeft size={22} strokeWidth={2.4} /></button>
+        <button onClick={onNext} disabled={nextDisabled} className="clay-sm bouncy flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label={`Next ${label}`}><ChevronRight size={22} strokeWidth={2.4} /></button>
       </div>
     </div>
   )
@@ -66,9 +66,9 @@ function Header({ onPrev, onNext, nextDisabled, label }: { onPrev: () => void; o
 /** A Wrapped-style look back at one month. */
 export default function Recap() {
   const { ym = '' } = useParams()
-  const navigate = useNavigate()
   const progress = useProgress()
   const prefs = usePrefs()
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (ym) db.meta.put({ key: `recap_seen:${ym}`, value: '1' })
@@ -93,9 +93,9 @@ export default function Recap() {
 /** The whole year, as one recap. A first version, reachable from the test workspace for now. */
 export function YearRecap() {
   const { y = '' } = useParams()
-  const navigate = useNavigate()
   const progress = useProgress()
   const prefs = usePrefs()
+  const navigate = useNavigate()
   const data = useMemo(() => (progress ? buildRecap(progress, 'year', `${y}-01-01`, `${y}-12-31`, y) : null), [progress, y])
   if (!progress || !data) return null
   return (

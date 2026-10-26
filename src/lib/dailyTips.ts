@@ -1,9 +1,8 @@
 // Short, practical tips in plain words. One shows on Today each day; all of them live on the Tips page.
 
-export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
+export const TIP_GROUPS: { title: string; tips: string[] }[] = [
   {
     title: 'Getting started',
-    icon: '🌱',
     tips: [
       'Start smaller than you think. "Read one page" beats "read a chapter" you never start.',
       'Pick one habit at a time. Add the next one once the first feels easy.',
@@ -15,7 +14,6 @@ export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
   },
   {
     title: 'Staying consistent',
-    icon: '🔥',
     tips: [
       'Never miss twice. One missed day is an accident; two is the start of a new habit.',
       'On tough days, do the 2-minute version. It keeps the streak and the identity alive.',
@@ -28,7 +26,6 @@ export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
   },
   {
     title: 'Breaking bad habits',
-    icon: '✂️',
     tips: [
       'Find the trigger. Most bad habits start with a cue: boredom, a place, a time, a feeling.',
       'Hide the cue. Out of sight really is out of mind: phone in another room, snacks off the counter.',
@@ -40,7 +37,6 @@ export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
   },
   {
     title: 'Motivation & identity',
-    icon: '🪞',
     tips: [
       'Every check-off is a vote for who you want to become. You don\'t need every vote, just most.',
       'Say "I am a reader", not "I\'m trying to read more". Identity drives behavior.',
@@ -52,7 +48,6 @@ export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
   },
   {
     title: 'Leveling up',
-    icon: '📈',
     tips: [
       'When a habit feels easy, make it a little harder, about 10–20% more. Not too easy, not too hard.',
       "Boredom is the real enemy of long habits. Small changes and level-ups keep it interesting.",
@@ -62,7 +57,7 @@ export const TIP_GROUPS: { title: string; icon: string; tips: string[] }[] = [
   },
 ]
 
-export const ALL_TIPS = TIP_GROUPS.flatMap((g) => g.tips.map((tip) => ({ tip, icon: g.icon, group: g.title })))
+export const ALL_TIPS = TIP_GROUPS.flatMap((g) => g.tips.map((tip) => ({ tip, group: g.title })))
 
 /** The same tip all day, a new one tomorrow. */
 export function tipOfTheDay(dayNumber: number) {

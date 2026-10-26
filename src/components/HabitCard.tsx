@@ -1,3 +1,4 @@
+import { Pencil } from 'lucide-react'
 import { buzz } from '../lib/prefs'
 import { AnimatePresence, motion } from 'motion/react'
 import { useRef, useState, type ReactNode } from 'react'
@@ -44,7 +45,7 @@ function Meta({ children, color }: { icon?: ReactNode; children: ReactNode; colo
 }
 
 /** A row of facts with a dot between each one. */
-const metaRow = "mt-1 flex flex-wrap leading-snug [&>*+*]:before:text-muted [&>*+*]:before:content-['_·_']"
+const metaRow = "mt-1 flex flex-wrap leading-snug [&>*+*]:before:mx-1.5 [&>*+*]:before:text-muted [&>*+*]:before:content-['·']"
 
 /** A small word button with a fingertip-sized tap area. */
 function IconButton({ label, onClick, to, children }: { label: string; onClick?: () => void; to?: string; children: ReactNode }) {
@@ -141,7 +142,7 @@ export function HabitCard(p: Props) {
               {stats.best > stats.current && <Meta>best {stats.best}</Meta>}
             </div>
           </Link>
-          <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}>Edit</IconButton>
+          <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}><Pencil size={18} strokeWidth={2.4} aria-hidden /></IconButton>
         </div>
         <div className="mt-3 flex justify-end">
           {slipped ? (
@@ -176,6 +177,7 @@ export function HabitCard(p: Props) {
             {h.schedule.kind === 'weekly' && <Meta>{stats.weekDone}/{h.schedule.times} this week</Meta>}
             {h.cue_time && <Meta>at {h.cue_time}</Meta>}
             {!h.cue_time && h.location && <Meta>{h.location}</Meta>}
+            {toBadge !== null && stats.current > 0 && toBadge <= 3 && <Meta>{toBadge} to the {next}-{stats.unit} badge</Meta>}
           </div>
         </Link>
 
@@ -213,7 +215,7 @@ export function HabitCard(p: Props) {
               <motion.span key={popKey} initial={{ scale: 0.85 }} animate={{ scale: 1 }} transition={spring} className="inline-block whitespace-nowrap tabular-nums">
                 {c?.kind === 'two_min' ? '2-minute version done' : progressText(h, count)}
               </motion.span>
-              {servingsText(h, count) && <span className="whitespace-nowrap text-muted"> · {servingsText(h, count)}</span>}
+              {servingsText(h, count) && <span className="block whitespace-nowrap text-muted">{servingsText(h, count)}</span>}
             </div>
             <span className="flex shrink-0 gap-1.5">
               <IconButton label="Take one back" onClick={() => count > 0 && bump(-step)}><span className="text-[20px] leading-none">−</span></IconButton>
@@ -258,21 +260,16 @@ export function HabitCard(p: Props) {
         </motion.button>
       )}
 
-      {h.two_min_version && !done && (
-        <button onClick={() => tap('two_min')} className="tray bouncy mt-3 flex min-h-11 w-full items-center rounded-[18px] px-4 py-2.5 text-left text-[16px] font-bold leading-snug text-muted">
-          Busy? Just {h.two_min_version}
-        </button>
-      )}
-      <div className="mt-2.5 flex items-center gap-1.5">
-        {toBadge !== null && stats.current > 0 && toBadge <= 3 ? (
-          <span className="flex-1 text-[16px] font-bold text-muted">
-            {toBadge} more to the {next}-{stats.unit} badge
-          </span>
+      <div className="mt-3 flex items-center gap-1.5">
+        {h.two_min_version && !done ? (
+          <button onClick={() => tap('two_min')} className="tray bouncy flex min-h-11 min-w-0 flex-1 items-center rounded-[18px] px-4 py-2 text-left text-[15px] font-bold leading-snug text-muted">
+            Busy? Just {h.two_min_version}
+          </button>
         ) : <span className="flex-1" />}
         <IconButton label={c?.note ? 'Edit note' : 'Add note'} onClick={p.onNote}>
           <span className={c?.note ? 'text-sage-deep' : ''}>Note</span>
         </IconButton>
-        <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}>Edit</IconButton>
+        <IconButton label="Edit habit" to={`/habits/${h.id}/edit`}><Pencil size={18} strokeWidth={2.4} aria-hidden /></IconButton>
       </div>
     </motion.div>
   )

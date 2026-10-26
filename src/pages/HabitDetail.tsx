@@ -1,10 +1,11 @@
+import { Snowflake } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { DayEditor } from '../components/DayEditor'
 import { streakLabel } from '../components/HabitCard'
 import { Heatmap } from '../components/Heatmap'
 import { LevelUpModal } from '../components/LevelUpModal'
-import { Button, buttonClass, Card, InfoTip, useConfirm } from '../components/ui'
+import { BackButton, Button, buttonClass, Card, InfoTip, useConfirm } from '../components/ui'
 import { formatDay } from '../lib/dates'
 import { useProgress } from '../lib/progress'
 import { deleteHabit, setArchived } from '../lib/repo'
@@ -38,7 +39,7 @@ export default function HabitDetail() {
       return d < start ? null : { color: `${h.color}aa`, title: 'clean' }
     }
     if (isDone(h, c)) return c!.kind === 'two_min' ? { color: `${h.color}88`, title: '2-minute version', icon: '½' } : { color: h.color, title: 'done' }
-    if (s.frozen.has(d)) return { color: 'color-mix(in srgb, var(--color-sky) 45%, transparent)', title: 'saved by a freeze', icon: '🧊' }
+    if (s.frozen.has(d)) return { color: 'color-mix(in srgb, var(--color-sky) 45%, transparent)', title: 'saved by a freeze', icon: <Snowflake size={11} strokeWidth={2.6} aria-hidden /> }
     if (c && c.count > 0) return { color: `${h.color}44`, title: `${c.count}/${h.target_count}` }
     return null
   }
@@ -58,7 +59,7 @@ export default function HabitDetail() {
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
-        <button onClick={() => navigate(-1)} className="-ml-1 flex min-h-11 items-center gap-0.5 pr-3 text-[16px] font-bold text-muted">‹ Back</button>
+        <BackButton />
         <Link to={`/habits/${h.id}/edit`} className={buttonClass('secondary', '!min-h-11 !px-4 !py-2 text-sm')}>Edit</Link>
       </div>
 

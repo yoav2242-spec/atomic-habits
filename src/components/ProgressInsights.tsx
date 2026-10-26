@@ -50,7 +50,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
         <div className="grid grid-cols-3 gap-2">
           {stages.map((s) => (
             <div key={s.key} className="rounded-2xl tray p-2.5 text-center">
-              <div className="text-2xl">{s.icon}</div>
+              <s.icon aria-hidden className="mx-auto mb-1 text-sage-deep" size={22} strokeWidth={2.2} />
               <div className="text-xl font-black">{s.habits.length}</div>
               <div className="text-[12px] font-extrabold text-muted">{s.label}</div>
               <div className="text-[12px] font-semibold text-muted">{s.to === Infinity ? '66+ days' : `${s.from}–${s.to} days`}</div>
@@ -59,7 +59,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
         </div>
         {maintained.length > 0 && (
           <p className="mt-3 text-xs font-bold text-sage-deep">
-            ✨ Keeping up {maintained.length} automatic habit{maintained.length === 1 ? '' : 's'}: {maintained.map((p) => p.habit.name).join(', ')}
+            Keeping up {maintained.length} automatic habit{maintained.length === 1 ? '' : 's'}: {maintained.map((p) => p.habit.name).join(', ')}
           </p>
         )}
       </Card>
@@ -136,7 +136,7 @@ function HabitRow({ p, today }: { p: HabitProgress; today: string }) {
         </span>
       </div>
       <div className="mb-2 flex items-center gap-2 text-[12px] font-bold text-muted">
-        <span>{stage.icon} {stage.label}</span>
+        <span className="flex items-center gap-1"><stage.icon aria-hidden size={14} strokeWidth={2.4} />{stage.label}</span>
         <div className="h-1.5 flex-1 overflow-hidden rounded-full tray">
           <div className="h-full rounded-full" style={{ width: `${stageProgress * 100}%`, background: h.color }} />
         </div>

@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TimePicker } from '../components/TimePicker'
-import { Button, buttonClass, Field, Segmented, spring, Stepper, Toggle, useToast } from '../components/ui'
+import { BackButton, Button, buttonClass, Field, Segmented, spring, Stepper, Toggle, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -115,7 +115,7 @@ export default function HabitForm() {
   if (step === -1) {
     return (
       <div>
-        <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center gap-0.5 pr-3 text-[16px] font-bold text-muted">‹ Cancel</button>
+        <BackButton label="Cancel" className="mb-2" />
         <h1 className="text-[30px] font-black leading-[1.05] tracking-[-0.02em]">Add a habit</h1>
         <p className="mb-5 mt-2 font-semibold leading-snug text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
         <button onClick={() => setStep(0)} className="btn-3d mb-5 flex w-full items-center gap-3.5 rounded-[24px] bg-sage p-4 text-left text-on-pastel">
@@ -281,7 +281,7 @@ export default function HabitForm() {
   return (
     <div>
       <div className="mb-3 flex items-center justify-between">
-        <button onClick={() => (step === 0 ? (id ? navigate(-1) : setStep(-1)) : setStep(step - 1))} className="-ml-1 flex min-h-11 items-center gap-0.5 pr-3 text-[16px] font-bold text-muted">‹ {step === 0 && id ? 'Cancel' : 'Back'}</button>
+        <BackButton label={step === 0 && id ? 'Cancel' : 'Back'} onClick={() => (step === 0 ? (id ? navigate(-1) : setStep(-1)) : setStep(step - 1))} />
         <div className="-mr-1 flex">
           {steps.map((s, i) => (
             <button key={i} onClick={() => setStep(i)} aria-label={`Step ${i + 1}: ${s.title}`} aria-current={i === step ? 'step' : undefined}

@@ -1,12 +1,10 @@
 import { useLiveQuery } from 'dexie-react-hooks'
-import { useNavigate } from 'react-router-dom'
-import { Card, InfoTip, XPBar } from '../components/ui'
+import { BackButton, Card, InfoTip, XPBar } from '../components/ui'
 import { getMeta } from '../lib/db'
 import { useProgress } from '../lib/progress'
 import { setTheme, STICKERS, THEMES, unlockedThemes } from '../lib/rewards'
 
 export default function Rewards() {
-  const navigate = useNavigate()
   const progress = useProgress()
   const current = useLiveQuery(() => getMeta('theme'), [], 'sage')
   if (!progress) return null
@@ -19,7 +17,7 @@ export default function Rewards() {
 
   return (
     <div>
-      <button onClick={() => navigate(-1)} className="-ml-1 mb-2 flex min-h-11 items-center pr-3 text-[16px] font-bold text-muted">‹ Back</button>
+      <BackButton className="mb-2" />
       <h1 className="text-[30px] font-black tracking-[-0.02em]">Rewards</h1>
       <p className="mb-5 font-semibold text-muted">Level up to unlock new colors. Open surprise boxes to collect stickers.</p>
 
@@ -32,7 +30,7 @@ export default function Rewards() {
       </Card>
 
       <Card className="mb-4">
-        <div className="mb-3 text-[18px] font-black">🎨 Color themes</div>
+        <div className="mb-3 text-[18px] font-black">Color themes</div>
         <div className="grid grid-cols-4 gap-2">
           {THEMES.map((t) => {
             const open = unlocked.has(t.id)
@@ -52,7 +50,7 @@ export default function Rewards() {
       </Card>
 
       <Card>
-        <div className="mb-1 text-[18px] font-black">🦊 Sticker collection</div>
+        <div className="mb-1 text-[18px] font-black">Sticker collection</div>
         <p className="mb-3 text-[14px] font-semibold text-muted">{stickerCounts.size} of {STICKERS.length} collected. Finish your day to open a surprise box.</p>
         <div className="grid grid-cols-6 gap-2">
           {STICKERS.map((s) => {

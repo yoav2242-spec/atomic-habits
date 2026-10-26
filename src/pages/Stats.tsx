@@ -6,7 +6,7 @@ import { computeRecords } from '../lib/records'
 import { AreaChart, BarChart } from '../components/Charts'
 import { Heatmap } from '../components/Heatmap'
 import { Card, InfoTip, PageHeader, XPBar } from '../components/ui'
-import { addDays, formatDay, range, todayKey, WEEKDAY_LONG, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
+import { addDays, diffDays, formatDay, range, todayKey, WEEKDAY_LONG, WEEKDAY_SHORT, weekday, weekStart } from '../lib/dates'
 import { useProgress, type HabitProgress } from '../lib/progress'
 import { byDate, isDone, isScheduled, pointsOn, startDate } from '../lib/streaks'
 
@@ -62,6 +62,8 @@ export default function Stats() {
   const weekRates = weeks.map(weekRate)
   const thisWeek = weekRates.at(-1)
   const lastWeek = weekRates.at(-2)
+  // Early in the week a part-done today isn't a fair match for a whole week.
+  const daysIntoWeek = diffDays(weekStart(today), today) + 1
   const diff = thisWeek != null && lastWeek != null ? Math.round((thisWeek - lastWeek) * 100) : null
 
   // Points earned day by day, then added up: the "1% better" curve.
@@ -105,7 +107,8 @@ export default function Stats() {
           <span className="text-[16px] font-bold text-muted">of your plan done</span>
         </div>
         <p className="mb-4 mt-2 text-[16px] font-semibold leading-snug">
-          {diff === null ? 'Your weekly trend shows up after your second week.'
+          {daysIntoWeek < 3 && lastWeek != null ? <>A new week. Last week you did <span className="font-black">{Math.round(lastWeek * 100)}%</span>.</>
+            : diff === null ? 'Your weekly trend shows up after your second week.'
             : diff === 0 ? 'Same as last week. Steady counts.'
             : diff > 0 ? <><span className="font-black text-sage-deep">Up {diff}%</span> on last week.</>
             : <><span className="font-black text-[var(--flame)]">Down {Math.abs(diff)}%</span> on last week. Never miss twice.</>}
