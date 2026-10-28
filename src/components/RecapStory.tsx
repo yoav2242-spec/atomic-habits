@@ -138,7 +138,6 @@ export function RecapStory({ data, name }: { data: RecapData; name?: string }) {
             <CountUp to={data.checkIns} className="text-[68px] font-black leading-none tracking-[-0.04em]" />
             <span className="text-[19px] font-extrabold opacity-70">habits done</span>
           </div>
-          <p className="mt-2 text-[17px] font-bold opacity-75">Each one a vote for who you're becoming.</p>
           {data.kind === 'month' ? <MonthPebbles data={data} /> : <YearPebbles data={data} />}
         </div>
       </Slide>
@@ -245,7 +244,7 @@ export function RecapStory({ data, name }: { data: RecapData; name?: string }) {
               </motion.ul>
               {data.slips !== null && (
                 <p className="mt-5 text-[17px] font-bold text-muted">
-                  Breaking bad habits: {data.slips === 0 ? `zero slips all ${period}.` : `${data.slips} slip${data.slips === 1 ? '' : 's'}, and you kept going.`}
+                  {data.slips === 0 ? 'No slips' : `${data.slips} slip${data.slips === 1 ? '' : 's'}`}
                 </p>
               )}
             </Slide>
@@ -255,7 +254,6 @@ export function RecapStory({ data, name }: { data: RecapData; name?: string }) {
             <Drift colors={['var(--color-butter)', 'var(--color-lavender)', 'var(--color-rose)', 'var(--color-sky)', '#f7f8f5']} />
             <div className="relative py-6">
               <p className="text-[28px] font-black leading-tight">1% better every day</p>
-              <p className="mt-2 text-[17px] font-bold opacity-75">Small habits, done again and again, add up to something big.</p>
             </div>
           </Slide>
         </>

@@ -14,7 +14,7 @@ export function ClockAlarm({ h }: { h: Habit }) {
         <div className="min-w-0 flex-1">
           <h2 className="text-[18px] font-black leading-tight">Alarm in your Clock app</h2>
           <p className="text-[14px] font-semibold leading-snug text-muted">
-            {h.cue_time ? `Rings at ${h.cue_time}, even when Atomic is closed.` : 'Give this habit a time first, then add the alarm.'}
+            {h.cue_time ? 'Rings even when Atomic is closed' : 'Give it a time first'}
           </p>
         </div>
         {h.cue_time && <span className="shrink-0 text-[22px] font-black tabular-nums">{h.cue_time}</span>}
@@ -24,10 +24,10 @@ export function ClockAlarm({ h }: { h: Habit }) {
       ) : isAndroid() && url ? (
         <>
           <a href={url} className={buttonClass('primary', 'mt-3 w-full')}>Set the alarm</a>
-          <p className="mt-2 text-[14px] font-semibold leading-snug text-muted">Your Clock app opens with the time and name filled in. Choose the days and the sound there, then tap Save.</p>
+          <p className="mt-2 text-[14px] font-semibold leading-snug text-muted">Choose the days and sound in Clock, then Save.</p>
         </>
       ) : (
-        <p className="tray mt-3 rounded-2xl p-3 text-[14px] font-semibold text-muted">This works on Android phones: open Atomic on your phone to set it.</p>
+        <p className="tray mt-3 rounded-2xl p-3 text-[14px] font-semibold text-muted">Works on Android phones</p>
       )}
     </section>
   )

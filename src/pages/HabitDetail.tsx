@@ -96,7 +96,7 @@ export default function HabitDetail() {
           <h2 className="text-[18px] font-black">Calendar</h2>
           <span className="text-[14px] font-bold text-muted">30 days: {pct(p.rate30)} · {votes(h, checkins, today)} votes</span>
         </div>
-        <p className="mb-3 text-[14px] font-semibold text-muted">Tap any day to change it or fill in a day you missed.</p>
+        <p className="mb-3 text-[14px] font-semibold text-muted">Tap a day to change it</p>
         <Heatmap today={today} weeks={16} cell={cell} onPick={setEditDay} />
         <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-[14px] font-bold text-muted">
           <span><i className="mr-1 inline-block h-2.5 w-2.5 rounded-sm align-middle" style={{ background: h.type === 'break' ? `${h.color}aa` : h.color }} />{h.type === 'break' ? 'clean' : 'done'}</span>
@@ -114,7 +114,7 @@ export default function HabitDetail() {
           </div>
           {(h.level_history ?? []).length > 0 && (
             <ul className="mb-3 space-y-1 text-sm font-semibold">
-              {[...h.level_history].reverse().slice(0, 5).map((l, i) => (
+              {[...h.level_history].reverse().slice(0, 3).map((l, i) => (
                 <li key={i} className="flex justify-between"><span>Lv {l.level}: {l.name}{l.target_count > 1 ? ` ×${l.target_count}` : ''}</span><span className="text-muted">{formatDay(l.date, { month: 'short', day: 'numeric' })}</span></li>
               ))}
             </ul>

@@ -40,9 +40,7 @@ const STEPS = {
 
 function Tip({ children }: { children: ReactNode }) {
   return (
-    <p className="flex gap-2.5 rounded-[20px] bg-[color-mix(in_srgb,var(--color-sage)_20%,var(--card))] p-3.5 text-[16px] font-semibold leading-relaxed">
-            <span>{children}</span>
-    </p>
+    <p className="-mt-2 text-[16px] font-semibold leading-snug text-muted">{children}</p>
   )
 }
 
@@ -139,7 +137,7 @@ export default function HabitForm() {
       <div>
         <BackButton label="Cancel" className="mb-2" />
         <h1 className="text-[30px] font-black leading-[1.05] tracking-[-0.02em]">Add a habit</h1>
-        <p className="mb-5 mt-2 font-semibold leading-snug text-muted">Tap a ready-made habit. Every step is already filled in, and you can change anything as you go. Or make your own.</p>
+        <p className="mb-5 mt-2 font-semibold leading-snug text-muted">Pick a ready-made habit or make your own.</p>
         <button onClick={() => setStep(0)} className="btn-3d mb-5 flex w-full items-center gap-3.5 rounded-[24px] bg-sage p-4 text-left text-on-pastel">
                     <span>
             <span className="block text-lg font-black">Make my own</span>
@@ -176,7 +174,7 @@ export default function HabitForm() {
   )
 
   const pastProgress = !id && (
-    <Field label={h.type === 'build' ? 'Already doing this?' : 'Already stopped?'} hint={h.type === 'build' ? 'How many days in a row so far? They count toward your streak.' : 'How many days since you last did it?'}>
+    <Field label={h.type === 'build' ? 'Already doing this?' : 'Already stopped?'} hint={h.type === 'build' ? 'Days in a row so far' : 'Days since you last did it'}>
       <Stepper value={pastDays} min={0} max={365} onChange={setPastDays} />
     </Field>
   )
@@ -186,16 +184,16 @@ export default function HabitForm() {
       ? [
           <>
             {typeSwitch}
-            <Field label="What's the habit?" hint="Be specific: “Read 10 pages”, not “Read more”.">
+            <Field label="What's the habit?" hint="Be specific, like “Read 10 pages”">
               <input value={h.name} onChange={(e) => set({ name: e.target.value })} placeholder="e.g. Read 10 pages" autoFocus />
             </Field>
             <EmojiAndColor h={h} set={set} />
           </>,
           <IdentityStep h={h} set={set} identities={identities} newIdentity={newIdentity} setNewIdentity={setNewIdentity} addIdentity={addIdentity}>
-            <Tip>The goal isn't to read a book, it's to <b>become a reader</b>. Each time you do this habit, it's a vote for that person.</Tip>
+            <Tip>Each time you do it is a vote for who you become.</Tip>
           </IdentityStep>,
           <>
-            <Tip>Pick an exact time and place. A clear plan makes you much more likely to actually do it.</Tip>
+            <Tip>An exact time and place makes it happen.</Tip>
             {isAmount(h) ? (
               <p className="tray rounded-2xl p-3.5 text-[16px] font-bold">
                 This is an every-day amount. You set how much, and in how many {h.step_label || 'drinks'}s, in "Make it easy".
@@ -231,7 +229,7 @@ export default function HabitForm() {
             </Field>
             <Field label="Where?"><input value={h.location} onChange={(e) => set({ location: e.target.value })} placeholder="e.g. bedroom" /></Field>
             <ReminderSettings h={h} set={set} />
-            <Field label="Right after I…" tip="stacking" hint="Link it to something you already do every day.">
+            <Field label="Right after I…" tip="stacking">
               <input value={h.stack_after_text} disabled={!!h.stack_after_habit_id} onChange={(e) => set({ stack_after_text: e.target.value })} placeholder="e.g. pour my morning coffee" />
             </Field>
             {others.length > 0 && (
@@ -244,23 +242,23 @@ export default function HabitForm() {
             {anchor && <Sentence>After I {anchor}, I will {name.toLowerCase()}.</Sentence>}
           </>,
           <>
-            <Tip>We repeat what we enjoy. Remind yourself why it matters, and pair it with something you love.</Tip>
+            <Tip>We repeat what we enjoy.</Tip>
             <Field label="Why does this matter to you?">
               <textarea rows={3} value={h.why} onChange={(e) => set({ why: e.target.value })} placeholder="e.g. I want to feel calm and focused" />
             </Field>
-            <Field label="Pair it with a treat" tip="bundle" hint="You only get the treat while doing the habit.">
+            <Field label="Pair it with a treat" tip="bundle" hint="Only while doing the habit">
               <input value={h.temptation_bundle} onChange={(e) => set({ temptation_bundle: e.target.value })} placeholder="e.g. listen to my favorite podcast" />
             </Field>
           </>,
           <>
-            <Tip>Make it so easy you can't say no. On hard days, the tiny version still counts and keeps your streak.</Tip>
-            <Field label="The 2-minute version" tip="two_min" hint="Something that takes 2 minutes or less.">
+            <Tip>On hard days, the tiny version still counts.</Tip>
+            <Field label="The 2-minute version" tip="two_min" hint="2 minutes or less">
               <input value={h.two_min_version} onChange={(e) => set({ two_min_version: e.target.value })} placeholder="e.g. read one page" />
             </Field>
             <DailyGoal h={h} set={set} />
           </>,
           <>
-            <Tip>Each check-off gives you points, confetti and a growing streak. If you miss a day, just don't miss twice.</Tip>
+            <Tip>Check it off. Never miss twice.</Tip>
             <Summary h={h} identity={identities.find((i) => i.id === h.identity_id)?.name} anchor={anchor} />
             {pastProgress}
             <Field label="Habit contract (optional)" tip="contract">
@@ -290,21 +288,21 @@ export default function HabitForm() {
             <EmojiAndColor h={h} set={set} />
           </>,
           <IdentityStep h={h} set={set} identities={identities} newIdentity={newIdentity} setNewIdentity={setNewIdentity} addIdentity={addIdentity}>
-            <Tip>Not “I'm trying to quit”, but “I'm <b>not a smoker</b>.” Every clean day is a vote for that person.</Tip>
+            <Tip>Every clean day is a vote for who you become.</Tip>
           </IdentityStep>,
           <>
-            <Tip>Bad habits start with a trigger. Spot it, then get it out of sight.</Tip>
+            <Tip>Find what sets it off, then hide it.</Tip>
             <Field label="What usually sets it off?"><input value={h.cue_trigger} onChange={(e) => set({ cue_trigger: e.target.value })} placeholder="e.g. phone on the nightstand" /></Field>
             <Field label="How will you hide that trigger?"><input value={h.hide_plan} onChange={(e) => set({ hide_plan: e.target.value })} placeholder="e.g. charge my phone in the kitchen" /></Field>
           </>,
           <>
-            <Tip>Look at what it really costs you. The clearer the downside, the less tempting it feels.</Tip>
+            <Tip>See clearly what it costs you.</Tip>
             <Field label="What does this habit cost you?">
               <textarea rows={3} value={h.why} onChange={(e) => set({ why: e.target.value })} placeholder="e.g. I sleep badly and feel tired all day" />
             </Field>
           </>,
           <>
-            <Tip>Put more steps between you and the habit. The harder it is to start, the less you'll do it.</Tip>
+            <Tip>The harder it is to start, the less you'll do it.</Tip>
             <Field label="How will you make it harder?">
               <textarea rows={3} value={h.friction_plan} onChange={(e) => set({ friction_plan: e.target.value })} placeholder="e.g. log out of social apps every night" />
             </Field>
@@ -344,8 +342,7 @@ export default function HabitForm() {
           {isLast ? (id ? 'Save changes' : queue.length > 1 ? 'Create, then next habit' : 'Create habit') : 'Next'}
         </Button>
       </div>
-      {!isLast && step > 0 && <p className="mt-3 text-center text-[14px] font-semibold text-muted">Everything here is optional. Skip what you like.</p>}
-      {id && <p className="mt-3 text-center text-[14px] font-semibold text-muted">Tap the dots at the top to jump to any part.</p>}
+      {!isLast && step > 0 && <p className="mt-3 text-center text-[14px] font-semibold text-muted">All optional</p>}
     </div>
   )
 }
@@ -427,7 +424,6 @@ function Summary({ h, identity, anchor }: { h: Habit; identity?: string; anchor?
           <div key={k} className="flex gap-2"><dt className="w-[6.5rem] shrink-0 font-bold opacity-70">{k}</dt><dd className="font-semibold">{v}</dd></div>
         ))}
       </dl>
-      <p className="mt-3 text-[14px] font-semibold opacity-70">Want to change something? Tap the dots at the top.</p>
     </div>
   )
 }
