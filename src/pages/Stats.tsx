@@ -97,7 +97,7 @@ export default function Stats() {
 
   return (
     <div>
-      <PageHeader title="Progress" subtitle="Small wins, adding up." />
+      <PageHeader title="Progress" />
 
       {/* The screen's question first: am I getting better? */}
       <Card className="mb-4 !p-5">
@@ -111,7 +111,7 @@ export default function Stats() {
             : diff === null ? 'Your weekly trend shows up after your second week.'
             : diff === 0 ? 'Same as last week. Steady counts.'
             : diff > 0 ? <><span className="font-black text-sage-deep">Up {diff}%</span> on last week.</>
-            : <><span className="font-black text-[var(--flame)]">Down {Math.abs(diff)}%</span> on last week. Never miss twice.</>}
+            : <><span className="font-black text-[var(--flame)]">Down {Math.abs(diff)}%</span> on last week.</>}
         </p>
         <BarChart values={weekRates} labels={weeks.map((w, i) => (i % 3 === 0 || i === weeks.length - 1 ? formatDay(w, { month: 'short', day: 'numeric' }) : ''))} />
       </Card>
@@ -165,21 +165,21 @@ export default function Stats() {
             </div>
           ))}
         </div>
-        <p className="mt-2 text-[14px] font-semibold text-muted">{records.perfectDays} perfect day{records.perfectDays === 1 ? '' : 's'} so far. Beat your records to get a celebration!</p>
+        <p className="mt-2 text-[14px] font-semibold text-muted tabular-nums">{records.perfectDays} perfect day{records.perfectDays === 1 ? '' : 's'} so far</p>
       </Card>
 
       <ProgressInsights progress={progress} />
 
       <Card className="mb-4">
         <h2 className="text-[18px] font-black">Points, last 90 days</h2>
-        <p className="mb-3 text-[14px] font-semibold text-muted">Get 1% better every day and you end up about 37 times better in a year. This line is your small wins adding up.</p>
+        <div className="mb-3" />
         <AreaChart values={cumulative} />
       </Card>
 
       <Card className="mb-4">
         <h2 className="text-[18px] font-black">Your best days</h2>
         <p className="mb-3 text-[14px] font-semibold text-muted">
-          {byWeekday.some((v) => v !== null) ? `You're most consistent on ${WEEKDAY_LONG[MON_FIRST[bestDay]]}s. Plan tough habits for those days.` : 'Check off habits for a while to see your best days.'}
+          {byWeekday.some((v) => v !== null) ? `Best: ${WEEKDAY_LONG[MON_FIRST[bestDay]]}` : 'Shows up after a few weeks'}
         </p>
         <BarChart values={byWeekday} labels={MON_FIRST.map((d) => WEEKDAY_SHORT[d])} color="var(--color-sky)" highlightLast={false} height={90} />
       </Card>

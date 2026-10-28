@@ -24,11 +24,7 @@ export default function Identity() {
 
   return (
     <div>
-      <PageHeader title="Who I'm becoming" subtitle="Every habit is a vote for who you want to be." />
-      <Card className="mb-5 text-sm font-semibold text-muted">
-        Real change comes from changing who you believe you are. Each time you do a habit, you cast a vote for that person.
-        Every identity has its own level, so you can watch it grow. <InfoTip tip="identity" className="align-middle" />
-      </Card>
+      <PageHeader title="Who I'm becoming" action={<InfoTip tip="identity" />} />
 
       <div className="space-y-3">
         {progress.identities.map((i, n) => {
@@ -74,7 +70,7 @@ export default function Identity() {
         <Card className="flex items-center justify-between">
           <div>
             <div className="text-[18px] font-black">Habits Scorecard</div>
-            <div className="text-sm font-semibold text-muted">List what you do each day, and track it with your progress so far.</div>
+            <div className="text-sm font-semibold text-muted">What you already do each day</div>
           </div>
           <span className="text-2xl text-muted">›</span>
         </Card>

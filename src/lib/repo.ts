@@ -84,6 +84,20 @@ export async function saveHabit(h: Habit) {
   await save('habits', h)
 }
 export const deleteHabit = (h: Habit) => save('habits', { ...h, deleted: true })
+/**
+ * Start over: every habit, its history, points, levels, rewards and identities go, back to level 1.
+ * Settings (name, light or dark, Google connection) stay. Habits are marked deleted rather than erased,
+ * so the Google calendar sync can still take their events away.
+ */
+export async function startOver() {
+  await db.transaction('rw', [db.habits, db.checkins, db.identities, db.scorecard_items, db.rewards, db.meta], async () => {
+    const t = now()
+    await db.habits.toCollection().modify((h) => { h.deleted = true; h.updated_at = t })
+    await Promise.all([db.checkins.clear(), db.identities.clear(), db.scorecard_items.clear(), db.rewards.clear()])
+    const keep = (k: string) => k === 'prefs' || k === 'last_backup' || k.startsWith('gcal')
+    await db.meta.filter((m) => !keep(m.key)).delete()
+  })
+}
 export const setArchived = (h: Habit, archived: boolean) => save('habits', { ...h, archived })
 
 export async function swapOrder(a: Habit, b: Habit) {

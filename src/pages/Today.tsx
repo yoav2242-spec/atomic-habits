@@ -9,7 +9,7 @@ import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { Pebbles } from '../components/Pebbles'
-import { Button, buttonClass, Card, Chevron, InfoTip, Modal, spring, useToast, XPBar } from '../components/ui'
+import { Button, buttonClass, Card, Chevron, Modal, spring, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
 import { db, getMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
@@ -124,12 +124,6 @@ export default function Today() {
     { key: 'tip', label: 'Tip', Icon: Lightbulb, color: 'var(--color-sky)', badge: '' },
   ] as const
   const focusId = focus && focus.until >= today ? focus.habit_id : null
-  // The one line under the count: what to do next, in words.
-  const left = build.filter(({ habit }) => !(isDone(habit, checkinOn(habit)) || weekGoalMet(habit)))
-  const nextUp = left.find(({ habit }) => habit.cue_time)?.habit ?? left[0]?.habit
-  const nextLine = build.length === 0 ? 'Nothing scheduled today. Enjoy the rest.'
-    : !nextUp ? (boxReady ? 'Everything done. Your daily bonus is ready.' : 'Everything done. See you tomorrow.')
-    : `Next: ${nextUp.name}${nextUp.cue_time ? ` at ${nextUp.cue_time}` : ''}${left.length > 1 ? ` · then ${left.length - 1} more` : ''}`
   const reviewDue = weekday(today) === 0 && !progress.rewards.some((r) => r.id === `review_${weekStart(today)}`)
   const lastMonth = addDays(`${today.slice(0, 8)}01`, -1).slice(0, 7)
   const recapDue = Number(today.slice(8)) <= 7 && !recapSeen.includes(lastMonth) && progress.habits.some((p) => p.checkins.some((c) => c.date.startsWith(lastMonth)))
@@ -206,7 +200,6 @@ export default function Today() {
                   +{progress.todayPoints} today
                 </motion.span>}
               </div>
-              <p className="mt-1.5 text-[16px] font-semibold leading-snug text-muted">{nextLine}</p>
               <div className="-ml-1.5 mt-3">
                 <Pebbles items={buildOrdered.map(({ habit }) => ({ id: habit.id, color: habit.color, done: isDone(habit, checkinOn(habit)) || weekGoalMet(habit), label: habit.name }))}
                   onPick={(id) => document.getElementById(`habit-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' })} />
@@ -217,12 +210,11 @@ export default function Today() {
                   <span className="flex-1"><XPBar into={progress.level.into} need={progress.level.need} /></span>
                   <span className="shrink-0 text-[14px] font-bold text-muted tabular-nums">{progress.level.need - progress.level.into} to go</span>
                 </Link>
-                <InfoTip tip="points" />
               </div>
             </Card>
           ) : (
             <div className="tray mb-5 flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-bold">
-              Filling in {offset === 1 ? 'yesterday' : formatDay(date)}. Tap to fix anything you forgot.
+              Editing {offset === 1 ? 'yesterday' : formatDay(date)}
             </div>
           )}
 
@@ -247,13 +239,13 @@ export default function Today() {
             <div className="mb-5 space-y-2.5">
               {reviewDue && (
                 <Link to="/review" className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-sky)_50%,var(--card))] px-4 py-3">
-                                    <span className="flex-1"><span className="block font-black">Your weekly review is ready</span><span className="text-[14px] font-bold opacity-80">2 minutes · pick next week's focus · +25</span></span>
+                                    <span className="flex-1 font-bold">Weekly review</span>
                   <Chevron />
                 </Link>
               )}
               {recapDue && (
                 <Link to={`/recap/${lastMonth}`} className="bouncy flex min-h-14 items-center gap-3 rounded-[22px] bg-[color-mix(in_srgb,var(--color-peach)_50%,var(--card))] px-4 py-3">
-                                    <span className="flex-1"><span className="block font-black">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap is here</span><span className="text-[14px] font-bold opacity-80">See everything you did last month</span></span>
+                                    <span className="flex-1 font-bold">Your {formatDay(`${lastMonth}-01`, { month: 'long' })} recap</span>
                   <Chevron />
                 </Link>
               )}
@@ -262,7 +254,7 @@ export default function Today() {
 
           <div className="space-y-4">
             {buildOrdered.map(({ habit, depth }) => card(habit, depth))}
-            {build.length === 0 && <p className="py-4 text-center font-semibold text-muted">Nothing scheduled for this day. Enjoy the rest.</p>}
+            {build.length === 0 && <p className="py-4 text-center font-semibold text-muted">Nothing planned today.</p>}
           </div>
 
           {breaking.length > 0 && (
@@ -278,7 +270,7 @@ export default function Today() {
 
           {backupDue && (
             <Link to="/settings" className="tray mt-4 flex min-h-12 items-center gap-2.5 rounded-2xl p-3.5 text-sm font-bold">
-              Your habits live only on this phone. Tap to save a backup copy.
+              Back up your habits
             </Link>
           )}
         </>

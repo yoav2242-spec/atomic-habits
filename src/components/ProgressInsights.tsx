@@ -4,7 +4,7 @@ import type { HabitProgress, Progress } from '../lib/progress'
 import { STAGES, stageOf, trend } from '../lib/stages'
 import { byDate, isDone, startDate } from '../lib/streaks'
 import { Strip } from './Charts'
-import { Card } from './ui'
+import { Card, InfoTip } from './ui'
 
 const pct = (r: number | null) => (r === null ? '–' : `${Math.round(r * 100)}%`)
 const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null)
@@ -20,7 +20,6 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
   const buildRate = avg(building.map((p) => p.rate30).filter((r): r is number => r !== null))
   const cleanDays = breaking.reduce((n, p) => n + p.stats.current, 0)
   const stages = STAGES.map((s) => ({ ...s, habits: active.filter((p) => stageOf(p, today).stage.key === s.key) }))
-  const maintained = active.filter((p) => stageOf(p, today).stage.key === 'automatic' && (p.rate30 ?? 0) >= 0.8)
 
   // Best and weakest need at least a week of history to be fair.
   const rated = active.filter((p) => p.rate30 !== null && startDate(p.habit, p.checkins) <= addDays(today, -7))
@@ -46,7 +45,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
 
       <Card className="mb-4">
         <div className="text-[18px] font-black">Your habits' journey</div>
-        <p className="mb-3 text-[14px] font-semibold text-muted">Every habit grows from starting to automatic. Practice days move it along.</p>
+        <div className="mb-3" />
         <div className="grid grid-cols-3 gap-2">
           {stages.map((s) => (
             <div key={s.key} className="rounded-2xl tray p-2.5 text-center">
@@ -57,11 +56,6 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
             </div>
           ))}
         </div>
-        {maintained.length > 0 && (
-          <p className="mt-3 text-xs font-bold text-sage-deep">
-            Keeping up {maintained.length} automatic habit{maintained.length === 1 ? '' : 's'}: {maintained.map((p) => p.habit.name).join(', ')}
-          </p>
-        )}
       </Card>
 
       {(best || weakest) && (
@@ -82,7 +76,7 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
                 <div className="text-[14px] font-extrabold text-muted">Needs some love</div>
                 <div className="mt-1 text-2xl">{weakest.habit.emoji}</div>
                 <div className="line-clamp-2 font-black leading-tight">{weakest.habit.name}</div>
-                <div className="text-xs font-bold text-[var(--flame)]">{pct(weakest.rate30)} · try the 2-minute version</div>
+                <div className="text-xs font-bold text-[var(--flame)]">{pct(weakest.rate30)}</div>
               </Card>
             </Link>
           )}
@@ -90,25 +84,17 @@ export function ProgressInsights({ progress }: { progress: Progress }) {
       )}
 
       <Card className="mb-4">
-        <div className="text-[18px] font-black">You vs. the research</div>
-        <p className="mb-3 text-[14px] font-semibold text-muted">
-          The app can't see other people's data, so here's how you compare with a well-known study of how people form new habits.
-        </p>
-        <div className="space-y-3 text-sm font-semibold">
-          <div>
-            <div className="mb-1 flex justify-between"><span>Average time for a habit to feel automatic: <b>66 days</b></span></div>
-            <div className="h-3 overflow-hidden rounded-full tray">
-              <div className="h-full rounded-full bg-sage transition-all duration-700" style={{ width: `${Math.min(100, (oldest / 66) * 100)}%` }} />
-            </div>
-            <div className="mt-1 text-[14px] font-bold text-muted">
-              {oldest >= 66 ? `Your longest-practiced habit is past 66 days. You're ahead of the average!` : `Your longest-practiced habit: ${oldest} days. ${66 - oldest} to go to reach the average.`}
-            </div>
-          </div>
-          <p className="text-[14px] font-semibold text-muted">
-            In that study it took anywhere from 18 to 254 days, so don't worry if yours feels slow. Missing a single day didn't
-            stop people from forming the habit. That's why the app only asks you to never miss twice.
-          </p>
+        <div className="mb-2 flex items-baseline justify-between gap-3">
+          <h2 className="text-[18px] font-black">Becoming automatic</h2>
+          <span className="text-[14px] font-bold text-muted tabular-nums">{Math.min(oldest, 66)} of 66 days</span>
         </div>
+        <div className="h-2.5 overflow-hidden rounded-full tray">
+          <div className="h-full rounded-full bg-sage transition-all duration-700" style={{ width: `${Math.min(100, (oldest / 66) * 100)}%` }} />
+        </div>
+        <p className="mt-2 flex items-center gap-1 text-[14px] font-semibold text-muted">
+          <span className="flex-1">{oldest >= 66 ? 'Your oldest habit passed the average.' : 'The average habit takes 66 days.'}</span>
+          <InfoTip tip="never_miss_twice" />
+        </p>
       </Card>
     </>
   )

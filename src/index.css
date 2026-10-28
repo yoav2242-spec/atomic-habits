@@ -36,6 +36,11 @@
   /* Levels and points: lavender, deep on light, pale on dark. */
   --color-level: var(--level);
   --radius-clay: 26px;
+  /* Quieter letters: every weight one step lighter than its name, so screens read calm, not shouty. */
+  --font-weight-black: 780;
+  --font-weight-extrabold: 680;
+  --font-weight-bold: 620;
+  --font-weight-semibold: 540;
 }
 
 :root {
@@ -128,12 +133,12 @@ body {
 /* Raised clay surface (cards): one soft shade, one highlight, a lit top edge. */
 .clay {
   background: var(--card);
-  box-shadow: 0 1px 0 0 var(--sh-inner) inset, 8px 10px 22px -10px var(--sh-dark), -6px -6px 16px -6px var(--sh-light);
+  box-shadow: 0 1px 0 0 var(--sh-inner) inset, 5px 7px 18px -10px var(--sh-dark), -4px -4px 12px -6px var(--sh-light);
 }
 /* Smaller raised clay (round buttons, chips). */
 .clay-sm {
   background: var(--card);
-  box-shadow: 0 1px 0 0 var(--sh-inner) inset, 3px 4px 9px -3px var(--sh-dark), -3px -3px 8px -3px var(--sh-light);
+  box-shadow: 0 1px 0 0 var(--sh-inner) inset, 2px 3px 7px -3px var(--sh-dark), -2px -2px 6px -3px var(--sh-light);
 }
 /* Pressed-in clay well (inputs, tracks, empty checks). */
 .clay-in {

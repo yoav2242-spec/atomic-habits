@@ -147,14 +147,14 @@ export default function Habits() {
   return (
     <div>
       <PageHeader title="My habits"
-        subtitle={active.length > 1 ? 'Tap a habit to see its calendar. Press and hold one to move it.' : 'Tap a habit to see its calendar.'}
+        subtitle={active.length > 1 ? 'Press and hold to move' : undefined}
         action={<Link to="/habits/new" className={buttonClass('primary', '!px-5 !py-2.5')}>+ New</Link>} />
-      {active.length === 0 && <p className="text-[18px] font-semibold text-muted">No habits yet. Tap “+ New” to add one.</p>}
+      {active.length === 0 && <p className="text-[18px] font-semibold text-muted">No habits yet</p>}
       <Reorder.Group as="ul" axis="y" values={shown} onReorder={setIds} className="space-y-3">
         {shown.map((id) => <DraggableRow key={id} h={byId.get(id)!} streak={progress.byId.get(id)?.stats.current} onDrop={save} />)}
       </Reorder.Group>
       <Link to="/scorecard" className="tray mt-5 block rounded-[20px] p-4 text-[17px] font-bold leading-snug text-muted">
-        Already doing some habits? Add them with your progress so far in the <span className="text-ink underline underline-offset-2">Habits Scorecard</span>.
+        Already doing some? <span className="text-ink underline underline-offset-2">Habits Scorecard</span>
       </Link>
       {archived.length > 0 && (
         <div className="mt-8">

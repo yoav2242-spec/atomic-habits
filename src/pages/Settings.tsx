@@ -1,7 +1,7 @@
 import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button, buttonClass, Card, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
+import { Button, buttonClass, Card, Chevron, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
 import { clockAlarmUrl, isAndroid } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
@@ -9,7 +9,7 @@ import { useHabits } from '../lib/hooks'
 import { isInstalled, useInstallPrompt } from '../lib/install'
 import { setPrefs, usePrefs } from '../lib/prefs'
 import { disableNotifications, enableNotifications, notificationsOn, notificationsSupported, remindersReady } from '../lib/reminders'
-import { exportBackup, importBackup, saveHabit } from '../lib/repo'
+import { exportBackup, importBackup, saveHabit, startOver } from '../lib/repo'
 import { THEMES } from '../lib/rewards'
 import { useGoogleStatus } from '../lib/gcal'
 import { GoogleCalendarCard } from '../components/GoogleCalendarCard'
@@ -125,28 +125,28 @@ export default function Settings() {
       <PageHeader title="Settings" />
 
       <Section title="You">
-        <Row title="Your name" hint="Used in your greeting on Today" stacked>
+        <Row title="Your name" stacked>
           <input value={name} onChange={(e) => setName(e.target.value)} onBlur={() => setPrefs({ name: name.trim() })} placeholder="Your first name" maxLength={30} />
         </Row>
       </Section>
 
       <Section title="Look and feel">
-        <Row title="Light or dark" hint="Auto follows your phone" stacked>
+        <Row title="Light or dark" stacked>
           <Segmented value={prefs.theme} onChange={(theme) => setPrefs({ theme })} options={[{ value: 'auto', label: 'Auto' }, { value: 'light', label: 'Light' }, { value: 'dark', label: 'Dark' }]} />
         </Row>
         <Link to="/rewards" className="block">
-          <Row title="Color theme" hint={`${theme.name} · unlock more by leveling up`}>
+          <Row title="Color theme" hint={theme.name}>
             <span className="puffy h-8 w-8 rounded-full" style={{ background: theme.accent }} />
-            <span className="text-[26px] font-black leading-none text-muted">›</span>
+            <Chevron className="text-muted" />
           </Row>
         </Link>
-        <Row title="Animations" hint="Calm turns off bouncing and confetti" stacked>
+        <Row title="Animations" stacked>
           <Segmented value={prefs.motion} calm={prefs.motion === 'calm'} onChange={(motion) => setPrefs({ motion })} options={[{ value: 'full', label: 'Bouncy' }, { value: 'calm', label: 'Calm' }]} />
         </Row>
-        <Row title="Confetti" hint="When you finish a habit or your day">
+        <Row title="Confetti">
           <Toggle label="Confetti" on={prefs.confetti} onChange={(confetti) => setPrefs({ confetti })} />
         </Row>
-        <Row title="Vibration" hint="A little buzz when you tap">
+        <Row title="Vibration">
           <Toggle label="Vibration" on={prefs.haptics} onChange={(haptics) => setPrefs({ haptics })} />
         </Row>
       </Section>
@@ -160,15 +160,14 @@ export default function Settings() {
         </Row>
         {notifOn && (
           <p className="tray rounded-2xl p-3.5 text-[14px] font-semibold text-muted">
-            Open a habit's Edit page, go to "Make it obvious", and turn on "Remind me". You can give each habit its own vibration. Only
-            reminder times leave your phone, never habit names or progress.
+            Turn on "Remind me" in a habit's Edit page.
           </p>
         )}
         </>)}
         <GoogleCalendarCard />
-        <Row title="Alarms and calendar" hint="Reminders that work even when Atomic is closed" stacked>
+        <Row title="Alarms and calendar" stacked>
           {timed.length === 0 ? (
-            <p className="text-[14px] font-semibold text-muted">Give a habit a time (in its Edit page, "Make it obvious") to add an alarm for it.</p>
+            <p className="text-[14px] font-semibold text-muted">Give a habit a time to add an alarm.</p>
           ) : (
             <ul className="space-y-2">
               {timed.map((h) => (
@@ -190,10 +189,6 @@ export default function Settings() {
               ))}
             </ul>
           )}
-          <p className="text-[14px] font-semibold text-muted">
-            {isAndroid() ? '"Alarm" opens your Clock app with the time and name filled in: pick the sound and days, then save. ' : ''}
-            {google?.on ? 'Tap "In calendar" to show or hide a habit in your Habits calendar.' : 'Connect Google Calendar above to add your habits to a "Habits" calendar by themselves.'}
-          </p>
         </Row>
       </Section>
 
@@ -205,10 +200,10 @@ export default function Settings() {
           </div>
           <input ref={fileInput} type="file" accept="application/json,.json" className="hidden" onChange={(e) => restore(e.target.files?.[0])} />
         </Row>
-        <Row title="Delete everything" hint="Start fresh. Save a backup first.">
+        <Row title="Start over" hint="Deletes all habits, points and levels">
           <Button variant="danger" className="!min-h-11 !px-4 !py-1.5 text-sm"
-            onClick={() => confirm.ask('Delete everything?', 'All habits, history, points and settings on this phone will be erased. This cannot be undone.', async () => { await db.delete(); location.hash = '#/'; location.reload() })}>
-            Delete
+            onClick={() => confirm.ask('Start over?', 'All your habits, history, points and levels will be deleted, and you go back to level 1. Your settings stay. This cannot be undone.', async () => { await startOver(); navigate('/', { replace: true }); toast('Fresh start') })}>
+            Start over
           </Button>
         </Row>
       </Section>
@@ -229,13 +224,6 @@ export default function Settings() {
       <Section title="Help">
         <Button variant="secondary" className="w-full" onClick={() => db.meta.delete('onboarded')}>Show the welcome tour again</Button>
         <Button variant="secondary" className="w-full" onClick={() => navigate('/tips')}>Read all the tips</Button>
-        <div className="space-y-1.5 pt-1 text-[14px]">
-          <p><b>1. Make it obvious.</b> Pick a time and place, and stack it after something you already do.</p>
-          <p><b>2. Make it attractive.</b> Pair it with something you enjoy.</p>
-          <p><b>3. Make it easy.</b> Start with a 2-minute version.</p>
-          <p><b>4. Make it satisfying.</b> Track it, and never miss twice.</p>
-          <p className="text-muted">Ideas from <i>Atomic Habits</i> by James Clear.</p>
-        </div>
       </Section>
 
       {/* Tapping the version 7 times opens the private test workspace on this device. */}
