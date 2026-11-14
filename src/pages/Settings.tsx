@@ -2,7 +2,7 @@ import { useLiveQuery } from 'dexie-react-hooks'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Button, buttonClass, Card, Chevron, PageHeader, Segmented, Toggle, useConfirm, useToast } from '../components/ui'
-import { clockAlarmUrl, isAndroid } from '../lib/alarm'
+import { addDailyReminder } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
@@ -164,9 +164,9 @@ export default function Settings() {
         )}
         </>)}
         <GoogleCalendarCard />
-        <Row title="Alarms and calendar" stacked>
+        <Row title="Daily reminders" stacked>
           {timed.length === 0 ? (
-            <p className="text-[14px] font-semibold text-muted">Give a habit a time to add an alarm.</p>
+            <p className="text-[14px] font-semibold text-muted">Give a habit a time to add a daily reminder.</p>
           ) : (
             <ul className="space-y-2">
               {timed.map((h) => (
@@ -176,7 +176,7 @@ export default function Settings() {
                     <span className="font-black tabular-nums">{h.cue_time}</span>
                   </div>
                   <div className="flex gap-2">
-                    {isAndroid() && <a href={clockAlarmUrl(h)!} className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 !py-1.5 text-sm')}>Alarm</a>}
+                    <button onClick={() => { addDailyReminder(h); toast('Open the file, then tap Save') }} className={buttonClass('secondary', 'flex-1 !min-h-11 gap-1.5 !px-3 !py-1.5 text-sm')}>Add to Calendar</button>
                     {google?.on && (
                       <button onClick={() => saveHabit({ ...h, calendar: !h.calendar })} aria-pressed={h.calendar}
                         className={`flex min-h-11 flex-1 items-center justify-center gap-1.5 rounded-full px-3 text-sm font-extrabold ${h.calendar ? 'puffy bg-sky text-on-pastel' : 'clay-sm text-muted'}`}>

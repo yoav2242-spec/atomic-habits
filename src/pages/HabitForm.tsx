@@ -3,7 +3,7 @@ import { motion } from 'motion/react'
 import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { TimePicker } from '../components/TimePicker'
-import { BackButton, Button, buttonClass, Field, Segmented, spring, Stepper, Toggle, useToast } from '../components/ui'
+import { BackButton, Button, Field, Segmented, spring, Stepper, Toggle, useToast } from '../components/ui'
 import { bigCelebration } from '../lib/celebrate'
 import { db } from '../lib/db'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -11,7 +11,7 @@ import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount } from '../lib/amounts'
-import { clockAlarmUrl, isAndroid } from '../lib/alarm'
+import { addDailyReminder } from '../lib/alarm'
 import { connectGoogle, googleReady, syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
@@ -63,7 +63,7 @@ export default function HabitForm() {
   const [step, setStep] = useState(search.has('step') ? Number(search.get('step')) || 0 : id || search.has('own') || queue.length ? 0 : -1)
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
-  // "Also add to" on the last step: put the habit in Google Calendar and/or the Clock app.
+  // "Also add to" on the last step: put the habit in Google Calendar and/or the phone's Calendar as a daily reminder.
   const [addAlarm, setAddAlarm] = useState(false)
   const toast = useToast()
   const google = useGoogleStatus()
@@ -93,7 +93,6 @@ export default function HabitForm() {
   const save = async () => {
     const saved = { ...h, name: h.name.trim(), target_count: Math.max(1, h.target_count || 1), step: Math.max(1, h.step || 1) }
     const offerReminders = isLast && saved.type === 'build' && !!saved.cue_time
-    const alarm = offerReminders && addAlarm && !isAmount(saved) && isAndroid() ? clockAlarmUrl(saved) : null
     await saveHabit(saved)
     if (!id) {
       await addPastProgress(saved, pastDays)
@@ -116,8 +115,11 @@ export default function HabitForm() {
       if (state === 'needs-tap') toast('Google needs you to sign in again', { label: 'Update calendar', onClick: () => { syncGoogle(true).then(() => toast('Habits calendar updated')).catch(() => {}) } })
       else if (offerReminders && saved.calendar) toast('Added to your Habits calendar')
     }
-    // The Clock app opens over Atomic; its back button comes straight back here.
-    if (alarm) location.href = alarm
+    // The reminder file downloads; tapping it adds a repeating event to the phone's Calendar.
+    if (offerReminders && addAlarm && !isAmount(saved)) {
+      addDailyReminder(saved)
+      toast('Open the file, then tap Save')
+    }
   }
 
   const addIdentity = async () => {
@@ -494,7 +496,6 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
 /** "Remind me" with this habit's own vibration, plus a Clock-app alarm for a custom sound. */
 function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
   if (!h.cue_time) return null
-  const alarm = clockAlarmUrl(h)
   return (
     <div className="tray space-y-4 rounded-[20px] p-3.5">
       {remindersReady && (<>
@@ -520,8 +521,8 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
       )}
       </>)}
       {h.type === 'build' && <CalendarChoice h={h} set={set} />}
-      {isAndroid() && alarm && (
-        <a href={alarm} className={buttonClass('secondary', 'w-full !min-h-11 gap-1.5 !px-3 text-sm')}>Add a Clock alarm (pick its sound)</a>
+      {!isAmount(h) && (
+        <Button variant="secondary" type="button" className="w-full !min-h-11 gap-1.5 !px-3 text-sm" onClick={() => addDailyReminder(h)}>Add a daily reminder to Calendar</Button>
       )}
     </div>
   )
@@ -543,10 +544,10 @@ function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
     <div className="tray mt-6 space-y-4 rounded-[20px] p-3.5">
       <div className="text-[16px] font-extrabold">Reminders at {h.cue_time}</div>
       <CalendarChoice h={h} set={set} />
-      {isAndroid() && !isAmount(h) && (
+      {!isAmount(h) && (
         <div className="flex items-center gap-3">
-          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold">Also set an alarm in my Clock app</span>
-          <Toggle label="Clock alarm" on={alarm} onChange={setAlarm} />
+          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold">Also add a daily reminder to my Calendar</span>
+          <Toggle label="Daily reminder" on={alarm} onChange={setAlarm} />
         </div>
       )}
     </div>

@@ -1,7 +1,7 @@
 import { Snowflake } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ClockAlarm } from '../components/ClockAlarm'
+import { DailyReminder } from '../components/DailyReminder'
 import { DayEditor } from '../components/DayEditor'
 import { streakLabel } from '../components/HabitCard'
 import { Heatmap } from '../components/Heatmap'
@@ -89,7 +89,7 @@ export default function HabitDetail() {
         </dl>
       </Card>
 
-      {h.type === 'build' && !isAmount(h) && <ClockAlarm h={h} />}
+      {h.type === 'build' && !isAmount(h) && <DailyReminder h={h} />}
 
       <Card className="mb-4">
         <div className="mb-1 flex items-center justify-between">
