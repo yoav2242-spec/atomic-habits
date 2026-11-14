@@ -5,13 +5,14 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Celebration, type CelebrationInfo } from '../components/Celebration'
 import { HabitCard } from '../components/HabitCard'
+import { InstallCard } from '../components/InstallCard'
 import { markFlag, QuestList, useQuests } from '../components/Quests'
 import { SurpriseBox } from '../components/SurpriseBox'
 import { LevelUpModal } from '../components/LevelUpModal'
 import { Pebbles } from '../components/Pebbles'
 import { Button, buttonClass, Card, Chevron, Modal, spring, useToast, XPBar } from '../components/ui'
 import { tipOfTheDay } from '../lib/dailyTips'
-import { db, getMeta } from '../lib/db'
+import { db, getMeta, setMeta } from '../lib/db'
 import { computeRecords } from '../lib/records'
 import { addDays, diffDays, formatDay, weekday, weekStart } from '../lib/dates'
 import { usePrefs } from '../lib/prefs'
@@ -65,6 +66,7 @@ export default function Today() {
   const armed = useRef<{ level: number; badges: Map<string, number>; done: number; perfectBest: number; mostInADay: number } | null>(null)
   const records = useMemo(() => (progress ? computeRecords(progress) : null), [progress])
   const focus = useLiveQuery(async () => { const f = await getMeta('focus'); return f ? (JSON.parse(f) as { habit_id: string; until: string }) : null })
+  const installHidden = useLiveQuery(async () => !!(await getMeta('install_hidden')), [], true)
   const recapSeen = useLiveQuery(async () => (await db.meta.where('key').startsWith('recap_seen:').toArray()).map((m) => m.key.slice(11)), [], [] as string[])
 
   const today = progress?.today ?? ''
@@ -174,6 +176,8 @@ export default function Today() {
           <motion.button whileTap={{ scaleX: 1.15, scaleY: 0.85 }} transition={spring} onClick={() => setOffset((o) => Math.max(0, o - 1))} disabled={offset === 0} className="clay-sm flex h-11 w-11 items-center justify-center rounded-full disabled:opacity-30" aria-label="Next day"><ChevronRight size={24} strokeWidth={2.4} /></motion.button>
         </div>
       </header>
+
+      {!installHidden && <InstallCard onDismiss={() => setMeta('install_hidden', '1')} />}
 
       {all.length === 0 ? (
         <Card className="animate-rise !p-6 text-center">

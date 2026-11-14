@@ -20,10 +20,16 @@ export default defineConfig({
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon.svg'],
       manifest: {
         name: 'Atomic — Habit Tracker',
+        id: './',
         short_name: 'Atomic',
         description: 'Build better habits, one vote at a time.',
-        theme_color: '#1c1917',
-        background_color: '#1c1917',
+        theme_color: '#151816',
+        background_color: '#151816',
+        categories: ['health', 'lifestyle', 'productivity'],
+        shortcuts: [
+          { name: 'Today', short_name: 'Today', url: './#/', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+          { name: 'New habit', short_name: 'New habit', url: './#/habits/new', icons: [{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' }] },
+        ],
         display: 'standalone',
         orientation: 'portrait',
         start_url: './',

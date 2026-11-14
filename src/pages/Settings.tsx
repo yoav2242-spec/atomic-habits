@@ -6,7 +6,7 @@ import { clockAlarmUrl, isAndroid } from '../lib/alarm'
 import { db, getMeta } from '../lib/db'
 import { formatDay, todayKey } from '../lib/dates'
 import { useHabits } from '../lib/hooks'
-import { isInstalled, useInstallPrompt } from '../lib/install'
+import { InstallCard } from '../components/InstallCard'
 import { setPrefs, usePrefs } from '../lib/prefs'
 import { disableNotifications, enableNotifications, notificationsOn, notificationsSupported, remindersReady } from '../lib/reminders'
 import { exportBackup, importBackup, saveHabit, startOver } from '../lib/repo'
@@ -40,7 +40,6 @@ function Row({ title, hint, children, stacked }: { title: string; hint?: string;
 }
 
 export default function Settings() {
-  const install = useInstallPrompt()
   const habits = useHabits()
   const prefs = usePrefs()
   const google = useGoogleStatus()
@@ -208,18 +207,7 @@ export default function Settings() {
         </Row>
       </Section>
 
-      {!isInstalled() && (
-        <Section title="Put it on your home screen">
-          {install ? (
-            <>
-              <p>Add Atomic to your home screen so it opens like a normal app.</p>
-              <Button onClick={install} className="w-full">Install app</Button>
-            </>
-          ) : (
-            <p>In Chrome, tap the <b>⋮</b> menu (top right), then <b>Add to Home screen</b> or <b>Install app</b>.</p>
-          )}
-        </Section>
-      )}
+      <InstallCard />
 
       <Section title="Help">
         <Button variant="secondary" className="w-full" onClick={() => db.meta.delete('onboarded')}>Show the welcome tour again</Button>
