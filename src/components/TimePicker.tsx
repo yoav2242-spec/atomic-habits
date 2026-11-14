@@ -41,14 +41,15 @@ function Wheel({ values, value, onChange, label }: { values: number[]; value: nu
   return (
     <div className="clay-in relative h-[240px] flex-1 overflow-hidden rounded-[22px]">
       {/* The selected row: a puffy band across the middle. */}
-      <div className="clay-sm pointer-events-none absolute inset-x-2 top-1/2 h-12 -translate-y-1/2 rounded-2xl" />
+      <div className="clay-sm pointer-events-none absolute inset-x-2 top-1/2 -translate-y-1/2 rounded-2xl" style={{ height: ROW }} />
       <div ref={ref} onScroll={onScroll} aria-label={label} role="listbox"
         className="relative h-full snap-y snap-mandatory overflow-y-auto overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ paddingBlock: 240 / 2 - ROW / 2 }}>
         {values.map((v, i) => (
           <button key={v} type="button" role="option" aria-selected={v === shown}
             onClick={() => ref.current?.scrollTo({ top: i * ROW, behavior: 'smooth' })}
-            className={`flex h-12 w-full snap-center items-center justify-center text-2xl tabular-nums transition-all duration-200 ${v === shown ? 'font-black text-ink' : 'font-bold text-muted opacity-50'}`}>
+            style={{ height: ROW }}
+            className={`flex w-full snap-center items-center justify-center text-2xl tabular-nums transition-all duration-200 ${v === shown ? 'font-black text-ink' : 'font-bold text-muted opacity-50'}`}>
             {pad(v)}
           </button>
         ))}

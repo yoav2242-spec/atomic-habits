@@ -428,17 +428,35 @@ function Summary({ h, identity, anchor }: { h: Habit; identity?: string; anchor?
   )
 }
 
-/** How much counts as done: once, a number of times, or an amount like 2,400 ml in 800 ml bottles. */
+/** Sensible starting numbers for each thing you can count, so picking one never needs maths. */
+const UNIT_START: Record<string, { target: number; step: number; label?: string }> = {
+  minutes: { target: 20, step: 5 },
+  pages: { target: 10, step: 5 },
+  km: { target: 5, step: 1 },
+  steps: { target: 8000, step: 1000 },
+  reps: { target: 30, step: 10 },
+  ml: { target: 2000, step: 500, label: 'bottle' },
+  L: { target: 2, step: 1 },
+}
+
+/** How much counts as done: once, a number of times, or an amount (minutes, pages, km, a drink in ml...). */
 function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
   const mode = isAmount(h) ? 'amount' : h.target_count > 1 ? 'times' : 'once'
+  const known = UNITS.includes(h.unit)
+  const setUnit = (unit: string) => {
+    const d = UNIT_START[unit]
+    set(d ? { unit, target_count: d.target, step: d.step, step_label: d.label ?? '' } : { unit, target_count: 10, step: 1, step_label: '' })
+  }
   const setMode = (m: string) =>
     set(m === 'once' ? { target_count: 1, unit: '', step: 1, step_label: '' }
       : m === 'times' ? { target_count: Math.max(2, isAmount(h) ? 3 : h.target_count), unit: '', step: 1, step_label: '' }
-      : { target_count: 2000, unit: 'ml', step: 500, step_label: 'bottle', calendar: false, schedule: { kind: 'daily' } })
+      : { ...(isAmount(h) ? {} : { unit: 'minutes', target_count: 20, step: 5, step_label: '' }), calendar: false, schedule: { kind: 'daily' } })
+  // Only drinks (ml, L) come in cups and bottles.
   const presets = CONTAINERS[h.unit] ?? []
   // Keep the number of bottles the same when the bottle size changes.
   const servings = Math.max(1, Math.round(h.target_count / Math.max(1, h.step)))
   const setContainer = (size: number, label: string) => set({ step: size, step_label: label, target_count: servings * Math.max(1, size) })
+  const chip = (on: boolean) => `min-h-11 rounded-full px-3.5 text-[15px] font-extrabold ${on ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`
   return (
     <Field label="What counts as done each day?">
       <div className="space-y-3">
@@ -447,40 +465,40 @@ function DailyGoal({ h, set }: { h: Habit; set: (p: Partial<Habit>) => void }) {
         {mode === 'amount' && (
           <div className="tray space-y-4 rounded-[20px] p-3.5">
             <div>
-              <div className="mb-2 text-[14px] font-bold text-muted">What do you drink from?</div>
-              {presets.length > 0 && (
-                <div className="mb-2 flex flex-wrap gap-1.5">
+              <div className="mb-2 text-[14px] font-bold text-muted">What are you counting?</div>
+              <div className="flex flex-wrap gap-1.5">
+                {UNITS.map((u) => <button key={u} type="button" onClick={() => setUnit(u)} className={chip(h.unit === u)}>{u}</button>)}
+                <button type="button" onClick={() => set({ unit: 'times' })} className={chip(!known)}>other</button>
+              </div>
+              {!known && (
+                <input className="mt-2" value={h.unit === 'times' ? '' : h.unit} onChange={(e) => set({ unit: e.target.value || 'times' })} placeholder="e.g. push-ups" aria-label="What you count" />
+              )}
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-extrabold">Goal each day</span>
+              <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-32 text-right" aria-label="Daily goal" />
+            </div>
+            <div className="flex items-center justify-between gap-3">
+              <span className="text-sm font-extrabold">Each tap adds</span>
+              <input type="number" inputMode="decimal" min={1} value={h.step || ''} onChange={(e) => set({ step: Math.max(0, Number(e.target.value)), step_label: h.step_label && presets.length ? h.step_label : '' })} className="!w-32 text-right" aria-label="Each tap adds" />
+            </div>
+            {presets.length > 0 && (
+              <div>
+                <div className="mb-2 text-[14px] font-bold text-muted">What do you drink from?</div>
+                <div className="flex flex-wrap gap-1.5">
                   {presets.map((c) => (
-                    <button key={`${c.label}${c.size}`} type="button" onClick={() => setContainer(c.size, c.label)}
-                      className={`min-h-11 rounded-full px-3.5 text-[14px] font-extrabold ${h.step === c.size && h.step_label === c.label ? 'puffy bg-sage text-on-pastel' : 'clay-sm text-muted'}`}>
+                    <button key={`${c.label}${c.size}`} type="button" onClick={() => setContainer(c.size, c.label)} className={chip(h.step === c.size && h.step_label === c.label)}>
                       {c.label} · {c.size} {h.unit}
                     </button>
                   ))}
                 </div>
-              )}
-              <div className="flex gap-2">
-                <input type="number" inputMode="decimal" min={1} value={h.step || ''} onChange={(e) => setContainer(Math.max(0, Number(e.target.value)), h.step_label)} className="!w-1/2" aria-label="Size of one" />
-                <input value={h.step_label} onChange={(e) => set({ step_label: e.target.value })} placeholder="name, e.g. bottle" className="!w-1/2" />
               </div>
-            </div>
-            <div className="flex items-center justify-between gap-3">
-              <span className="text-sm font-extrabold">How many {h.step_label || 'times'}s a day?</span>
-              <Stepper value={servings} min={1} max={40} onChange={(n) => set({ target_count: n * Math.max(1, h.step) })} />
-            </div>
-            <div>
-              <div className="mb-2 text-[14px] font-bold text-muted">Or type the daily total</div>
-              <div className="flex gap-2">
-                <input type="number" inputMode="decimal" min={1} value={h.target_count || ''} onChange={(e) => set({ target_count: Math.max(0, Number(e.target.value)) })} className="!w-1/2" aria-label="Daily total" />
-                <select value={UNITS.includes(h.unit) ? h.unit : 'other'} onChange={(e) => set({ unit: e.target.value === 'other' ? 'times' : e.target.value })} className="!w-1/2">
-                  {UNITS.map((u) => <option key={u} value={u}>{u}</option>)}
-                  <option value="other">other…</option>
-                </select>
-              </div>
-              {!UNITS.includes(h.unit) && (
-                <input className="mt-2" value={h.unit} onChange={(e) => set({ unit: e.target.value || 'times' })} placeholder="Your unit, e.g. push-ups" />
-              )}
-            </div>
-            {h.target_count > 0 && h.step > 0 && <p className="text-sm font-bold">= {goalBreakdown(h)} a day</p>}
+            )}
+            {h.target_count > 0 && h.step > 0 && (
+              <p className="text-sm font-bold tabular-nums">
+                {h.step_label ? `= ${goalBreakdown(h)} a day` : `${Math.ceil(h.target_count / Math.max(1, h.step))} taps of ${h.step} ${h.unit}`}
+              </p>
+            )}
           </div>
         )}
       </div>
