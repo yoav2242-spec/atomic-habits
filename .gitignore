@@ -8,3 +8,7 @@ secrets.txt
 cloudflare/vapid-private.json
 cloudflare/.wrangler
 cloudflare/node_modules
+
+# The signed Android app file: built on this PC, published with the site, not kept in git
+public/Atomic.apk
+android/local.properties

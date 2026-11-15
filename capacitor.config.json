@@ -1,0 +1,11 @@
+{
+  "appId": "com.yoav.atomic",
+  "appName": "Atomic",
+  "webDir": "dist",
+  "server": {
+    "url": "https://yoav2242-spec.github.io/atomic-habits/",
+    "androidScheme": "https",
+    "allowNavigation": ["yoav2242-spec.github.io"]
+  },
+  "android": { "backgroundColor": "#151816" }
+}

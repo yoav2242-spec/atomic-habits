@@ -12,8 +12,8 @@ self.skipWaiting()
 clientsClaim()
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
-// Standalone pages (like the style preview) open as themselves, not as the app.
-registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/\/[\w-]+\.html$/] }))
+// Standalone pages (like the style preview) open as themselves, not as the app, and the Android app file downloads.
+registerRoute(new NavigationRoute(createHandlerBoundToURL('index.html'), { denylist: [/\/[\w-]+\.html$/, /\.apk$/] }))
 
 // --- Reminders ---
 

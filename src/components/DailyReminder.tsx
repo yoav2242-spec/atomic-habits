@@ -20,7 +20,7 @@ export function DailyReminder({ h }: { h: Habit }) {
       </div>
       {h.cue_time ? (
         <button className={buttonClass('primary', 'mt-3 w-full')}
-          onClick={() => { if (addDailyReminder(h)) toast('Open the file, then tap Save') }}>
+          onClick={async () => { const message = await addDailyReminder(h); if (message) toast(message) }}>
           Add to Calendar
         </button>
       ) : (

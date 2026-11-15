@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from 'react'
+import { isNativeApp } from './native'
 
 // Android Chrome offers an "install" event; keep it so Settings can show an Install button.
 
@@ -35,4 +36,5 @@ export function useInstallPrompt() {
   }
 }
 
-export const isInstalled = () => window.matchMedia('(display-mode: standalone)').matches
+/** Installed as a home-screen app, or running inside the Atomic Android app. */
+export const isInstalled = () => isNativeApp() || window.matchMedia('(display-mode: standalone)').matches

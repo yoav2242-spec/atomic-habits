@@ -1,5 +1,6 @@
 import { formatDay, weekday } from './dates'
 import { dateOf, dayRates, recapLink, type RecapData } from './recap'
+import { isNativeApp, shareFileNative } from './native'
 
 // Draws the recap as a picture (a 1080px-wide card) so a shared month looks like the app, not a line of text.
 
@@ -167,6 +168,13 @@ export async function shareRecapImage(data: RecapData, blob: Blob): Promise<'sha
   const file = new File([blob], `atomic-${data.title.toLowerCase().replace(/\s+/g, '-')}.png`, { type: 'image/png' })
   const url = recapLink(data)
   const text = `My ${data.title} in Atomic, small habits adding up. See it move: ${url}`
+  if (isNativeApp()) {
+    try {
+      return await shareFileNative(file, { text })
+    } catch {
+      return 'cancelled'
+    }
+  }
   try {
     if (navigator.canShare?.({ files: [file] })) {
       await navigator.share({ files: [file], text })
