@@ -1,6 +1,8 @@
 import { Reorder, useDragControls } from 'motion/react'
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
+import { BellRing, Pencil } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import { ReminderSheet } from '../components/ReminderSheet'
 import { buttonClass, PageHeader } from '../components/ui'
 import { goalLabel } from '../lib/amounts'
 import { WEEKDAY_SHORT } from '../lib/dates'
@@ -18,10 +20,10 @@ export function scheduleLabel(h: Habit) {
 }
 
 const HOLD_MS = 380
-const rowClass = 'clay relative flex touch-manipulation select-none items-center gap-3.5 rounded-[24px] py-3.5 pl-3.5 pr-2 [-webkit-touch-callout:none]'
+const rowClass = 'clay relative flex touch-manipulation select-none items-center gap-3.5 rounded-[24px] py-3.5 pl-3.5 pr-2.5 [-webkit-touch-callout:none]'
 
 /** What a habit row shows: its emoji, name and plan, and an Edit button. */
-function RowBody({ h, streak, onOpen }: { h: Habit; streak?: number; onOpen?: (e: React.MouseEvent) => void }) {
+function RowBody({ h, streak, onOpen, onReminder }: { h: Habit; streak?: number; onOpen?: (e: React.MouseEvent) => void; onReminder?: () => void }) {
   return (
     <>
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[17px] text-2xl" style={{ background: `color-mix(in srgb, ${h.color} 38%, var(--card))` }}>{h.emoji}</span>
@@ -32,16 +34,22 @@ function RowBody({ h, streak, onOpen }: { h: Habit; streak?: number; onOpen?: (e
           {!!streak && <span className="text-[var(--flame)]"> · {streak} in a row</span>}
         </div>
       </Link>
+      {onReminder && (
+        <button type="button" onClick={(e) => { if (onOpen) onOpen(e); if (!e.defaultPrevented) onReminder() }} aria-label={`Reminder for ${h.name}`}
+          className={`bouncy flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${h.cue_time ? 'text-sage-deep' : 'text-muted'}`}>
+          <BellRing size={21} strokeWidth={2.2} aria-hidden />
+        </button>
+      )}
       <Link to={`/habits/${h.id}/edit`} onClick={onOpen} draggable={false} aria-label={`Edit ${h.name}`}
-        className="tray bouncy flex min-h-11 shrink-0 items-center rounded-full px-4 text-[16px] font-extrabold text-muted">
-        Edit
+        className="tray bouncy flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-muted">
+        <Pencil size={19} strokeWidth={2.3} aria-hidden />
       </Link>
     </>
   )
 }
 
 /** A habit you can press and hold, then drag to a new place in the list. */
-function DraggableRow({ h, streak, onDrop }: { h: Habit; streak?: number; onDrop: () => void }) {
+function DraggableRow({ h, streak, onDrop, onReminder }: { h: Habit; streak?: number; onDrop: () => void; onReminder: () => void }) {
   const controls = useDragControls()
   const el = useRef<HTMLLIElement>(null)
   const [lifted, setLifted] = useState(false)
@@ -120,7 +128,7 @@ function DraggableRow({ h, streak, onDrop }: { h: Habit; streak?: number; onDrop
       className={rowClass}
       style={{ zIndex: lifted ? 20 : 0, boxShadow: lifted ? '0 22px 40px -16px rgba(10, 30, 15, 0.45)' : undefined }}
     >
-      <RowBody h={h} streak={streak} onOpen={(e) => { if (dragged.current) e.preventDefault() }} />
+      <RowBody h={h} streak={streak} onReminder={onReminder} onOpen={(e) => { if (dragged.current) e.preventDefault() }} />
     </Reorder.Item>
   )
 }
@@ -128,6 +136,7 @@ function DraggableRow({ h, streak, onDrop }: { h: Habit; streak?: number; onDrop
 export default function Habits() {
   const progress = useProgress()
   const [showArchived, setShowArchived] = useState(false)
+  const [reminderId, setReminderId] = useState<string | null>(null)
   const habits = progress?.habits.map((p) => p.habit) ?? []
   const active = habits.filter((h) => !h.archived)
   const archived = habits.filter((h) => h.archived)
@@ -151,11 +160,12 @@ export default function Habits() {
         action={<Link to="/habits/new" className={buttonClass('primary', '!px-5 !py-2.5')}>+ New</Link>} />
       {active.length === 0 && <p className="text-[18px] font-semibold text-muted">No habits yet</p>}
       <Reorder.Group as="ul" axis="y" values={shown} onReorder={setIds} className="space-y-3">
-        {shown.map((id) => <DraggableRow key={id} h={byId.get(id)!} streak={progress.byId.get(id)?.stats.current} onDrop={save} />)}
+        {shown.map((id) => <DraggableRow key={id} h={byId.get(id)!} streak={progress.byId.get(id)?.stats.current} onDrop={save} onReminder={() => setReminderId(id)} />)}
       </Reorder.Group>
       <Link to="/scorecard" className="tray mt-5 block rounded-[20px] p-4 text-[17px] font-bold leading-snug text-muted">
         Already doing some? <span className="text-ink underline underline-offset-2">Habits Scorecard</span>
       </Link>
+      <ReminderSheet habit={habits.find((x) => x.id === reminderId) ?? null} onClose={() => setReminderId(null)} />
       {archived.length > 0 && (
         <div className="mt-8">
           <button onClick={() => setShowArchived(!showArchived)} className="flex min-h-11 items-center px-1 text-[18px] font-extrabold text-muted">

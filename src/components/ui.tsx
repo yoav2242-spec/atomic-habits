@@ -26,7 +26,7 @@ export function buttonClass(variant: Variant = 'primary', className = '') {
   const styles = {
     primary: 'btn-3d bg-sage text-on-pastel disabled:opacity-40',
     lavender: 'btn-3d bg-lavender text-on-pastel',
-    secondary: 'clay-sm bouncy text-ink',
+    secondary: 'clay-sm bouncy text-ink disabled:opacity-40',
     ghost: 'bouncy text-muted',
     danger: 'btn-3d bg-rose text-on-pastel',
   }[variant]

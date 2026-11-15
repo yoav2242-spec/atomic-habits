@@ -1,10 +1,37 @@
 import { todayKey } from './dates'
 import type { Habit } from './types'
 
-// A daily reminder for a habit, as a calendar file. Opening it in the phone's Calendar adds one
-// event that repeats every day at the habit's time, with a notification right at that time.
-// (A website can't set a repeating alarm in the Clock app: Chrome only opens apps that accept links
-// from the browser, and the Clock app doesn't.)
+// Two ways to remind you of a habit at its time:
+//  - Calendar: a calendar file. Opening it in the phone's Calendar adds one event that repeats every day
+//    at the habit's time, with a notification right at that time. This always works.
+//  - Clock (Android): a link that asks the Clock app for an alarm with the time and name filled in.
+//    Some phones let Chrome open it and some don't, so we check whether the Clock really opened.
+//    (A link can't pick the repeat days: you choose those in Clock.)
+
+export const isAndroid = () => /Android/i.test(navigator.userAgent)
+
+function clockAlarmUrl(h: Habit): string | null {
+  if (!h.cue_time) return null
+  const [hour, minute] = h.cue_time.split(':').map(Number)
+  const label = encodeURIComponent(h.name)
+  return `intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR=${hour};i.android.intent.extra.alarm.MINUTES=${minute};S.android.intent.extra.alarm.MESSAGE=${label};end`
+}
+
+/** Asks the Clock app for an alarm. Resolves true if the Clock opened (Atomic went to the background), false if the phone blocked it. */
+export function addToClock(h: Habit): Promise<boolean> {
+  const url = clockAlarmUrl(h)
+  if (!url || !isAndroid()) return Promise.resolve(false)
+  return new Promise((resolve) => {
+    let left = false
+    const onChange = () => { if (document.visibilityState === 'hidden') left = true }
+    document.addEventListener('visibilitychange', onChange)
+    location.href = url
+    setTimeout(() => {
+      document.removeEventListener('visibilitychange', onChange)
+      resolve(left)
+    }, 1600)
+  })
+}
 
 const DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']
 
