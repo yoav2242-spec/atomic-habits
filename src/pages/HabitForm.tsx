@@ -11,7 +11,7 @@ import { useHabits, useIdentities } from '../lib/hooks'
 import { addPastProgress, createIdentity, HABIT_COLORS, newHabit, saveHabit, saveIdentity } from '../lib/repo'
 import { habitFromTemplate, TEMPLATES } from '../lib/templates'
 import { CONTAINERS, goalBreakdown, isAmount } from '../lib/amounts'
-import { addDailyReminder } from '../lib/alarm'
+import { ReminderButtons } from '../components/ReminderButtons'
 import { connectGoogle, googleReady, syncGoogle, useGoogleStatus } from '../lib/gcal'
 import { remindersReady, VIBRATIONS } from '../lib/reminders'
 import type { Habit, Schedule } from '../lib/types'
@@ -64,7 +64,6 @@ export default function HabitForm() {
   const [newIdentity, setNewIdentity] = useState('')
   const [pastDays, setPastDays] = useState(0)
   // "Also add to" on the last step: put the habit in Google Calendar and/or the phone's Calendar as a daily reminder.
-  const [addAlarm, setAddAlarm] = useState(false)
   const toast = useToast()
   const google = useGoogleStatus()
 
@@ -103,7 +102,6 @@ export default function HabitForm() {
       setQueue(queue.slice(1))
       setStep(0)
       setPastDays(0)
-      setAddAlarm(false)
       window.scrollTo(0, 0)
       toast(`${saved.name} added. Next: ${TEMPLATES[queue[1]].habit.name}`)
       return
@@ -114,11 +112,6 @@ export default function HabitForm() {
       const state = await syncGoogle().catch(() => 'needs-tap' as const)
       if (state === 'needs-tap') toast('Google needs you to sign in again', { label: 'Update calendar', onClick: () => { syncGoogle(true).then(() => toast('Habits calendar updated')).catch(() => {}) } })
       else if (offerReminders && saved.calendar) toast('Added to your Habits calendar')
-    }
-    // The reminder file downloads; tapping it adds a repeating event to the phone's Calendar.
-    if (offerReminders && addAlarm && !isAmount(saved)) {
-      addDailyReminder(saved)
-      toast('Open the file, then tap Save')
     }
   }
 
@@ -336,7 +329,7 @@ export default function HabitForm() {
       {steps[step].law ? <p className="mb-5 mt-1 text-[16px] font-bold text-sage-deep">{steps[step].law}</p> : <div className="mb-5" />}
       <div key={step} className="animate-rise space-y-4">{pages[step]}</div>
       {isLast && h.type === 'build' && (
-        <AlsoAdd h={h} set={set} alarm={addAlarm} setAlarm={setAddAlarm} pickTime={() => setStep(2)} />
+        <AlsoAdd h={h} set={set} pickTime={() => setStep(2)} />
       )}
       <div className="mt-8 flex gap-2">
         {id && !isLast && <Button variant="secondary" className="flex-1" onClick={save} disabled={!h.name.trim()}>Save</Button>}
@@ -521,16 +514,14 @@ function ReminderSettings({ h, set }: { h: Habit; set: (p: Partial<Habit>) => vo
       )}
       </>)}
       {h.type === 'build' && <CalendarChoice h={h} set={set} />}
-      {!isAmount(h) && (
-        <Button variant="secondary" type="button" className="w-full !min-h-11 gap-1.5 !px-3 text-sm" onClick={() => addDailyReminder(h)}>Add a daily reminder to Calendar</Button>
-      )}
+      <ReminderButtons h={h} />
     </div>
   )
 }
 
 /** Last step: tick where else the habit should go, and it's added there when you press Create. */
-function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
-  h: Habit; set: (p: Partial<Habit>) => void; alarm: boolean; setAlarm: (v: boolean) => void; pickTime: () => void
+function AlsoAdd({ h, set, pickTime }: {
+  h: Habit; set: (p: Partial<Habit>) => void; pickTime: () => void
 }) {
   if (!h.cue_time) {
     return (
@@ -544,12 +535,7 @@ function AlsoAdd({ h, set, alarm, setAlarm, pickTime }: {
     <div className="tray mt-6 space-y-4 rounded-[20px] p-3.5">
       <div className="text-[16px] font-extrabold">Reminders at {h.cue_time}</div>
       <CalendarChoice h={h} set={set} />
-      {!isAmount(h) && (
-        <div className="flex items-center gap-3">
-          <span className="flex flex-1 items-center gap-2 text-sm font-extrabold">Also add a daily reminder to my Calendar</span>
-          <Toggle label="Daily reminder" on={alarm} onChange={setAlarm} />
-        </div>
-      )}
+      <ReminderButtons h={h} />
     </div>
   )
 }
