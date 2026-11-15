@@ -31,4 +31,5 @@ Remove-Item $aligned, $final -ErrorAction SilentlyContinue
 & "$bt\zipalign.exe" -p -f 4 $unsigned $aligned
 & "$bt\apksigner.bat" sign --ks "$sign\atomic-release.jks" --ks-key-alias atomic --ks-pass "pass:$pw" --key-pass "pass:$pw" --out $final $aligned
 & "$bt\apksigner.bat" verify --print-certs $final
+Remove-Item "$final.idsig" -ErrorAction SilentlyContinue
 "Done: $final"
