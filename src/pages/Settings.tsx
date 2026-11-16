@@ -238,7 +238,7 @@ export default function Settings() {
           }
         }}
       >
-        Atomic v5 · updated {new Date(__APP_BUILT__).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}{taps >= 3 && taps < 7 ? ` · ${7 - taps}` : ''}
+        Atomic v5{isNativeApp() ? ' · Android app' : ''} · updated {new Date(__APP_BUILT__).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}{taps >= 3 && taps < 7 ? ` · ${7 - taps}` : ''}
       </button>
       {confirm.element}
     </div>

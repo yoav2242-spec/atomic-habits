@@ -24,21 +24,32 @@ function alarmDays(h: Habit): number[] {
   return [1, 2, 3, 4, 5, 6, 7]
 }
 
-/** Asks the Clock app for an alarm. Resolves true if the Clock opened (inside the app, or Atomic went to the background), false if the phone blocked it. */
-export async function addToClock(h: Habit): Promise<boolean> {
-  if (!h.cue_time) return false
+/** What happened when we asked for a Clock alarm. */
+export type ClockResult =
+  | { ok: true }
+  | { ok: false; why: 'browser' | 'no-clock' | 'app-outdated' | 'error'; detail?: string }
+
+/**
+ * Asks the Clock app for an alarm. Inside the Android app it asks the Clock directly; in a browser it tries a link
+ * and checks whether the Clock really opened (Atomic went to the background). When it fails, says why.
+ */
+export async function addToClock(h: Habit): Promise<ClockResult> {
+  if (!h.cue_time) return { ok: false, why: 'error', detail: 'Pick a time first' }
   if (isNativeApp()) {
     const [hour, minutes] = h.cue_time.split(':').map(Number)
     try {
       await AtomicNative.setAlarm({ hour, minutes, message: h.name, days: alarmDays(h) })
-      return true
-    } catch {
-      return false
+      return { ok: true }
+    } catch (e) {
+      const detail = String((e as { message?: string })?.message ?? e)
+      if (/No Clock app/i.test(detail)) return { ok: false, why: 'no-clock' }
+      if (/not implemented|not available|nativePromise|undefined/i.test(detail)) return { ok: false, why: 'app-outdated', detail }
+      return { ok: false, why: 'error', detail }
     }
   }
   const url = clockAlarmUrl(h)
-  if (!url || !isAndroid()) return false
-  return new Promise((resolve) => {
+  if (!url || !isAndroid()) return { ok: false, why: 'browser' }
+  const opened = await new Promise<boolean>((resolve) => {
     let left = false
     const onChange = () => { if (document.visibilityState === 'hidden') left = true }
     document.addEventListener('visibilitychange', onChange)
@@ -48,6 +59,7 @@ export async function addToClock(h: Habit): Promise<boolean> {
       resolve(left)
     }, 1600)
   })
+  return opened ? { ok: true } : { ok: false, why: 'browser' }
 }
 
 const DAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']

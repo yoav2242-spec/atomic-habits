@@ -16,6 +16,8 @@ $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
 Set-Location $repo
 npm run build
+# The old app file in dist must not be packed inside the new one.
+Remove-Item "$repo\dist\Atomic.apk" -ErrorAction SilentlyContinue
 npx cap sync android
 
 Set-Location "$repo\android"
@@ -32,4 +34,6 @@ Remove-Item $aligned, $final -ErrorAction SilentlyContinue
 & "$bt\apksigner.bat" sign --ks "$sign\atomic-release.jks" --ks-key-alias atomic --ks-pass "pass:$pw" --key-pass "pass:$pw" --out $final $aligned
 & "$bt\apksigner.bat" verify --print-certs $final
 Remove-Item "$final.idsig" -ErrorAction SilentlyContinue
+# npm run build ran before the file existed: put the new file in dist too, ready to publish.
+if (Test-Path "$repo\dist") { Copy-Item $final "$repo\dist\Atomic.apk" -Force }
 "Done: $final"

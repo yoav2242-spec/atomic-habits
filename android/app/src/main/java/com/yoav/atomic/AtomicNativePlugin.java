@@ -60,6 +60,20 @@ public class AtomicNativePlugin extends Plugin {
             call.resolve();
         } catch (ActivityNotFoundException e) {
             call.reject("No Clock app can set an alarm on this phone");
+        } catch (RuntimeException e) {
+            // Some Clock apps refuse the repeat days: try again for a one-time alarm rather than failing.
+            if (intent.hasExtra(AlarmClock.EXTRA_DAYS)) {
+                intent.removeExtra(AlarmClock.EXTRA_DAYS);
+                try {
+                    getContext().startActivity(intent);
+                    call.resolve();
+                    return;
+                } catch (RuntimeException e2) {
+                    call.reject(String.valueOf(e2.getMessage()));
+                    return;
+                }
+            }
+            call.reject(String.valueOf(e.getMessage()));
         }
     }
 
